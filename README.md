@@ -1,0 +1,5 @@
+Usage :
+
+```
+docker-compose up
+```

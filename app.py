@@ -1,19 +1,43 @@
 import praw 
 import yaml
+import config
+import logging 
+import video 
 
-config_file = "config.yml"
+logging.basicConfig(level=logging.INFO)
 
-stream = open(config_file, 'r')
-data = yaml.safe_load(stream)
+r = praw.Reddit(client_id=config.praw_client_id,
+                client_secret=config.praw_client_secret,
+                user_agent=config.praw_user_agent)
 
-praw_client_id = data.get('praw_client_id')
-praw_client_secret = data.get('praw_client_secret')
-praw_user_agent = data.get('praw_user_agent')
-reddit = praw.Reddit(client_id=praw_client_id,
-                    client_secret=praw_client_secret,
-                    user_agent=praw_user_agent)
+class ttsvibelounge():
+    subreddits = ['all']
+    validposts = []
+    videos = []
+    
+    def get_valid_posts(self):
+        for subreddit in self.subreddits:
+            for submission in r.subreddit(subreddit).top(time_filter='day'):
+                if self.valid_post(submission):
+                    self.validposts.append(submission)
 
-comments = reddit.replace_more(limit=0)
+    def valid_post(self, submission):
+        if not submission.stickied and submission.is_self:
+            return True
+        else:
+            return False
 
-for comment in comments:
-    print (comment)
+
+def main():
+    tvl = ttsvibelounge()
+
+    logging.info('Getting Valid Posts')
+    tvl.get_valid_posts()
+
+    logging.info('Create Videos from posts')
+    for post in tvl.validposts:
+        video.create(post)
+
+
+if __name__ == "__main__":
+    main()
