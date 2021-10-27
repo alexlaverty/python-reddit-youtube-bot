@@ -30,6 +30,10 @@ class ttsvibelounge():
                 if self.valid_post(submission):
                     self.validposts.append(submission)
 
+    def download_assets(self):
+        logging.info('Downloading Assets')
+        # Get latest Royalty Free Lofi Videos
+
     def valid_post(self, submission):
         if not submission.stickied and submission.is_self:
             return True
@@ -46,6 +50,7 @@ class ttsvibelounge():
 def main():
     tvl = ttsvibelounge()
     tvl.create_directories()
+    tvl.download_assets()
     tvl.get_valid_posts()
 
     logging.info('Creating Videos from posts')
