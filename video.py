@@ -2,12 +2,8 @@ import logging
 from moviepy.editor import *
 import random 
 
-height = 720
-width = 1280
 
-clip_margin = 50 
-fontsize = 32
-txt_clip_size = (width - (clip_margin * 2), None)
+
 
 comment_limit = 3
 
@@ -63,6 +59,12 @@ def create(post):
     return v
 
 def compile(video):
+    height = 720
+    width = 1280
+    clip_margin = 50 
+    fontsize = 32
+    txt_clip_size = (width - (clip_margin * 2), None)
+
     logging.info('========== Compiling Videos ==========')
     clip_list = []
     for scene in video.scenes:
@@ -70,15 +72,13 @@ def compile(video):
         logging.info(scene.text)
         txt_clip = TextClip(scene.text, 
                             font="Verdana",
-                            fontsize = 32, 
+                            fontsize = fontsize, 
                             color = 'white',
                             size = txt_clip_size,
                             kerning=-1,
                             method='caption',
                             #bg_color='blue',
-                            align='West')\
-                            .set_duration(3)\
-                            .set_pos((clip_margin,40))\
+                            align='West').set_pos((clip_margin,40)).set_duration(2)                            
                             #.resize(0.33)
                             
                             
