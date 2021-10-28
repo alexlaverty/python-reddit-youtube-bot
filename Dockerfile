@@ -4,7 +4,8 @@ RUN apt update -y
 
 RUN apt install -y \
         python \
-        python3-pip
+        python3-pip \
+        imagemagick
 
 COPY . /src
 

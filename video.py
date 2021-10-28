@@ -1,6 +1,7 @@
 import logging 
 from moviepy.editor import *
 import random 
+from pathlib import Path
 
 
 
@@ -86,15 +87,19 @@ def compile(video):
         clip_list.append(txt_clip)
     logging.info('Merging Text Clips')
     text_clip = concatenate(clip_list, method = "compose")
-    text_clip.write_videofile(video.meta.id + ".mp4", fps = 24, codec = 'mpeg4')
-    background_clip = VideoFileClip("backgrounds\\" + video.background)\
-                                                      .set_duration(text_clip.duration)\
-                                                      .set_opacity(0.1)
+    text_clip_path = str(Path("tmp", video.meta.id + ".mp4"))
+    text_clip.write_videofile(text_clip_path, fps = 24, codec = 'mpeg4')
+
+    backgrounds_folder = str(Path("backgrounds", video.background))
+
+    background_clip = VideoFileClip(backgrounds_folder)\
+                        .set_duration(text_clip.duration)\
+                        .set_opacity(0.1)
 
     logging.info('Merging Background and Text Clip')
 
     post_video = CompositeVideoClip([background_clip, text_clip])
-    video_filename = "output\\" + video.meta.id + ".mp4"
+    video_filename = str(Path("final", video.meta.id + ".mp4"))
     post_video.write_videofile(video_filename)
 
 

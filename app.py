@@ -19,9 +19,15 @@ class ttsvibelounge():
     subreddits = ['all']
     validposts = []
     videos = []
-    directories = ["backgrounds","audio","output"]
+    directories = ["backgrounds","audio","final","tmp"]
     post_max = 2
 
+    def valid_post(self, submission):
+        if not submission.stickied and submission.is_self:
+            return True
+        else:
+            return False
+            
     def get_valid_posts(self):
         logging.info('========== Scraping Reddit Posts =========')
         for subreddit in self.subreddits:
@@ -34,11 +40,7 @@ class ttsvibelounge():
         logging.info('Downloading Assets')
         # Get latest Royalty Free Lofi Videos
 
-    def valid_post(self, submission):
-        if not submission.stickied and submission.is_self:
-            return True
-        else:
-            return False
+
 
     def create_directories(self):
         logging.info('Checking Directory Structure')
