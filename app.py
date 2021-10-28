@@ -27,9 +27,9 @@ class ttsvibelounge():
             return True
         else:
             return False
-            
+
     def get_valid_posts(self):
-        logging.info('========== Scraping Reddit Posts =========')
+        logging.info('========== Scraping Reddit Posts ==========')
         for subreddit in self.subreddits:
             logging.info('Getting Posts from subreddit : ' + subreddit)
             for submission in r.subreddit(subreddit).top(time_filter='day'):
@@ -55,7 +55,6 @@ def main():
     tvl.download_assets()
     tvl.get_valid_posts()
 
-    logging.info('Creating Videos from posts')
     i = 0
     for post in tvl.validposts:
         post.comments.replace_more(limit=0)
@@ -66,9 +65,6 @@ def main():
             break
     
     
-    for v in tvl.videos:
-        video.compile(v)
-
 
 if __name__ == "__main__":
     main()
