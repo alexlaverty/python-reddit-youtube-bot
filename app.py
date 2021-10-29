@@ -4,23 +4,32 @@ import config
 import logging
 import video 
 import os
-
+from pathlib import Path
+import re 
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
-
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler()
+    ])
+    
 r = praw.Reddit(client_id=config.praw_client_id,
                 client_secret=config.praw_client_secret,
                 user_agent=config.praw_user_agent)
 
+def safe_filename(text):
+    text = text.replace(" ","_")
+    return "".join([c for c in text if re.match(r'\w', c)])[:50]
+
 class ttsvibelounge():
-    subreddits = ['all']
+    subreddits = ['askreddit']
     validposts = []
     videos = []
     directories = ["backgrounds","audio","final","tmp"]
-    post_max = 2
+    post_max = 10
 
     def valid_post(self, submission):
         if not submission.stickied and submission.is_self:
@@ -57,6 +66,11 @@ def main():
 
     i = 0
     for post in tvl.validposts:
+        video_final_path = str(Path("final", post.id + "_" + safe_filename(post.title) + ".mp4"))
+        if os.path.exists(video_final_path):
+            logging.info('Post Video already exists, skipping post : ' + video_final_path)
+            continue
+
         post.comments.replace_more(limit=0)
         post_video = video.create(post)
         tvl.videos.append(post_video)
