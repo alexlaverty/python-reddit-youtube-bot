@@ -6,3 +6,6 @@ backgrounds/
 final/
 thumbnails/
 *.log
+*.mp3
+backup/
+.vscode/
