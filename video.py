@@ -5,7 +5,7 @@ import random
 import re
 import speech
 import json 
-
+import thumbnail
 
 max_video_length = 600 # Seconds
 comment_limit = 600
@@ -47,10 +47,11 @@ class Scene():
         self.textclip = textclip
 
 class Video():
-    def __init__(self, clips=[], meta=None, background=None, script="", duration=0):
+    def __init__(self, clips=[], meta=None, background=None, thumbnail=None, script="", duration=0):
         self.clips = clips
         self.meta = meta
         self.background = background
+        self.thumbnail = thumbnail
         self.script = script
         self.duration = duration
 
@@ -61,7 +62,10 @@ class Video():
     def compile(self):
         pass
 
-
+def contains_url(text):
+    matches = ["http://", "https://"]
+    if any(x in text for x in matches):
+        return True
 
 
 def create(post):
@@ -71,6 +75,9 @@ def create(post):
     v.meta = post
     v.clips = []
     v.get_background()
+
+    v.thumbnail = str(Path("thumbnails", v.meta.id + "_thumbnail.png"))
+    thumbnail.generate(v, v.thumbnail)
 
     height = 720
     width = 1280
@@ -88,7 +95,7 @@ def create(post):
 
     speech.create_audio(audio_title, v.meta.title)
 
-    audioclip_title = AudioFileClip(audio_title)
+    audioclip_title = AudioFileClip(audio_title).volumex(2)
 
     subreddit_clip = TextClip(v.meta.subreddit_name_prefixed, 
                             font="Verdana",
@@ -117,8 +124,8 @@ def create(post):
                             .set_pos(("center","center"))\
                             .set_duration(audioclip_title.duration + pause)\
                             .set_audio(audioclip_title)\
-                            .set_start(t)\
-                            .volumex(1.5)
+                            .set_start(t)
+                            
     v.clips.append(title_clip)
 
     t += audioclip_title.duration + pause
@@ -136,6 +143,10 @@ def create(post):
 
         if c.stickied:
             logging.info("Skipping Stickied Comment...")
+            continue
+
+        if contains_url(comment):
+            logging.info("Skipping Comment with URL in it...")
             continue
 
         comment_lines = comment.splitlines()
@@ -227,13 +238,14 @@ def create(post):
     v.clips.insert(0,background_clip)
 
     post_video = CompositeVideoClip(v.clips)
-    #video_filename = str(Path("tmp", v.meta.id + "_" + str(count) + "_" + c.id + ".mp4"))
+
     video_filename = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
     json_filename  = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
 
     data = {
         'title': v.meta.title ,
         'subreddit': 'askreddit',
+        'thumbnail': v.thumbnail,
         'duration': v.duration,
         'height': height,
         'width': width
