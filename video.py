@@ -9,7 +9,7 @@ import thumbnail
 
 max_video_length = 600 # Seconds
 comment_limit = 600
-
+background_opacity = 0.3
 pause = 1 # Pause after speech
 
 logging.basicConfig(
@@ -47,13 +47,24 @@ class Scene():
         self.textclip = textclip
 
 class Video():
-    def __init__(self, clips=[], meta=None, background=None, thumbnail=None, script="", duration=0):
-        self.clips = clips
-        self.meta = meta
+    def __init__(self, 
+                background=None, 
+                clips=[],   
+                description="",
+                duration=0,
+                meta=None, 
+                script="", 
+                thumbnail=None, 
+                title=""
+                ):
         self.background = background
-        self.thumbnail = thumbnail
-        self.script = script
+        self.clips = clips
+        self.description = description
         self.duration = duration
+        self.meta = meta
+        self.script = script
+        self.thumbnail = thumbnail
+        self.title = title
 
     def get_background(self):
         self.background = random.choice(os.listdir("backgrounds"))
@@ -71,6 +82,7 @@ def contains_url(text):
 def create(post):
     logging.info('========== Processing Reddit Post ==========')
     print_post_details(post)
+
     v = Video()
     v.meta = post
     v.clips = []
@@ -78,7 +90,8 @@ def create(post):
 
     v.thumbnail = str(Path("thumbnails", v.meta.id + "_thumbnail.png"))
     thumbnail.generate(v, v.thumbnail)
-
+    v.description = f"{v.meta.id} - {v.meta.subreddit_name_prefixed}\\n\\n{v.meta.url}\\n\\n"
+    v.title = f"{v.meta.title} - {v.meta.subreddit_name_prefixed}"
     height = 720
     width = 1280
     clip_margin = 50 
@@ -90,6 +103,8 @@ def create(post):
 
     current_clip_text =""
     t = 0
+
+
 
     audio_title = str(Path("audio", v.meta.id + "_title.mp3"))
 
@@ -221,7 +236,7 @@ def create(post):
         
     
     background_clip = VideoFileClip(background_filepath)\
-                        .set_opacity(0.2)\
+                        .set_opacity(background_opacity)\
                         .volumex(0)
 
     logging.info("Video Clip Duration      : " + str(v.duration))
@@ -243,8 +258,8 @@ def create(post):
     json_filename  = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
 
     data = {
-        'title': v.meta.title ,
-        'subreddit': 'askreddit',
+        'title': v.title,
+        'description': v.description,
         'thumbnail': v.thumbnail,
         'duration': v.duration,
         'height': height,

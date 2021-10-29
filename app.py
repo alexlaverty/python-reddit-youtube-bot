@@ -25,10 +25,10 @@ def safe_filename(text):
     return "".join([c for c in text if re.match(r'\w', c)])[:50]
 
 class ttsvibelounge():
-    subreddits = ['askreddit']
+    subreddits = ['NoStupidQuestions+AmItheAsshole+antiwork+AskMen+unpopularopinion+Showerthoughts+TooAfraidToAsk+TwoXChromosomes+pettyrevenge']
     validposts = []
     videos = []
-    directories = ["backgrounds","audio","final","tmp"]
+    directories = ["backgrounds","audio","final","tmp","thumbnails"]
     post_max = 10
 
     def valid_post(self, submission):

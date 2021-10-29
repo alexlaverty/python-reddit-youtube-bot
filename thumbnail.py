@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 import random
 import logging 
 
+
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -58,7 +59,7 @@ def generate(video, filepath):
     background_clip = TextClip("",
                             size=(width,height), 
                             bg_color="#404040",
-                            method="caption")
+                            method="caption").margin(20, color=(218,165,32))
 
     clips.append(background_clip)
 
@@ -115,3 +116,16 @@ def generate(video, filepath):
     logging.info('Save Thumbnail to : ' + filepath)
     final_video.save_frame(filepath, 1)
 
+if __name__ == "__main__":
+    class meta():
+        title = "Whats a time you did a thing?"
+        subreddit_name_prefixed = "r/askreddit"
+
+    class Video():
+        meta=None
+
+    meta = meta()
+    video = Video()
+    video.meta = meta
+
+    generate(video, "thumbnail.png")
