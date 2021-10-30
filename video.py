@@ -7,7 +7,7 @@ import speech
 import json 
 import thumbnail
 
-max_video_length = 600 # Seconds
+max_video_length = 30 # Seconds
 comment_limit = 600
 background_opacity = 0.5
 pause = 1 # Pause after speech
@@ -107,11 +107,24 @@ def create(post):
     current_clip_text =""
     t = 0
 
+    #intro_audio = AudioFileClip("intro.mp3").volumex(2)
 
+    intro_clip = VideoFileClip("intro_welcome.mp4")\
+                    .set_start(0)
+    
+    #intro_clip_with_audio = intro_clip.set_audio(CompositeAudioClip([intro_audio.set_start(1)]))
+
+    v.clips.append(intro_clip)
+
+    t += intro_clip.duration
+
+    tb = t
 
     audio_title = str(Path("audio", v.meta.id + "_title.mp3"))
+    subreddit_name = v.meta.subreddit_name_prefixed.replace("r/","")
+    title_speech_text = f"From {subreddit_name}. {v.meta.title}"
 
-    speech.create_audio(audio_title, v.meta.title)
+    speech.create_audio(audio_title, title_speech_text)
 
     audioclip_title = AudioFileClip(audio_title).volumex(2)
 
@@ -313,6 +326,7 @@ def create(post):
     
     background_clip = VideoFileClip(background_filepath)\
                         .set_opacity(background_opacity)\
+                        .set_start(tb)\
                         .volumex(0)
 
     logging.info("Video Clip Duration      : " + str(v.duration))
