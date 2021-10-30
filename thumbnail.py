@@ -56,7 +56,7 @@ def get_font_size(length):
 def generate(video, filepath):
     logging.info('========== Generating Thumbnail ==========')
 
-    colors = ["blue","green","yellow","red"]
+    colors = ["#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
     stop_word_colour = random.choice(colors)
 
     image = random.choice(os.listdir("images"))
@@ -64,6 +64,7 @@ def generate(video, filepath):
     logging.info('Randomly Selecting Background : ' + image_path)
     text = video.meta.title
     subreddit = video.meta.subreddit_name_prefixed
+    nltk.download('stopwords')
     s=set(stopwords.words('english'))
     words = text.split(" ")
     unique_words = list(filter(lambda w: not w in s,text.split()))
@@ -81,7 +82,7 @@ def generate(video, filepath):
 
     background_clip = TextClip("",
                             size=(width,height), 
-                            bg_color="#404040",
+                            bg_color="#000000",
                             method="caption").margin(20, color=(218,165,32))
 
     clips.append(background_clip)
@@ -98,7 +99,7 @@ def generate(video, filepath):
                         color="white", 
                         align='center', 
                         font="Verdana-Bold", 
-                        bg_color="#404040",
+                        bg_color="#000000",
                         method="caption")\
                         .set_pos((margin, 20))\
                         .set_opacity(0.8)
@@ -122,7 +123,7 @@ def generate(video, filepath):
                             color=word_color, 
                             align='center', 
                             font="Verdana-Bold", 
-                            bg_color="#404040",
+                            bg_color="#000000",
                             method="caption")\
                             .set_pos((txt_x, txt_y))\
                             #.set_opacity(0.8)
