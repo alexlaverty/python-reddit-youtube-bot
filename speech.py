@@ -22,3 +22,5 @@ def create_audio(path, text):
     file.write(response['AudioStream'].read())
     file.close()
     print("========== Finished Creating Audio File From Text ==========")   
+
+

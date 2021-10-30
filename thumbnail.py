@@ -17,6 +17,42 @@ logging.basicConfig(
         logging.StreamHandler()
     ])
 
+def get_font_size(length):
+
+    fontsize = 50
+    lineheight = 60
+
+    if length < 10 :
+        fontsize = 100
+        lineheight = 100
+
+    if length >= 10 and length < 30:
+        fontsize = 120
+        lineheight = 140
+
+    if length >= 30 and length < 50:
+        fontsize = 100
+        lineheight = 120
+
+    if length >= 50 and length < 70:
+        fontsize = 90
+        lineheight = 110
+
+    if length >= 70 and length < 90:
+        fontsize = 60
+        lineheight = 80
+
+    if length >= 90 and length < 100:
+        fontsize = 80
+        lineheight = 100
+
+    logging.info(f"Title Length       : {length}")
+    logging.info(f"Setting Fontsize   : {fontsize} " )
+    logging.info(f"Setting Lineheight : {lineheight} " )
+
+    return fontsize, lineheight
+
+
 def generate(video, filepath):
     logging.info('========== Generating Thumbnail ==========')
 
@@ -28,9 +64,6 @@ def generate(video, filepath):
     logging.info('Randomly Selecting Background : ' + image_path)
     text = video.meta.title
     subreddit = video.meta.subreddit_name_prefixed
-    print("Title Length :")
-    print(len(text))
-
     s=set(stopwords.words('english'))
     words = text.split(" ")
     unique_words = list(filter(lambda w: not w in s,text.split()))
@@ -42,19 +75,9 @@ def generate(video, filepath):
     txt_x = 0 + margin
     width = 1280
     height = 720
-    fontsize = 50
-    lineheight = 60
+    #fontsize = get_font_size(len(video.meta.title))
+    fontsize, lineheight = get_font_size(len(video.meta.title))
 
-    if len(text) < 100:
-        print("Increasing Font Size")
-        fontsize = 70
-        lineheight = 90 
-
-    print("fontsize")
-    print(fontsize)
-
-    print("lineheight")
-    print(lineheight)
 
     background_clip = TextClip("",
                             size=(width,height), 
@@ -71,18 +94,18 @@ def generate(video, filepath):
     clips.append(img_clip)
 
     subreddit_clip = TextClip(subreddit,
-                        fontsize = 45, 
+                        fontsize = 60, 
                         color="white", 
                         align='center', 
                         font="Verdana-Bold", 
                         bg_color="#404040",
                         method="caption")\
-                        .set_pos((margin, margin))\
+                        .set_pos((margin, 20))\
                         .set_opacity(0.8)
 
     clips.append(subreddit_clip)
 
-    txt_y += 50
+    txt_y += subreddit_clip.h
 
     for word in words:
         if word in unique_words:
@@ -90,7 +113,7 @@ def generate(video, filepath):
         else:
             word_color = stop_word_colour
 
-        if txt_x > (width / 3):
+        if txt_x > (width / 2):
             txt_x = 0 + margin
             txt_y += lineheight
 
@@ -102,7 +125,7 @@ def generate(video, filepath):
                             bg_color="#404040",
                             method="caption")\
                             .set_pos((txt_x, txt_y))\
-                            .set_opacity(0.8)
+                            #.set_opacity(0.8)
 
         clips.append(txt_clip)
         txt_x += txt_clip.w + 15
@@ -118,7 +141,7 @@ def generate(video, filepath):
 
 if __name__ == "__main__":
     class meta():
-        title = "Whats a time you did a thing?"
+        title = "Whats a time you wefwef"
         subreddit_name_prefixed = "r/askreddit"
 
     class Video():

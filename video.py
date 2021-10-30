@@ -9,8 +9,9 @@ import thumbnail
 
 max_video_length = 600 # Seconds
 comment_limit = 600
-background_opacity = 0.3
+background_opacity = 0.5
 pause = 1 # Pause after speech
+
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -27,6 +28,7 @@ def print_post_details(post):
     logging.info("Score     : " + str(post.score))
     logging.info("ID        : " + str(post.id))
     logging.info("URL       : " + post.url)
+    logging.info("SelfText  : " + post.selftext)
 
 def print_comment_details(comment):
     logging.info("Author   : " + str(comment.author))
@@ -88,9 +90,10 @@ def create(post):
     v.clips = []
     v.get_background()
 
-    v.thumbnail = str(Path("thumbnails", v.meta.id + "_thumbnail.png"))
-    thumbnail.generate(v, v.thumbnail)
-    v.description = f"{v.meta.id} - {v.meta.subreddit_name_prefixed}\\n\\n{v.meta.url}\\n\\n"
+    v.thumbnail = v.meta.id + "_thumbnail.png"
+    thumbnail_path = str(Path("thumbnails", v.thumbnail))
+    thumbnail.generate(v, thumbnail_path)
+    v.description = f"{v.meta.subreddit_name_prefixed} \\n\\n{v.meta.title} - \\n\\n{v.meta.url}\\n\\n{v.meta.selftext}\\n\\nCredits :\\n\\n Motion Graphics provided by https://www.tubebacks.com\\n\\nYouTube Channel: https://goo.gl/aayJRf\\n\\n"
     v.title = f"{v.meta.title} - {v.meta.subreddit_name_prefixed}"
     height = 720
     width = 1280
@@ -145,6 +148,79 @@ def create(post):
 
     t += audioclip_title.duration + pause
     v.duration += audioclip_title.duration + pause
+
+
+
+    if v.meta.selftext:
+        logging.info('========== Processing Submission SelfText ==========')
+        logging.info(v.meta.selftext)
+
+        selftext = v.meta.selftext
+        selftext = os.linesep.join([s for s in selftext.splitlines() if s])
+
+        logging.info("selftext Length  : " + str(len(selftext)))
+
+        selftext_lines = selftext.splitlines()
+
+        for selftext_line_count, selftext_line in enumerate(selftext_lines):
+            logging.info("selftext_line     : " + selftext_line)
+            selftext_audio_filepath = str(Path("audio", v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
+            speech.create_audio(selftext_audio_filepath, selftext_line)
+            selftext_audioclip = AudioFileClip(selftext_audio_filepath)
+
+            current_clip_text += selftext_line + "\n\n"
+            logging.info("Current Clip Text :")
+            logging.info(current_clip_text)
+
+            selftext_clip = TextClip(current_clip_text, 
+                                font="Verdana",
+                                fontsize = fontsize, 
+                                color = 'white',
+                                size = txt_clip_size,
+                                kerning=-1,
+                                method='caption',
+                                #bg_color='blue',
+                                align='West')\
+                                .set_pos((clip_margin,clip_margin_top))\
+                                .set_duration(selftext_audioclip.duration + pause)\
+                                .set_audio(selftext_audioclip)\
+                                .set_start(t)\
+                                .volumex(1.5)
+                                
+
+            if selftext_clip.h > height:
+                logging.info("Text exceeded Video Height, reset text")
+                current_clip_text = selftext_line + "\n\n"
+                selftext_clip = TextClip(current_clip_text, 
+                        font="Verdana",
+                        fontsize = fontsize, 
+                        color = 'white',
+                        size = txt_clip_size,
+                        kerning=-1,
+                        method='caption',
+                        #bg_color='blue',
+                        align='West')\
+                        .set_pos((clip_margin,clip_margin_top))\
+                        .set_duration(selftext_audioclip.duration + pause)\
+                        .set_audio(selftext_audioclip)\
+                        .set_start(t)
+
+                if selftext_clip.h > height:
+                    logging.info("Comment Text Too Long, Skipping Comment")
+                    continue   
+
+            t += selftext_audioclip.duration + pause
+            v.duration += selftext_audioclip.duration + pause
+            
+
+            v.clips.append(selftext_clip)
+            logging.info("Video Clips : ")
+            logging.info(str(len(v.clips)))
+
+        logging.info("Current Video Duration : " + str(v.duration))
+
+
+
 
     for count, c in enumerate(v.meta.comments):
         logging.info(f'========== Processing Reddit Comment {count}/{comment_limit} ==========')
