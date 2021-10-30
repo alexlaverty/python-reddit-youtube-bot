@@ -109,7 +109,7 @@ def create(post):
 
     #intro_audio = AudioFileClip("intro.mp3").volumex(2)
 
-    intro_clip = VideoFileClip("intro_welcome.mp4")\
+    intro_clip = VideoFileClip("intro.mp4")\
                     .set_start(0)
     
     #intro_clip_with_audio = intro_clip.set_audio(CompositeAudioClip([intro_audio.set_start(1)]))
@@ -122,7 +122,7 @@ def create(post):
 
     audio_title = str(Path("audio", v.meta.id + "_title.mp3"))
     subreddit_name = v.meta.subreddit_name_prefixed.replace("r/","")
-    title_speech_text = f"From {subreddit_name}. {v.meta.title}"
+    title_speech_text = f"From the subreddit {subreddit_name}. {v.meta.title}"
 
     speech.create_audio(audio_title, title_speech_text)
 
