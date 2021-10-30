@@ -71,6 +71,11 @@ def main():
             logging.info('Post Video already exists, skipping post : ' + video_final_path)
             continue
 
+        post_title = f"{post.title} - {post.subreddit_name_prefixed}"
+        if len(post_title) > 100:
+            logging.info('Post title exceeds 100 characeters, skipping post...')
+            continue
+
         post.comments.replace_more(limit=0)
         post_video = video.create(post)
         tvl.videos.append(post_video)
