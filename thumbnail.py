@@ -95,14 +95,14 @@ def generate(video, filepath):
     clips.append(img_clip)
 
     subreddit_clip = TextClip(subreddit,
-                        fontsize = 60, 
+                        fontsize = 70, 
                         color="white", 
                         align='center', 
                         font="Verdana-Bold", 
                         bg_color="#000000",
                         method="caption")\
                         .set_pos((margin, 20))\
-                        .set_opacity(0.8)
+                        #.set_opacity(0.8)
 
     clips.append(subreddit_clip)
 
