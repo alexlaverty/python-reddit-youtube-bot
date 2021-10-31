@@ -13,22 +13,23 @@ logging.basicConfig(
 
 def process_speech_text(text):
     text = text.replace(" AFAIK ", " as far as I know ")
-    text = text.replace(" AITA ", " Am I The Asshole? ")
+    text = text.replace("AITA", " Am I The Asshole? ")
     text = text.replace(" AMA ", " Ask me anything ")
     text = text.replace(" ELI5 ", " Explain Like I'm Five ")
     text = text.replace(" IAMA ", " I am a ")
-    text = text.replace(" IANAD ", " i am not a doctor ")
-    text = text.replace(" IANAL ", " i am not a lawyer ")
+    text = text.replace("IANAD", " i am not a doctor ")
+    text = text.replace("IANAL", " i am not a lawyer ")
     text = text.replace(" IMO ", " in my opinion ")
     text = text.replace(" NSFL ", " Not safe for life ")
     text = text.replace(" NSFW ", " Not safe for Work ")
-    text = text.replace(" NTA ", " Not The Asshole ")
+    text = text.replace("NTA", " Not The Asshole ")
     text = text.replace(" SMH ", " Shaking my head ")
-    text = text.replace(" TD;LR ", " too long didn't read ")
-    text = text.replace(" TDLR ", " too long didn't read ")
+    text = text.replace("TD;LR", " too long didn't read ")
+    text = text.replace("TDLR", " too long didn't read ")
     text = text.replace(" TIL ", " Today I Learned ")
-    text = text.replace(" YTA ", " You're the asshole ")
-    text = text.replace(" SAHM ", " stay at home mother ")
+    text = text.replace("YTA", " You're the asshole ")
+    text = text.replace("SAHM", " stay at home mother ")
+    text = text.replace("WIBTA", " would I be the asshole ")
     return text
 
 def create_audio(path, text):
