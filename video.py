@@ -7,7 +7,7 @@ import speech
 import json 
 import thumbnail
 
-max_video_length = 30 # Seconds
+max_video_length = 600 # Seconds
 comment_limit = 600
 background_opacity = 0.5
 pause = 1 # Pause after speech
@@ -47,6 +47,49 @@ class Scene():
         self.starttime = starttime
         self.duration = duration
         self.textclip = textclip
+
+def get_font_size(length):
+
+    fontsize = 50
+    lineheight = 60
+
+    if length < 10 :
+        fontsize = 100
+        lineheight = 100
+
+    if length >= 10 and length < 30:
+        fontsize = 120
+        lineheight = 140
+
+    if length >= 30 and length < 40:
+        fontsize = 130
+        lineheight = 150
+
+    if length >= 40 and length < 50:
+        fontsize = 100
+        lineheight = 120
+
+    if length >= 50 and length < 70:
+        fontsize = 100
+        lineheight = 110
+
+    if length >= 70 and length < 80:
+        fontsize = 100
+        lineheight = 110
+
+    if length >= 80 and length < 90:
+        fontsize = 70
+        lineheight = 90
+
+    if length >= 90 and length < 100:
+        fontsize = 80
+        lineheight = 100
+
+    logging.info(f"Title Length       : {length}")
+    logging.info(f"Setting Fontsize   : {fontsize} " )
+    logging.info(f"Setting Lineheight : {lineheight} " )
+
+    return fontsize, lineheight
 
 class Video():
     def __init__(self, 
@@ -91,7 +134,7 @@ def create(post):
     v.get_background()
 
     v.thumbnail = v.meta.id + "_thumbnail.png"
-    thumbnail_path = str(Path("thumbnails", v.thumbnail))
+    thumbnail_path = str(Path("final", v.thumbnail))
     thumbnail.generate(v, thumbnail_path)
     v.description = f"{v.meta.subreddit_name_prefixed} \\n\\n{v.meta.title} - \\n\\n{v.meta.url}\\n\\n{v.meta.selftext}\\n\\nCredits :\\n\\n Motion Graphics provided by https://www.tubebacks.com\\n\\nYouTube Channel: https://goo.gl/aayJRf\\n\\n"
     v.title = f"{v.meta.title} - {v.meta.subreddit_name_prefixed}"
@@ -109,7 +152,7 @@ def create(post):
 
     #intro_audio = AudioFileClip("intro.mp3").volumex(2)
 
-    intro_clip = VideoFileClip("intro.mp4")\
+    intro_clip = VideoFileClip("intro_welcome_crop.mp4")\
                     .set_start(0)
     
     #intro_clip_with_audio = intro_clip.set_audio(CompositeAudioClip([intro_audio.set_start(1)]))
@@ -129,8 +172,8 @@ def create(post):
     audioclip_title = AudioFileClip(audio_title).volumex(2)
 
     subreddit_clip = TextClip(v.meta.subreddit_name_prefixed, 
-                            font="Verdana",
-                            fontsize = 42, 
+                            font="Verdana-Bold",
+                            fontsize = 60, 
                             color = 'white',
                             size = txt_clip_size,
                             kerning=-1,
@@ -143,9 +186,11 @@ def create(post):
 
     v.clips.append(subreddit_clip)
 
+    title_fontsize, lineheight = get_font_size(len(v.meta.title))
+
     title_clip = TextClip(v.meta.title, 
-                            font="Verdana",
-                            fontsize = 40, 
+                            font="Verdana-Bold",
+                            fontsize = title_fontsize, 
                             color = 'white',
                             size = txt_clip_size,
                             kerning=-1,
@@ -162,7 +207,14 @@ def create(post):
     t += audioclip_title.duration + pause
     v.duration += audioclip_title.duration + pause
 
+    static_clip = VideoFileClip("static.mp4")\
+                    .set_duration(1)\
+                    .resize(width=width, height=height)\
+                    .set_start(t)
 
+    v.clips.append(static_clip)
+    t += static_clip.duration
+    v.duration += static_clip.duration
 
     if v.meta.selftext:
         logging.info('========== Processing Submission SelfText ==========')
@@ -334,8 +386,9 @@ def create(post):
 
     if background_clip.duration < v.duration:
         logging.info("Looping Background")
-        background_clip = vfx.make_loopable(background_clip, cross=0)
-        background_clip = vfx.loop(background_clip, duration=v.duration)
+        #background_clip = vfx.make_loopable(background_clip, cross=0)
+        background_clip = vfx.loop(background_clip, duration=v.duration).without_audio()
+        logging.info("Looped Background Clip Duration : " + str(background_clip.duration))
     else:
         logging.info("Not Looping Background")
         background_clip = background_clip.set_duration(v.duration)
