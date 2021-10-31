@@ -1,5 +1,15 @@
 import boto3 
 import config
+import logging 
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler()
+    ])
 
 def process_speech_text(text):
     text = text.replace(" AFAIK ", " as far as I know ")
@@ -22,11 +32,11 @@ def process_speech_text(text):
     return text
 
 def create_audio(path, text):
-    print("========== Creating Audio File From Text ==========")   
-    print("Path : " + path)
+    logging.info("========== Creating Audio File From Text ==========")   
+    logging.info("Path : " + path)
     
     text = process_speech_text(text)
-    print("Speech : " + text)
+    logging.info("Speech : " + text)
 
     polly_client = boto3.Session(
                     aws_access_key_id=config.aws_access_key_id,                     
@@ -43,6 +53,6 @@ def create_audio(path, text):
     file = open(path, 'wb')
     file.write(response['AudioStream'].read())
     file.close()
-    print("========== Finished Creating Audio File From Text ==========")   
+    logging.info("========== Finished Creating Audio File From Text ==========")   
 
 
