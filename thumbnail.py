@@ -30,17 +30,25 @@ def get_font_size(length):
         fontsize = 120
         lineheight = 140
 
-    if length >= 30 and length < 50:
+    if length >= 30 and length < 40:
+        fontsize = 130
+        lineheight = 150
+
+    if length >= 40 and length < 50:
         fontsize = 100
         lineheight = 120
 
     if length >= 50 and length < 70:
-        fontsize = 90
+        fontsize = 100
         lineheight = 110
 
-    if length >= 70 and length < 90:
-        fontsize = 60
-        lineheight = 80
+    if length >= 70 and length < 80:
+        fontsize = 100
+        lineheight = 110
+
+    if length >= 80 and length < 90:
+        fontsize = 70
+        lineheight = 90
 
     if length >= 90 and length < 100:
         fontsize = 80
@@ -56,7 +64,7 @@ def get_font_size(length):
 def generate(video, filepath):
     logging.info('========== Generating Thumbnail ==========')
 
-    colors = ["#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
+    colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
     stop_word_colour = random.choice(colors)
 
     image = random.choice(os.listdir("images"))
@@ -95,7 +103,7 @@ def generate(video, filepath):
     clips.append(img_clip)
 
     subreddit_clip = TextClip(subreddit,
-                        fontsize = 70, 
+                        fontsize = 80, 
                         color="white", 
                         align='center', 
                         font="Verdana-Bold", 
@@ -142,7 +150,7 @@ def generate(video, filepath):
 
 if __name__ == "__main__":
     class meta():
-        title = "Whats a time you wefwef"
+        title = "Why don't they listen until we're reduced to tears?"
         subreddit_name_prefixed = "r/askreddit"
 
     class Video():
