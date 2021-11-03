@@ -9,3 +9,6 @@ thumbnails/
 *.mp3
 backup/
 .vscode/
+client_secret.json
+cookies.json
+credentials.storage

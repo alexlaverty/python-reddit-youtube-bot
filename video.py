@@ -6,8 +6,10 @@ import re
 import speech
 import json 
 import thumbnail
+import os 
+import youtube 
 
-max_video_length = 600 # Seconds
+max_video_length = 30 # Seconds
 comment_limit = 600
 background_opacity = 0.5
 pause = 1 # Pause after speech
@@ -74,7 +76,7 @@ def get_font_size(length):
         lineheight = 110
 
     if length >= 70 and length < 80:
-        fontsize = 100
+        fontsize = 80
         lineheight = 110
 
     if length >= 80 and length < 90:
@@ -82,8 +84,8 @@ def get_font_size(length):
         lineheight = 90
 
     if length >= 90 and length < 100:
-        fontsize = 80
-        lineheight = 100
+        fontsize = 60
+        lineheight = 80
 
     logging.info(f"Title Length       : {length}")
     logging.info(f"Setting Fontsize   : {fontsize} " )
@@ -100,7 +102,9 @@ class Video():
                 meta=None, 
                 script="", 
                 thumbnail=None, 
-                title=""
+                title="",
+                filepath="",
+                json=""
                 ):
         self.background = background
         self.clips = clips
@@ -110,6 +114,8 @@ class Video():
         self.script = script
         self.thumbnail = thumbnail
         self.title = title
+        self.filepath = filepath
+        self.json = json
 
     def get_background(self):
         self.background = random.choice(os.listdir("backgrounds"))
@@ -133,9 +139,9 @@ def create(post):
     v.clips = []
     v.get_background()
 
-    v.thumbnail = v.meta.id + "_thumbnail.png"
-    thumbnail_path = str(Path("final", v.thumbnail))
-    thumbnail.generate(v, thumbnail_path)
+    thumbnail_name = v.meta.id + "_thumbnail.png"
+    v.thumbnail = str(Path("final", thumbnail_name))
+    thumbnail.generate(v, v.thumbnail)
     v.description = f"{v.meta.subreddit_name_prefixed} \\n\\n{v.meta.title} - \\n\\n{v.meta.url}\\n\\n{v.meta.selftext}\\n\\nCredits :\\n\\n Motion Graphics provided by https://www.tubebacks.com\\n\\nYouTube Channel: https://goo.gl/aayJRf\\n\\n"
     v.title = f"{v.meta.title} - {v.meta.subreddit_name_prefixed}"
     height = 720
@@ -207,14 +213,7 @@ def create(post):
     t += audioclip_title.duration + pause
     v.duration += audioclip_title.duration + pause
 
-    static_clip = VideoFileClip("static.mp4")\
-                    .set_duration(1)\
-                    .resize(width=width, height=height)\
-                    .set_start(t)
 
-    v.clips.append(static_clip)
-    t += static_clip.duration
-    v.duration += static_clip.duration
 
     if v.meta.selftext:
         logging.info('========== Processing Submission SelfText ==========')
@@ -286,6 +285,15 @@ def create(post):
 
 
 
+    static_clip = VideoFileClip("static.mp4")\
+                    .set_duration(1)\
+                    .resize(width=width, height=height)\
+                    .set_start(t)
+
+    v.clips.append(static_clip)
+    t += static_clip.duration
+    v.duration += static_clip.duration
+
 
     for count, c in enumerate(v.meta.comments):
         logging.info(f'========== Processing Reddit Comment {count}/{comment_limit} ==========')
@@ -293,9 +301,17 @@ def create(post):
         logging.info("Comment #  : " + str(count))
 
         comment = c.body 
+
+        if comment == "[removed]":
+            logging.info("Skipping Comment : " + comment)
+            continue
+
+
         comment = os.linesep.join([s for s in comment.splitlines() if s])
 
         logging.info("Comment Length  : " + str(len(comment)))
+
+
 
         if c.stickied:
             logging.info("Skipping Stickied Comment...")
@@ -308,6 +324,11 @@ def create(post):
         comment_lines = comment.splitlines()
 
         for comment_line_count, comment_line in enumerate(comment_lines):
+
+            if comment == "[removed]":
+                logging.info("Skipping Comment : " + comment)
+                continue
+
             logging.info("comment_line     : " + comment_line)
             audio_filepath = str(Path("audio", v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
             speech.create_audio(audio_filepath, comment_line)
@@ -397,8 +418,8 @@ def create(post):
 
     post_video = CompositeVideoClip(v.clips)
 
-    video_filename = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
-    json_filename  = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
+    v.filepath = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
+    v.json  = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
 
     data = {
         'title': v.title,
@@ -409,10 +430,11 @@ def create(post):
         'width': width
     }
 
-    with open(json_filename, 'w') as outfile:
+    with open(v.json, 'w') as outfile:
         json.dump(data, outfile, indent=4)
 
-    post_video.write_videofile(video_filename)
+    post_video.write_videofile(v.filepath)
     
+    youtube.publish(v)
 
 

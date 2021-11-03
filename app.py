@@ -41,7 +41,7 @@ class ttsvibelounge():
         logging.info('========== Scraping Reddit Posts ==========')
         for subreddit in self.subreddits:
             logging.info('Getting Posts from subreddit : ' + subreddit)
-            for submission in r.subreddit(subreddit).top(time_filter='day'):
+            for submission in r.subreddit(subreddit).hot(limit=50):
                 if self.valid_post(submission):
                     self.validposts.append(submission)
 

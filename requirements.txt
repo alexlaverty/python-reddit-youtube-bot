@@ -1,3 +1,7 @@
 praw
 pyyaml
 moviepy
+boto3
+nltk
+poetry
+selenium
