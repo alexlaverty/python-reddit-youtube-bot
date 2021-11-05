@@ -6,7 +6,7 @@ import nltk
 from nltk.corpus import stopwords
 import random
 import logging 
-
+import settings
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -52,8 +52,8 @@ def get_font_size(length):
         lineheight = 150
 
     if length >= 40 and length < 50:
-        fontsize = 130
-        lineheight = 120
+        fontsize = 140
+        lineheight = 150
 
     if length >= 50 and length < 60:
         fontsize = 140
@@ -88,8 +88,8 @@ def generate(video, filepath):
     colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
     stop_word_colour = random.choice(colors)
 
-    image = random.choice(os.listdir("images"))
-    image_path = str(Path("images", image))
+    image = random.choice(os.listdir(settings.images_directory))
+    image_path = str(Path(settings.images_directory, image))
     logging.info('Randomly Selecting Background : ' + image_path)
     text = video.meta.title
     subreddit = video.meta.subreddit_name_prefixed
@@ -101,7 +101,7 @@ def generate(video, filepath):
     clips = []
 
     margin = 40
-    txt_y = 0 + margin
+    txt_y = 0 
     txt_x = 0 + margin
     width = 1280
     height = 720
@@ -153,6 +153,8 @@ def generate(video, filepath):
                             align='center', 
                             font="Impact", 
                             #bg_color="#000000",
+                            stroke_color="#000000",
+                            stroke_width=3,
                             method="caption")\
                             .set_pos((txt_x, txt_y))
                             #.set_opacity(0.8)
@@ -171,8 +173,8 @@ def generate(video, filepath):
 
 if __name__ == "__main__":
     class meta():
-        title = "What is the correct answer to ‘would you still love me if I was a worm' fhdngh apple"
-        subreddit_name_prefixed = "r/askreddit"
+        title = "Jobs LYING about starting pay should be illegal"
+        subreddit_name_prefixed = "r/antiwork"
 
     class Video():
         meta=None

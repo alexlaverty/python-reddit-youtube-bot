@@ -10,5 +10,5 @@ thumbnails/
 backup/
 .vscode/
 client_secret.json
-cookies.json
+cookies*.json
 credentials.storage

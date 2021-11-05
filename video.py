@@ -6,16 +6,11 @@ import logging
 import os 
 import random 
 import re
+import settings
 import speech
 import sys
 import thumbnail
 import youtube 
-#import youtubeapi
-
-max_video_length = 600 # Seconds
-comment_limit = 600
-background_opacity = 0.5
-pause = 1 # Pause after speech
 
 def give_emoji_free_text(text):
     allchars = [str for str in text]
@@ -119,7 +114,8 @@ class Video():
                 thumbnail=None, 
                 title="",
                 filepath="",
-                json=""
+                json="",
+                theme=None
                 ):
         self.background = background
         self.clips = clips
@@ -131,9 +127,10 @@ class Video():
         self.title = title
         self.filepath = filepath
         self.json = json
+        self.theme = theme
 
     def get_background(self):
-        self.background = random.choice(os.listdir("backgrounds"))
+        self.background = random.choice(os.listdir(settings.background_directory))
         logging.info('Randomly Selecting Background : ' + self.background)
     
     def compile(self):
@@ -166,7 +163,7 @@ def create(post):
     fontsize = 32
     txt_clip_size = (width - (clip_margin * 2), None)
 
-    background_filepath = str(Path("backgrounds", v.background))
+    background_filepath = str(Path(settings.background_directory, v.background))
 
     current_clip_text =""
     t = 0
@@ -180,7 +177,7 @@ def create(post):
 
     tb = t
 
-    audio_title = str(Path("audio", v.meta.id + "_title.mp3"))
+    audio_title = str(Path(settings.audio_directory, v.meta.id + "_title.mp3"))
     subreddit_name = v.meta.subreddit_name_prefixed.replace("r/","")
     title_speech_text = f"From the subreddit {subreddit_name}. {v.meta.title}"
 
@@ -198,7 +195,7 @@ def create(post):
                             #bg_color='blue',
                             align='West')\
                             .set_pos((40,40))\
-                            .set_duration(audioclip_title.duration + pause)\
+                            .set_duration(audioclip_title.duration + settings.pause)\
                             .set_start(t)   
 
     v.clips.append(subreddit_clip)
@@ -215,14 +212,14 @@ def create(post):
                             #bg_color='blue',
                             align='Center')\
                             .set_pos(("center","center"))\
-                            .set_duration(audioclip_title.duration + pause)\
+                            .set_duration(audioclip_title.duration + settings.pause)\
                             .set_audio(audioclip_title)\
                             .set_start(t)
                             
     v.clips.append(title_clip)
 
-    t += audioclip_title.duration + pause
-    v.duration += audioclip_title.duration + pause
+    t += audioclip_title.duration + settings.pause
+    v.duration += audioclip_title.duration + settings.pause
 
 
 
@@ -241,7 +238,7 @@ def create(post):
 
         for selftext_line_count, selftext_line in enumerate(selftext_lines):
             logging.info("selftext_line     : " + selftext_line)
-            selftext_audio_filepath = str(Path("audio", v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
+            selftext_audio_filepath = str(Path(settings.audio_directory, v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
             speech.create_audio(selftext_audio_filepath, selftext_line)
             selftext_audioclip = AudioFileClip(selftext_audio_filepath)
 
@@ -260,7 +257,7 @@ def create(post):
                                 #bg_color='blue',
                                 align='West')\
                                 .set_pos((clip_margin,clip_margin_top))\
-                                .set_duration(selftext_audioclip.duration + pause)\
+                                .set_duration(selftext_audioclip.duration + settings.pause)\
                                 .set_audio(selftext_audioclip)\
                                 .set_start(t)\
                                 .volumex(1.5)
@@ -279,7 +276,7 @@ def create(post):
                         #bg_color='blue',
                         align='West')\
                         .set_pos((clip_margin,clip_margin_top))\
-                        .set_duration(selftext_audioclip.duration + pause)\
+                        .set_duration(selftext_audioclip.duration + settings.pause)\
                         .set_audio(selftext_audioclip)\
                         .set_start(t)
 
@@ -287,8 +284,8 @@ def create(post):
                     logging.info("Comment Text Too Long, Skipping Comment")
                     continue   
 
-            t += selftext_audioclip.duration + pause
-            v.duration += selftext_audioclip.duration + pause
+            t += selftext_audioclip.duration + settings.pause
+            v.duration += selftext_audioclip.duration + settings.pause
             
 
             v.clips.append(selftext_clip)
@@ -304,7 +301,7 @@ def create(post):
                     .set_duration(1)\
                     .set_pos(("center","center"))\
                     .set_start(t)\
-                    .set_opacity(background_opacity)\
+                    .set_opacity(settings.background_opacity)\
                     .volumex(0.3)
 
     v.clips.append(static_clip)
@@ -314,7 +311,7 @@ def create(post):
     current_clip_text = ""
 
     for count, c in enumerate(v.meta.comments):
-        logging.info(f'========== Processing Reddit Comment {count}/{comment_limit} ==========')
+        logging.info(f'========== Processing Reddit Comment {count}/{settings.comment_limit} ==========')
         print_comment_details(c)
         logging.info("Comment #  : " + str(count))
 
@@ -352,7 +349,7 @@ def create(post):
                 continue
 
             logging.info("comment_line     : " + comment_line)
-            audio_filepath = str(Path("audio", v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
+            audio_filepath = str(Path(settings.audio_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
             speech.create_audio(audio_filepath, comment_line)
             audioclip = AudioFileClip(audio_filepath)
 
@@ -370,7 +367,7 @@ def create(post):
                                 #bg_color='blue',
                                 align='West')\
                                 .set_pos((clip_margin,clip_margin_top))\
-                                .set_duration(audioclip.duration + pause)\
+                                .set_duration(audioclip.duration + settings.pause)\
                                 .set_audio(audioclip)\
                                 .set_start(t)\
                                 .volumex(1.5)
@@ -389,7 +386,7 @@ def create(post):
                         #bg_color='blue',
                         align='West')\
                         .set_pos((clip_margin,clip_margin_top))\
-                        .set_duration(audioclip.duration + pause)\
+                        .set_duration(audioclip.duration + settings.pause)\
                         .set_audio(audioclip)\
                         .set_start(t)
 
@@ -397,8 +394,8 @@ def create(post):
                     logging.info("Comment Text Too Long, Skipping Comment")
                     continue   
 
-            t += audioclip.duration + pause
-            v.duration += audioclip.duration + pause
+            t += audioclip.duration + settings.pause
+            v.duration += audioclip.duration + settings.pause
             
 
             v.clips.append(txt_clip)
@@ -407,20 +404,20 @@ def create(post):
 
         logging.info("Current Video Duration : " + str(v.duration))
 
-        if v.duration > max_video_length:
-            logging.info("Reached Maximum Video Length : " + str(max_video_length))
+        if v.duration > settings.max_video_length:
+            logging.info("Reached Maximum Video Length : " + str(settings.max_video_length))
             logging.info("Exiting...")     
             break 
 
-        if count == comment_limit:
-            logging.info("Reached Maximum Number of Comments Limit : " + str(comment_limit))
+        if count == settings.comment_limit:
+            logging.info("Reached Maximum Number of Comments Limit : " + str(settings.comment_limit))
             logging.info("Exiting...")
             break
         
         
     
     background_clip = VideoFileClip(background_filepath)\
-                        .set_opacity(background_opacity)\
+                        .set_opacity(settings.background_opacity)\
                         .set_start(tb)\
                         .volumex(0)
 

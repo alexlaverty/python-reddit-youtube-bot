@@ -28,7 +28,8 @@ class ttsvibelounge():
     subreddits = ['NoStupidQuestions+AmItheAsshole+antiwork+AskMen+unpopularopinion+Showerthoughts+TooAfraidToAsk+TwoXChromosomes+pettyrevenge']
     validposts = []
     videos = []
-    directories = ["backgrounds","audio","final","tmp","thumbnails"]
+    directories = ["final","temp","assets"]
+    asset_directories = ["audio","backgrounds","fonts","images","soundeffects"]
     post_max = 10
 
     def valid_post(self, submission):
@@ -49,14 +50,19 @@ class ttsvibelounge():
         logging.info('Downloading Assets')
         # Get latest Royalty Free Lofi Videos
 
-
-
     def create_directories(self):
         logging.info('Checking Directory Structure')
         for directory in self.directories:
-            if not os.path.exists(directory):
-                logging.info('Creating Directory : ' + directory)
-                os.makedirs(directory)
+            self.create_directory(directory)
+
+        for asset_directory in self.asset_directories:
+            self.create_directory(str(Path("assets", asset_directory)))
+
+    def create_directory(self, path):
+        logging.info(f'Checking Directory : {path}')
+        if not os.path.exists(path):
+            logging.info('Creating Directory : ' + path)
+            os.makedirs(path)
 
 def main():
     tvl = ttsvibelounge()
@@ -87,6 +93,7 @@ def main():
         tvl.videos.append(post_video)
         i += 1
         if i == tvl.post_max:
+            logging.info('Reached Max Posts Limit : ' + str(tvl.post_max))
             break
     
     

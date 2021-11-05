@@ -4,9 +4,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV FIREFOX_VER 87.0
 ENV GECKODRIVER_VER v0.30.0
 
-COPY fonts /usr/share/fonts/truetype/ttsvibelounge
+COPY assets/fonts /usr/share/fonts/truetype/ttsvibelounge
 
-COPY bin/geckodriver /usr/bin/geckodriver
+COPY assets/bin/geckodriver /usr/bin/geckodriver
 
 RUN chmod +x /usr/bin/geckodriver
 
@@ -41,9 +41,5 @@ COPY policy.xml /etc/ImageMagick-6/policy.xml
 WORKDIR /app
 
 RUN pip install -r requirements.txt
-
-# RUN poetry config virtualenvs.create false
-# RUN poetry install 
-
 
 CMD ["python3", "/app/app.py"]
