@@ -17,38 +17,59 @@ logging.basicConfig(
         logging.StreamHandler()
     ])
 
+def random_hex_colour():
+    r = lambda: random.randint(0,255)
+    rcolor = '#%02X%02X%02X' % (r(),r(),r())
+    print("Generated random hex colour") 
+    print(rcolor)
+    return rcolor
+
+def random_rgb_colour():
+    rbg_colour = random.choices(range(256), k=3)
+    print("Generated random rgb colour") 
+    print(rbg_colour)
+    return rbg_colour
+
 def get_font_size(length):
 
     fontsize = 50
     lineheight = 60
 
     if length < 10 :
-        fontsize = 100
-        lineheight = 100
+        fontsize = 190
+        lineheight = 200
 
-    if length >= 10 and length < 30:
-        fontsize = 120
-        lineheight = 140
+    if length >= 10 and length < 20:
+        fontsize = 180
+        lineheight = 190
+
+    if length >= 20 and length < 30:
+        fontsize = 170
+        lineheight = 180
 
     if length >= 30 and length < 40:
         fontsize = 130
         lineheight = 150
 
     if length >= 40 and length < 50:
-        fontsize = 100
+        fontsize = 130
         lineheight = 120
 
-    if length >= 50 and length < 70:
-        fontsize = 100
-        lineheight = 110
+    if length >= 50 and length < 60:
+        fontsize = 140
+        lineheight = 140
+
+    if length >= 60 and length < 70:
+        fontsize = 120
+        lineheight = 120
 
     if length >= 70 and length < 80:
-        fontsize = 100
+        fontsize = 115
         lineheight = 110
 
     if length >= 80 and length < 90:
-        fontsize = 70
-        lineheight = 90
+        fontsize = 115
+        lineheight = 110
 
     if length >= 90 and length < 100:
         fontsize = 80
@@ -91,7 +112,7 @@ def generate(video, filepath):
     background_clip = TextClip("",
                             size=(width,height), 
                             bg_color="#000000",
-                            method="caption").margin(20, color=(218,165,32))
+                            method="caption").margin(20, color=random_rgb_colour())
 
     clips.append(background_clip)
 
@@ -130,10 +151,10 @@ def generate(video, filepath):
                             fontsize = fontsize, 
                             color=word_color, 
                             align='center', 
-                            font="Verdana-Bold", 
-                            bg_color="#000000",
+                            font="Impact", 
+                            #bg_color="#000000",
                             method="caption")\
-                            .set_pos((txt_x, txt_y))\
+                            .set_pos((txt_x, txt_y))
                             #.set_opacity(0.8)
 
         clips.append(txt_clip)
@@ -150,7 +171,7 @@ def generate(video, filepath):
 
 if __name__ == "__main__":
     class meta():
-        title = "Why don't they listen until we're reduced to tears?"
+        title = "What is the correct answer to ‘would you still love me if I was a worm' fhdngh apple"
         subreddit_name_prefixed = "r/askreddit"
 
     class Video():

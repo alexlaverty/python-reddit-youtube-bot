@@ -1,17 +1,38 @@
 FROM ubuntu
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV FIREFOX_VER 87.0
+ENV GECKODRIVER_VER v0.30.0
 
-RUN apt update -y
+COPY fonts /usr/share/fonts/truetype/ttsvibelounge
 
-RUN apt install -y \
-        python3.8 \
-        python3-pip \
-        libmagick++-dev \
+COPY bin/geckodriver /usr/bin/geckodriver
+
+RUN chmod +x /usr/bin/geckodriver
+
+RUN apt update -y && \
+    apt install -y \
+        curl \
         imagemagick \
-        vim \
-        ttf-mscorefonts-installer && \
+        libmagick++-dev \
+        python3-pip \
+        python3.8 \
+        ttf-mscorefonts-installer \
+        vim && \
         fc-cache -f
+
+
+# Add latest FireFox
+RUN set -x \
+   && apt install -y \
+       libx11-xcb1 \
+       libdbus-glib-1-2 \
+       firefox \
+   && curl -sSLO https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VER}/linux-x86_64/en-US/firefox-${FIREFOX_VER}.tar.bz2 \
+   && tar -jxf firefox-* \
+   && mv firefox /opt/ \
+   && chmod 755 /opt/firefox \
+   && chmod 755 /opt/firefox/firefox
 
 COPY . /app
 

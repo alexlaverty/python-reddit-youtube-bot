@@ -6,6 +6,8 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.remote.file_detector import LocalFileDetector
+from selenium.webdriver.firefox.options import Options
+
 
 from login import confirm_logged_in, login_using_cookie_file
 from upload import upload_file
@@ -27,11 +29,23 @@ def publish(video):
     logging.info(f'video.title     : {video.title}')
     logging.info(f'video.thumbnail : {video.thumbnail}')
 
-    driver = webdriver.Remote(
-        command_executor="http://127.0.0.1:4444/wd/hub",
-        desired_capabilities=DesiredCapabilities.FIREFOX,
-    )
+    # # Docker Remote
+    # driver = webdriver.Remote(
+    #     command_executor="http://firefox:4444/wd/hub",
+    #     desired_capabilities=DesiredCapabilities.FIREFOX,
+    # )
 
+    # Firefox Local
+    # options = Options()
+    # options.headless = True
+    # firefox_profile = webdriver.FirefoxProfile()
+    # firefox_profile.set_preference("intl.accept_languages", "en-us")
+    # firefox_profile.update_preferences()
+    # driver = webdriver.Firefox(firefox_profile,firefox_binary='/opt/firefox/firefox-bin')
+
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Firefox(options=options, firefox_binary='/opt/firefox/firefox')
 
     driver.set_window_size(1920, 1080)
     login_using_cookie_file(driver, cookie_file=login_cookies)

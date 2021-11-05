@@ -1,19 +1,28 @@
 from moviepy.editor import *
 from pathlib import Path
+import emoji 
+import json 
 import logging 
+import os 
 import random 
 import re
 import speech
-import json 
+import sys
 import thumbnail
-import os 
 import youtube 
+#import youtubeapi
 
-max_video_length = 30 # Seconds
+max_video_length = 600 # Seconds
 comment_limit = 600
 background_opacity = 0.5
 pause = 1 # Pause after speech
 
+def give_emoji_free_text(text):
+    allchars = [str for str in text]
+    emoji_list = [c for c in allchars if c in emoji.UNICODE_EMOJI]
+    clean_text = ' '.join([str for str in text.split() if not any(i in str for i in emoji_list)])
+
+    return clean_text
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -23,6 +32,12 @@ logging.basicConfig(
         logging.FileHandler("debug.log"),
         logging.StreamHandler()
     ])
+
+
+def random_hex_colour():
+    r = lambda: random.randint(0,255)
+    rcolor = '#%02X%02X%02X' % (r(),r(),r()) 
+    return rcolor
 
 def print_post_details(post):
     logging.info("SubReddit : " + post.subreddit_name_prefixed)
@@ -140,10 +155,10 @@ def create(post):
     v.get_background()
 
     thumbnail_name = v.meta.id + "_thumbnail.png"
-    v.thumbnail = str(Path("final", thumbnail_name))
+    v.thumbnail = str(Path(get_script_path(), "final", thumbnail_name))
     thumbnail.generate(v, v.thumbnail)
-    v.description = f"{v.meta.subreddit_name_prefixed} \\n\\n{v.meta.title} - \\n\\n{v.meta.url}\\n\\n{v.meta.selftext}\\n\\nCredits :\\n\\n Motion Graphics provided by https://www.tubebacks.com\\n\\nYouTube Channel: https://goo.gl/aayJRf\\n\\n"
-    v.title = f"{v.meta.title} - {v.meta.subreddit_name_prefixed}"
+    v.description = f"{v.meta.subreddit_name_prefixed} \n\n{v.meta.title} \n{v.meta.url}\n\n{v.meta.selftext}\n\nCredits :\n\n Motion Graphics provided by https://www.tubebacks.com\n\nYouTube Channel: https://goo.gl/aayJRf\n\n"
+    v.title = f"{v.meta.title} ({v.meta.subreddit_name_prefixed})"
     height = 720
     width = 1280
     clip_margin = 50 
@@ -156,16 +171,12 @@ def create(post):
     current_clip_text =""
     t = 0
 
-    #intro_audio = AudioFileClip("intro.mp3").volumex(2)
-
-    intro_clip = VideoFileClip("intro_welcome_crop.mp4")\
-                    .set_start(0)
+    # intro_clip = VideoFileClip("intro_welcome_crop.mp4")\
+    #                 .set_start(0)
     
-    #intro_clip_with_audio = intro_clip.set_audio(CompositeAudioClip([intro_audio.set_start(1)]))
+    # v.clips.append(intro_clip)
 
-    v.clips.append(intro_clip)
-
-    t += intro_clip.duration
+    # t += intro_clip.duration
 
     tb = t
 
@@ -178,7 +189,7 @@ def create(post):
     audioclip_title = AudioFileClip(audio_title).volumex(2)
 
     subreddit_clip = TextClip(v.meta.subreddit_name_prefixed, 
-                            font="Verdana-Bold",
+                            font="Impact",
                             fontsize = 60, 
                             color = 'white',
                             size = txt_clip_size,
@@ -195,7 +206,7 @@ def create(post):
     title_fontsize, lineheight = get_font_size(len(v.meta.title))
 
     title_clip = TextClip(v.meta.title, 
-                            font="Verdana-Bold",
+                            font="Impact",
                             fontsize = title_fontsize, 
                             color = 'white',
                             size = txt_clip_size,
@@ -215,11 +226,13 @@ def create(post):
 
 
 
-    if v.meta.selftext:
+    if v.meta.selftext :
         logging.info('========== Processing Submission SelfText ==========')
         logging.info(v.meta.selftext)
 
         selftext = v.meta.selftext
+
+        selftext = give_emoji_free_text(selftext)
         selftext = os.linesep.join([s for s in selftext.splitlines() if s])
 
         logging.info("selftext Length  : " + str(len(selftext)))
@@ -232,12 +245,13 @@ def create(post):
             speech.create_audio(selftext_audio_filepath, selftext_line)
             selftext_audioclip = AudioFileClip(selftext_audio_filepath)
 
-            current_clip_text += selftext_line + "\n\n"
+            current_clip_text += selftext_line + "\n"
             logging.info("Current Clip Text :")
             logging.info(current_clip_text)
-
+            logging.info(f"SelfText Fontsize : {fontsize}")
+            
             selftext_clip = TextClip(current_clip_text, 
-                                font="Verdana",
+                                font="Verdana-Bold",
                                 fontsize = fontsize, 
                                 color = 'white',
                                 size = txt_clip_size,
@@ -254,9 +268,9 @@ def create(post):
 
             if selftext_clip.h > height:
                 logging.info("Text exceeded Video Height, reset text")
-                current_clip_text = selftext_line + "\n\n"
+                current_clip_text = selftext_line + "\n"
                 selftext_clip = TextClip(current_clip_text, 
-                        font="Verdana",
+                        font="Verdana-Bold",
                         fontsize = fontsize, 
                         color = 'white',
                         size = txt_clip_size,
@@ -280,6 +294,7 @@ def create(post):
             v.clips.append(selftext_clip)
             logging.info("Video Clips : ")
             logging.info(str(len(v.clips)))
+            
 
         logging.info("Current Video Duration : " + str(v.duration))
 
@@ -287,13 +302,16 @@ def create(post):
 
     static_clip = VideoFileClip("static.mp4")\
                     .set_duration(1)\
-                    .resize(width=width, height=height)\
-                    .set_start(t)
+                    .set_pos(("center","center"))\
+                    .set_start(t)\
+                    .set_opacity(background_opacity)\
+                    .volumex(0.3)
 
     v.clips.append(static_clip)
     t += static_clip.duration
     v.duration += static_clip.duration
 
+    current_clip_text = ""
 
     for count, c in enumerate(v.meta.comments):
         logging.info(f'========== Processing Reddit Comment {count}/{comment_limit} ==========')
@@ -301,12 +319,16 @@ def create(post):
         logging.info("Comment #  : " + str(count))
 
         comment = c.body 
-
+        if len(comment) > 1000 :
+            logging.info('Comment exceeds 1000 characeters, skipping post... :')
+            logging.info(comment)
+            continue
+        
         if comment == "[removed]":
             logging.info("Skipping Comment : " + comment)
             continue
 
-
+        comment = give_emoji_free_text(comment)
         comment = os.linesep.join([s for s in comment.splitlines() if s])
 
         logging.info("Comment Length  : " + str(len(comment)))
@@ -339,7 +361,7 @@ def create(post):
             logging.info(current_clip_text)
 
             txt_clip = TextClip(current_clip_text, 
-                                font="Verdana",
+                                font="Verdana-Bold",
                                 fontsize = fontsize, 
                                 color = 'white',
                                 size = txt_clip_size,
@@ -358,7 +380,7 @@ def create(post):
                 logging.info("Text exceeded Video Height, reset text")
                 current_clip_text = comment_line + "\n\n"
                 txt_clip = TextClip(current_clip_text, 
-                        font="Verdana",
+                        font="Verdana-Bold",
                         fontsize = fontsize, 
                         color = 'white',
                         size = txt_clip_size,
@@ -418,23 +440,26 @@ def create(post):
 
     post_video = CompositeVideoClip(v.clips)
 
-    v.filepath = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
-    v.json  = str(Path("final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
+    v.filepath = str(Path(get_script_path(), "final", v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
+    v.json  = str(Path(get_script_path(), "final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
 
-    data = {
-        'title': v.title,
-        'description': v.description,
-        'thumbnail': v.thumbnail,
-        'duration': v.duration,
-        'height': height,
-        'width': width
-    }
+    # data = {
+    #     'title': v.title,
+    #     'description': v.description,
+    #     'thumbnail': v.thumbnail,
+    #     'duration': v.duration,
+    #     'height': height,
+    #     'width': width
+    # }
 
-    with open(v.json, 'w') as outfile:
-        json.dump(data, outfile, indent=4)
-
+    # with open(v.json, 'w') as outfile:
+    #     json.dump(data, outfile, indent=4)
+    logging.info("Compiling video, this takes a while, please be patient : )")
     post_video.write_videofile(v.filepath)
     
     youtube.publish(v)
+    #youtubeapi.publish(v)
 
 
+def get_script_path():
+    return os.path.dirname(os.path.realpath(sys.argv[0]))

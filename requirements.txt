@@ -5,3 +5,4 @@ boto3
 nltk
 poetry
 selenium
+emoji

@@ -72,8 +72,13 @@ def main():
             continue
 
         post_title = f"{post.title} - {post.subreddit_name_prefixed}"
-        if len(post_title) > 100:
+        if len(post_title) > 100 :
             logging.info('Post title exceeds 100 characeters, skipping post... :')
+            logging.info(post_title)
+            continue
+
+        if len(post.selftext) > 1000 :
+            logging.info('SelfText exceeds 1000 characeters, skipping post... :')
             logging.info(post_title)
             continue
 

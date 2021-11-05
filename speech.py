@@ -30,6 +30,8 @@ def process_speech_text(text):
     text = text.replace("YTA", " You're the asshole ")
     text = text.replace("SAHM", " stay at home mother ")
     text = text.replace("WIBTA", " would I be the asshole ")
+    text = text.replace(" stfu ", " shut the fuck up ")
+    text = text.replace(" OP ", " o p ")
     return text
 
 def create_audio(path, text):
