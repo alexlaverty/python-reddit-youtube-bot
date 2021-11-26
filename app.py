@@ -6,6 +6,9 @@ import video
 import os
 from pathlib import Path
 import re 
+import argparse
+import settings 
+
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -64,10 +67,31 @@ class ttsvibelounge():
             logging.info('Creating Directory : ' + path)
             os.makedirs(path)
 
-def main():
+    def clean_temp_dir(self):
+        logging.info(f'Cleaning Files')
+        audio_files = os.listdir(settings.audio_directory)
+        for item in audio_files:
+            if item.endswith(".mp3"):
+                os.remove(os.path.join(settings.audio_directory, item))
+
+        final_files = os.listdir("final")
+        for item in final_files:
+            if item.endswith(".mp4"):
+                os.remove(os.path.join(final_files, item))
+
+def main(args):
     tvl = ttsvibelounge()
     tvl.create_directories()
     tvl.download_assets()
+    if args.clean:
+        tvl.clean_temp_dir()
+        
+    if args.disableupload:
+        settings.disableupload = True
+
+    if args.disablecompile:
+        settings.disablecompile = True
+
     tvl.get_valid_posts()
 
     i = 0
@@ -88,6 +112,11 @@ def main():
             logging.info(post_title)
             continue
 
+        if post.over_18 :
+            logging.info('Skipping NSFW Post... :')
+            logging.info(post_title)
+            continue
+
         post.comments.replace_more(limit=0)
         post_video = video.create(post)
         tvl.videos.append(post_video)
@@ -99,4 +128,9 @@ def main():
     
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='TTS Vibe Lounge')
+    parser.add_argument('-c','--clean', help='Clean Temp Working Directory', action='store_true')
+    parser.add_argument('-z','--disableupload', help='Dont Upload Video', action='store_true')
+    parser.add_argument('-x','--disablecompile', help='Dont Compile Video', action='store_true')
+    args = parser.parse_args()
+    main(args)

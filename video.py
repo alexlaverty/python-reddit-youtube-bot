@@ -11,6 +11,8 @@ import speech
 import sys
 import thumbnail
 import youtube 
+import keywords 
+import bing
 
 def give_emoji_free_text(text):
     allchars = [str for str in text]
@@ -41,6 +43,7 @@ def print_post_details(post):
     logging.info("ID        : " + str(post.id))
     logging.info("URL       : " + post.url)
     logging.info("SelfText  : " + post.selftext)
+    logging.info("NSFW?     : " + str(post.over_18))
 
 def print_comment_details(comment):
     logging.info("Author   : " + str(comment.author))
@@ -141,6 +144,11 @@ def contains_url(text):
     if any(x in text for x in matches):
         return True
 
+def convert_keywords_to_string(keywords):
+    keyword_string = ""
+    for keyword in keywords:
+        keyword_string = keyword_string + str(keyword[0].encode('ascii', 'ignore').decode('ascii')) + " "
+    return keyword_string.strip()
 
 def create(post):
     logging.info('========== Processing Reddit Post ==========')
@@ -151,19 +159,28 @@ def create(post):
     v.clips = []
     v.get_background()
 
+    keyword_input = f"{v.meta.title} {v.meta.selftext}"
+    video_keywords = keywords.get_keywords(keyword_input)
+    logging.info('Video Keywords :')
+    logging.info(video_keywords[:3])
+    #bing_search_query = ' '.join(video_keywords[:3])
+    bing_search_query = convert_keywords_to_string(video_keywords[:3])
+    logging.info('bing_search_query : ' + bing_search_query)
+    bing_images = bing.get_images(v, bing_search_query)
+
     thumbnail_name = v.meta.id + "_thumbnail.png"
     v.thumbnail = str(Path(get_script_path(), "final", thumbnail_name))
-    thumbnail.generate(v, v.thumbnail)
-    v.description = f"{v.meta.subreddit_name_prefixed} \n\n{v.meta.title} \n{v.meta.url}\n\n{v.meta.selftext}\n\nCredits :\n\n Motion Graphics provided by https://www.tubebacks.com\n\nYouTube Channel: https://goo.gl/aayJRf\n\n"
+    thumbnail.generate(v, v.thumbnail, bing_images)
+    
+    subreddit_name = v.meta.subreddit_name_prefixed.replace("r/","")
+
+    v.description = f"{v.meta.subreddit_name_prefixed} \n\n{v.meta.title} \n{v.meta.url}\n\n{v.meta.selftext}\n\nCredits :\n\n Motion Graphics provided by https://www.tubebacks.com\n\nYouTube Channel: https://goo.gl/aayJRf\n\n#reddit #{subreddit_name} #tts"
     v.title = f"{v.meta.title} ({v.meta.subreddit_name_prefixed})"
     height = 720
     width = 1280
     clip_margin = 50 
     clip_margin_top = 30
-    fontsize = 32
     txt_clip_size = (width - (clip_margin * 2), None)
-
-    background_filepath = str(Path(settings.background_directory, v.background))
 
     current_clip_text =""
     t = 0
@@ -178,7 +195,7 @@ def create(post):
     tb = t
 
     audio_title = str(Path(settings.audio_directory, v.meta.id + "_title.mp3"))
-    subreddit_name = v.meta.subreddit_name_prefixed.replace("r/","")
+    
     title_speech_text = f"From the subreddit {subreddit_name}. {v.meta.title}"
 
     speech.create_audio(audio_title, title_speech_text)
@@ -188,11 +205,11 @@ def create(post):
     subreddit_clip = TextClip(v.meta.subreddit_name_prefixed, 
                             font="Impact",
                             fontsize = 60, 
-                            color = 'white',
+                            color = settings.text_color,
                             size = txt_clip_size,
                             kerning=-1,
                             method='caption',
-                            #bg_color='blue',
+                            ##bg_color=settings.text_bg_color,
                             align='West')\
                             .set_pos((40,40))\
                             .set_duration(audioclip_title.duration + settings.pause)\
@@ -205,11 +222,11 @@ def create(post):
     title_clip = TextClip(v.meta.title, 
                             font="Impact",
                             fontsize = title_fontsize, 
-                            color = 'white',
+                            color = settings.text_color,
                             size = txt_clip_size,
                             kerning=-1,
                             method='caption',
-                            #bg_color='blue',
+                            ##bg_color=settings.text_bg_color,
                             align='Center')\
                             .set_pos(("center","center"))\
                             .set_duration(audioclip_title.duration + settings.pause)\
@@ -245,21 +262,22 @@ def create(post):
             current_clip_text += selftext_line + "\n"
             logging.info("Current Clip Text :")
             logging.info(current_clip_text)
-            logging.info(f"SelfText Fontsize : {fontsize}")
+            logging.info(f"SelfText Fontsize : {settings.text_fontsize}")
             
             selftext_clip = TextClip(current_clip_text, 
-                                font="Verdana-Bold",
-                                fontsize = fontsize, 
-                                color = 'white',
+                                font=settings.text_font,
+                                fontsize = settings.text_fontsize, 
+                                color = settings.text_color,
                                 size = txt_clip_size,
                                 kerning=-1,
                                 method='caption',
-                                #bg_color='blue',
+                                #bg_color=settings.text_bg_color,
                                 align='West')\
                                 .set_pos((clip_margin,clip_margin_top))\
                                 .set_duration(selftext_audioclip.duration + settings.pause)\
                                 .set_audio(selftext_audioclip)\
                                 .set_start(t)\
+                                .set_opacity(settings.text_bg_opacity)\
                                 .volumex(1.5)
                                 
 
@@ -267,15 +285,16 @@ def create(post):
                 logging.info("Text exceeded Video Height, reset text")
                 current_clip_text = selftext_line + "\n"
                 selftext_clip = TextClip(current_clip_text, 
-                        font="Verdana-Bold",
-                        fontsize = fontsize, 
-                        color = 'white',
+                        font=settings.text_font,
+                        fontsize = settings.text_fontsize, 
+                        color = settings.text_color,
                         size = txt_clip_size,
                         kerning=-1,
                         method='caption',
-                        #bg_color='blue',
+                        #bg_color=settings.text_bg_color,
                         align='West')\
                         .set_pos((clip_margin,clip_margin_top))\
+                        .set_opacity(settings.text_bg_opacity)\
                         .set_duration(selftext_audioclip.duration + settings.pause)\
                         .set_audio(selftext_audioclip)\
                         .set_start(t)
@@ -358,18 +377,19 @@ def create(post):
             logging.info(current_clip_text)
 
             txt_clip = TextClip(current_clip_text, 
-                                font="Verdana-Bold",
-                                fontsize = fontsize, 
-                                color = 'white',
+                                font=settings.text_font,
+                                fontsize = settings.text_fontsize, 
+                                color = settings.text_color,
                                 size = txt_clip_size,
                                 kerning=-1,
                                 method='caption',
-                                #bg_color='blue',
+                                #bg_color=settings.text_bg_color,
                                 align='West')\
                                 .set_pos((clip_margin,clip_margin_top))\
                                 .set_duration(audioclip.duration + settings.pause)\
                                 .set_audio(audioclip)\
                                 .set_start(t)\
+                                .set_opacity(settings.text_bg_opacity)\
                                 .volumex(1.5)
                                 
 
@@ -377,17 +397,18 @@ def create(post):
                 logging.info("Text exceeded Video Height, reset text")
                 current_clip_text = comment_line + "\n\n"
                 txt_clip = TextClip(current_clip_text, 
-                        font="Verdana-Bold",
-                        fontsize = fontsize, 
-                        color = 'white',
+                        font=settings.text_font,
+                        fontsize = settings.text_fontsize, 
+                        color = settings.text_color,
                         size = txt_clip_size,
                         kerning=-1,
                         method='caption',
-                        #bg_color='blue',
+                        #bg_color=settings.text_bg_color,
                         align='West')\
                         .set_pos((clip_margin,clip_margin_top))\
                         .set_duration(audioclip.duration + settings.pause)\
                         .set_audio(audioclip)\
+                        .set_opacity(settings.text_bg_opacity)\
                         .set_start(t)
 
                 if txt_clip.h > height:
@@ -414,12 +435,14 @@ def create(post):
             logging.info("Exiting...")
             break
         
-        
+    video_overlay_filepath = str(Path(settings.assets_directory,"particles.mp4"))
+
+    
+    background_filepath = str(Path(settings.background_directory, v.background))
     
     background_clip = VideoFileClip(background_filepath)\
-                        .set_opacity(settings.background_opacity)\
                         .set_start(tb)\
-                        .volumex(0)
+                        .volumex(settings.background_volume)
 
     logging.info("Video Clip Duration      : " + str(v.duration))
     logging.info("Background Clip Duration : " + str(background_clip.duration))
@@ -434,6 +457,24 @@ def create(post):
         background_clip = background_clip.set_duration(v.duration)
 
     v.clips.insert(0,background_clip)
+
+    if settings.enable_overlay :
+        clip_video_overlay = VideoFileClip(video_overlay_filepath)\
+                                .set_start(tb)\
+                                .resize(settings.clip_size)\
+                                .set_opacity(0.8)\
+                                .volumex(0)
+
+        if clip_video_overlay.duration < v.duration:
+            logging.info("Looping Overlay")
+            #background_clip = vfx.make_loopable(background_clip, cross=0)
+            clip_video_overlay = vfx.loop(clip_video_overlay, duration=v.duration).without_audio()
+            logging.info("Looped Overlay Clip Duration : " + str(clip_video_overlay.duration))
+        else:
+            logging.info("Not Looping Overlay")
+            clip_video_overlay = clip_video_overlay.set_duration(v.duration)
+
+        v.clips.insert(1,clip_video_overlay)
 
     post_video = CompositeVideoClip(v.clips)
 
@@ -451,11 +492,18 @@ def create(post):
 
     # with open(v.json, 'w') as outfile:
     #     json.dump(data, outfile, indent=4)
-    logging.info("Compiling video, this takes a while, please be patient : )")
-    post_video.write_videofile(v.filepath)
     
-    youtube.publish(v)
-    #youtubeapi.publish(v)
+    if settings.disablecompile:
+        logging.info("Skipping Video Compilation --disablecompile passed")
+    else:
+        logging.info("Compiling video, this takes a while, please be patient : )")
+        post_video.write_videofile(v.filepath)
+    
+    if settings.disablecompile or settings.disableupload:
+        logging.info("Skipping Upload...")
+    else:
+        youtube.publish(v)
+        print("skipping ")
 
 
 def get_script_path():

@@ -58,3 +58,12 @@ https://www.youtube.com/watch?v=46gdWq_2qyU
 ## List available fonts 
 
 convert -list font
+
+
+## Youtube Channels 
+
+TTS Vibe Lounge
+https://www.youtube.com/channel/UCzIwW92D_rM5_yvWBsquSbw/videos
+
+Reddit2Youtuber
+https://www.youtube.com/channel/UCMx8LT5RomMkVhQY33MHlAw/videos

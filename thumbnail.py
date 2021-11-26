@@ -56,7 +56,7 @@ def get_font_size(length):
         lineheight = 150
 
     if length >= 50 and length < 60:
-        fontsize = 140
+        fontsize = 130
         lineheight = 140
 
     if length >= 60 and length < 70:
@@ -82,7 +82,7 @@ def get_font_size(length):
     return fontsize, lineheight
 
 
-def generate(video, filepath):
+def generate(video, filepath, bing_images):
     logging.info('========== Generating Thumbnail ==========')
 
     colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
@@ -124,7 +124,7 @@ def generate(video, filepath):
     clips.append(img_clip)
 
     subreddit_clip = TextClip(subreddit,
-                        fontsize = 80, 
+                        fontsize = 85, 
                         color="white", 
                         align='center', 
                         font="Verdana-Bold", 
@@ -170,11 +170,107 @@ def generate(video, filepath):
     final_video = CompositeVideoClip(clips)
     logging.info('Save Thumbnail to : ' + filepath)
     final_video.save_frame(filepath, 1)
+    return final_video
+
+
+    # logging.info('========== Generating Dynamic Thumbnail Alternatives ==========')
+
+    # logging.info('BING IMAGES')
+    # if bing_images:
+    #     for bing_image in bing_images:
+    #         logging.info(bing_image)
+
+    #         colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
+    #         stop_word_colour = random.choice(colors)
+
+    #         text = video.meta.title
+    #         subreddit = video.meta.subreddit_name_prefixed
+    #         nltk.download('stopwords')
+    #         s=set(stopwords.words('english'))
+    #         words = text.split(" ")
+    #         unique_words = list(filter(lambda w: not w in s,text.split()))
+
+    #         clips = []
+
+    #         margin = 40
+    #         txt_y = 0 
+    #         txt_x = 0 + margin
+    #         width = 1280
+    #         height = 720
+    #         #fontsize = get_font_size(len(video.meta.title))
+    #         fontsize, lineheight = get_font_size(len(video.meta.title))
+
+    #         background_clip = TextClip("",
+    #                                 size=(width,height), 
+    #                                 bg_color="#000000",
+    #                                 method="caption").margin(20, color=random_rgb_colour())
+    #         clips.append(background_clip)
+            
+    #         logging.info("Generating Background Clip")
+            
+    #         background_image_filepath = str(Path("assets","thumbnails",bing_image))
+            
+    #         logging.info("Current Background File Path : " + background_image_filepath)
+
+    #         background_image_clip = ImageClip(background_image_filepath).set_duration(1)
+
+    #         clips.append(background_image_clip)
+
+    #         logging.info("Generating Subreddit Title")
+    #         subreddit_clip = TextClip(subreddit,
+    #                             fontsize = 85, 
+    #                             color="white", 
+    #                             align='center', 
+    #                             font="Verdana-Bold", 
+    #                             bg_color="#000000",
+    #                             method="caption")\
+    #                             .set_pos((margin, 20))
+
+    #         clips.append(subreddit_clip)
+
+    #         txt_y += subreddit_clip.h
+
+    #         logging.info("Generating Title Text")
+    #         for word in words:
+    #             if word in unique_words:
+    #                 word_color = "white"
+    #             else:
+    #                 word_color = stop_word_colour
+
+    #             if txt_x > (width / 2):
+    #                 txt_x = 0 + margin
+    #                 txt_y += lineheight
+
+    #             txt_clip = TextClip(word,
+    #                                 fontsize = fontsize, 
+    #                                 color=word_color, 
+    #                                 align='center', 
+    #                                 font="Impact", 
+    #                                 #bg_color="#000000",
+    #                                 stroke_color="#000000",
+    #                                 stroke_width=3,
+    #                                 method="caption")\
+    #                                 .set_pos((txt_x, txt_y))
+    #                                 #.set_opacity(0.8)
+
+    #             clips.append(txt_clip)
+    #             txt_x += txt_clip.w + 15
+                
+
+    #         txt_clip = txt_clip.set_duration(10)
+    #         txt_clip = txt_clip.set_position(("center","center"))
+
+    #         logging.info("Compositing Clips")
+    #         final_video = CompositeVideoClip(clips)
+    #         thumbnail_filepath = str(Path("final",bing_image))
+    #         logging.info('Save Thumbnail to : ' + thumbnail_filepath)
+    #         final_video.save_frame(thumbnail_filepath, 1)
+
 
 if __name__ == "__main__":
     class meta():
-        title = "Jobs LYING about starting pay should be illegal"
-        subreddit_name_prefixed = "r/antiwork"
+        title = "What do you desire more than anything else in this world?"
+        subreddit_name_prefixed = "r/AskMen"
 
     class Video():
         meta=None
@@ -183,4 +279,4 @@ if __name__ == "__main__":
     video = Video()
     video.meta = meta
 
-    generate(video, "thumbnail.png")
+    generate(video, "thumbnail.png", None)

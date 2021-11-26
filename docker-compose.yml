@@ -2,7 +2,7 @@ version: "3.9"
 services:
   ttsvibelounge:
     #build: .
-    image: ttsvibelounge:1.0.5
+    image: ttsvibelounge:1.0.6
     volumes:
       - .:/app
 
