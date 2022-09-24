@@ -16,7 +16,7 @@ RUN apt update -y && \
         imagemagick \
         libmagick++-dev \
         python3-pip \
-        python3.8 \
+        python3 \
         ttf-mscorefonts-installer \
         vim && \
         fc-cache -f

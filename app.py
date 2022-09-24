@@ -28,7 +28,7 @@ def safe_filename(text):
     return "".join([c for c in text if re.match(r'\w', c)])[:50]
 
 class ttsvibelounge():
-    subreddits = ['NoStupidQuestions+AmItheAsshole+antiwork+AskMen+unpopularopinion+Showerthoughts+TooAfraidToAsk+TwoXChromosomes+pettyrevenge']
+    subreddits = ['NoStupidQuestions+AmItheAsshole+antiwork+AskMen+unpopularopinion+Showerthoughts+TooAfraidToAsk+TwoXChromosomes+pettyrevenge+hatemyjob+ChoosingBeggars']
     validposts = []
     videos = []
     directories = ["final","temp","assets"]
