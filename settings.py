@@ -1,6 +1,20 @@
 
 from pathlib import Path
 
+subreddits = [
+    "AmItheAsshole",
+    "antiwork",
+    "AskMen",
+    "ChoosingBeggars",
+    "hatemyjob",
+    "NoStupidQuestions",
+    "pettyrevenge",
+    "Showerthoughts",
+    "TooAfraidToAsk",
+    "TwoXChromosomes",
+    "unpopularopinion"
+    ]
+    
 max_video_length = 600 # Seconds
 comment_limit = 600
 
@@ -16,13 +30,14 @@ video_width = 1280
 clip_size = (video_width, video_height)
 
 disablecompile = False
-disableupload = True
+disableupload = False
 
 enable_overlay = True
 
 fonts_directory = str(Path(assets_directory,"fonts"))
 image_backgrounds_directory = str(Path(assets_directory,"image_backgrounds"))
 images_directory = str(Path(assets_directory,"images"))
+thumbnails_directory = str(Path(assets_directory,"images"))
 
 pause = 1 # Pause after speech
 soundeffects_directory = str(Path(assets_directory,"soundeffects"))
@@ -33,3 +48,4 @@ text_color = "white"
 text_font = "Verdana-Bold"
 text_fontsize = 32
 
+download_enabled = True

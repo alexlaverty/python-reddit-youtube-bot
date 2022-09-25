@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 import random
 import logging 
 import settings
+import lexica 
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -88,9 +89,14 @@ def generate(video, filepath, bing_images):
     colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
     stop_word_colour = random.choice(colors)
 
-    image = random.choice(os.listdir(settings.images_directory))
-    image_path = str(Path(settings.images_directory, image))
-    logging.info('Randomly Selecting Background : ' + image_path)
+    
+    #image = random.choice(os.listdir(settings.images_directory))
+    image_path = str(Path(settings.thumbnails_directory, str(video.meta.id) + ".png").absolute())
+
+    image = lexica.get_image(image_path, video.meta.title)
+
+    #image_path = str(Path(settings.images_directory, image))
+    #logging.info('Randomly Selecting Background : ' + image_path)
     text = video.meta.title
     subreddit = video.meta.subreddit_name_prefixed
     nltk.download('stopwords')
@@ -117,8 +123,8 @@ def generate(video, filepath, bing_images):
     clips.append(background_clip)
 
     img_width = width/2
-    img_clip = ImageClip(image_path).resize(width=img_width, height=height)\
-                                    .set_position(("right","bottom"))\
+    img_clip = ImageClip(image_path).resize(width=img_width)\
+                                    .set_position(("right","center"))\
                                     .set_opacity(0.8)
 
     clips.append(img_clip)
@@ -173,104 +179,11 @@ def generate(video, filepath, bing_images):
     return final_video
 
 
-    # logging.info('========== Generating Dynamic Thumbnail Alternatives ==========')
-
-    # logging.info('BING IMAGES')
-    # if bing_images:
-    #     for bing_image in bing_images:
-    #         logging.info(bing_image)
-
-    #         colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
-    #         stop_word_colour = random.choice(colors)
-
-    #         text = video.meta.title
-    #         subreddit = video.meta.subreddit_name_prefixed
-    #         nltk.download('stopwords')
-    #         s=set(stopwords.words('english'))
-    #         words = text.split(" ")
-    #         unique_words = list(filter(lambda w: not w in s,text.split()))
-
-    #         clips = []
-
-    #         margin = 40
-    #         txt_y = 0 
-    #         txt_x = 0 + margin
-    #         width = 1280
-    #         height = 720
-    #         #fontsize = get_font_size(len(video.meta.title))
-    #         fontsize, lineheight = get_font_size(len(video.meta.title))
-
-    #         background_clip = TextClip("",
-    #                                 size=(width,height), 
-    #                                 bg_color="#000000",
-    #                                 method="caption").margin(20, color=random_rgb_colour())
-    #         clips.append(background_clip)
-            
-    #         logging.info("Generating Background Clip")
-            
-    #         background_image_filepath = str(Path("assets","thumbnails",bing_image))
-            
-    #         logging.info("Current Background File Path : " + background_image_filepath)
-
-    #         background_image_clip = ImageClip(background_image_filepath).set_duration(1)
-
-    #         clips.append(background_image_clip)
-
-    #         logging.info("Generating Subreddit Title")
-    #         subreddit_clip = TextClip(subreddit,
-    #                             fontsize = 85, 
-    #                             color="white", 
-    #                             align='center', 
-    #                             font="Verdana-Bold", 
-    #                             bg_color="#000000",
-    #                             method="caption")\
-    #                             .set_pos((margin, 20))
-
-    #         clips.append(subreddit_clip)
-
-    #         txt_y += subreddit_clip.h
-
-    #         logging.info("Generating Title Text")
-    #         for word in words:
-    #             if word in unique_words:
-    #                 word_color = "white"
-    #             else:
-    #                 word_color = stop_word_colour
-
-    #             if txt_x > (width / 2):
-    #                 txt_x = 0 + margin
-    #                 txt_y += lineheight
-
-    #             txt_clip = TextClip(word,
-    #                                 fontsize = fontsize, 
-    #                                 color=word_color, 
-    #                                 align='center', 
-    #                                 font="Impact", 
-    #                                 #bg_color="#000000",
-    #                                 stroke_color="#000000",
-    #                                 stroke_width=3,
-    #                                 method="caption")\
-    #                                 .set_pos((txt_x, txt_y))
-    #                                 #.set_opacity(0.8)
-
-    #             clips.append(txt_clip)
-    #             txt_x += txt_clip.w + 15
-                
-
-    #         txt_clip = txt_clip.set_duration(10)
-    #         txt_clip = txt_clip.set_position(("center","center"))
-
-    #         logging.info("Compositing Clips")
-    #         final_video = CompositeVideoClip(clips)
-    #         thumbnail_filepath = str(Path("final",bing_image))
-    #         logging.info('Save Thumbnail to : ' + thumbnail_filepath)
-    #         final_video.save_frame(thumbnail_filepath, 1)
-
-
 if __name__ == "__main__":
     class meta():
         title = "What do you desire more than anything else in this world?"
         subreddit_name_prefixed = "r/AskMen"
+        id = "4hdu7"
 
     class Video():
         meta=None

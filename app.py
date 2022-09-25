@@ -28,7 +28,8 @@ def safe_filename(text):
     return "".join([c for c in text if re.match(r'\w', c)])[:50]
 
 class ttsvibelounge():
-    subreddits = ['NoStupidQuestions+AmItheAsshole+antiwork+AskMen+unpopularopinion+Showerthoughts+TooAfraidToAsk+TwoXChromosomes+pettyrevenge+hatemyjob+ChoosingBeggars']
+    subreddits = ["+".join(settings.subreddits)]
+    logging.info(subreddits)
     validposts = []
     videos = []
     directories = ["final","temp","assets"]
@@ -36,10 +37,9 @@ class ttsvibelounge():
     post_max = 10
 
     def valid_post(self, submission):
-        if not submission.stickied and submission.is_self:
-            return True
-        else:
+        if submission.stickied and submission.is_self:
             return False
+        return True
 
     def get_valid_posts(self):
         logging.info('========== Scraping Reddit Posts ==========')
@@ -112,7 +112,7 @@ def main(args):
             logging.info(post_title)
             continue
 
-        if post.over_18 :
+        if post.over_18 or "porn" in post.title.lower() :
             logging.info('Skipping NSFW Post... :')
             logging.info(post_title)
             continue
