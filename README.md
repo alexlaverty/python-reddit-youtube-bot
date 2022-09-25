@@ -31,6 +31,13 @@ Look into your youtube channel in chrome and then use this plugin to export the 
 
 Save the cookie in this repo with filename `cookies.json`
 
+Download video backgrounds using youtube-dl :
+
+```
+cd assets/backgrounds
+yt-dlp -f 22 --output "%(uploader)s_%(id)s.%(ext)s" https://www.youtube.com/playlist?list=PLGmxyVGSCDKvmLInHxJ9VdiwEb82Lxd2E
+```
+
 Make sure you have Docker installed and then run the following 
 
 ```
