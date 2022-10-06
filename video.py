@@ -11,15 +11,9 @@ import speech
 import sys
 import thumbnail
 import youtube 
-import keywords 
 import bing
 
-# def give_emoji_free_text(text):
-#     allchars = [str for str in text]
-#     emoji_list = [c for c in allchars if c in emoji.UNICODE_EMOJI]
-#     clean_text = ' '.join([str for str in text.split() if not any(i in str for i in emoji_list)])
 
-#     return clean_text
 
 def give_emoji_free_text(data):
     emoj = re.compile("["
@@ -72,7 +66,7 @@ def print_comment_details(comment):
     logging.info("Author   : " + str(comment.author))
     logging.info("id       : " + str(comment.id))
     logging.info("Stickied : " + str(comment.stickied))
-    logging.info("Body     : " + str(comment.body))
+    logging.info("Body     : " + give_emoji_free_text(str(comment.body)))
     
 def safe_filename(text):
     text = text.replace(" ","_")
@@ -173,7 +167,7 @@ def convert_keywords_to_string(keywords):
         keyword_string = keyword_string + str(keyword[0].encode('ascii', 'ignore').decode('ascii')) + " "
     return keyword_string.strip()
 
-def create(post):
+def create(video_directory, post):
     logging.info('========== Processing Reddit Post ==========')
     print_post_details(post)
 
@@ -182,18 +176,8 @@ def create(post):
     v.clips = []
     v.get_background()
 
-    keyword_input = f"{v.meta.title} {v.meta.selftext}"
-    video_keywords = keywords.get_keywords(keyword_input)
-    logging.info('Video Keywords :')
-    logging.info(video_keywords[:3])
-    #bing_search_query = ' '.join(video_keywords[:3])
-    bing_search_query = convert_keywords_to_string(video_keywords[:3])
-    logging.info('bing_search_query : ' + bing_search_query)
-    bing_images = bing.get_images(v, bing_search_query)
-
     thumbnail_name = v.meta.id + "_thumbnail.png"
-    v.thumbnail = str(Path(get_script_path(), "final", thumbnail_name))
-    thumbnail.generate(v, v.thumbnail, bing_images)
+    v.thumbnail = str(Path(video_directory, thumbnail_name))
     
     subreddit_name = v.meta.subreddit_name_prefixed.replace("r/","")
 
@@ -217,7 +201,7 @@ def create(post):
 
     tb = t
 
-    audio_title = str(Path(settings.audio_directory, v.meta.id + "_title.mp3"))
+    audio_title = str(Path(video_directory, v.meta.id + "_title.mp3"))
     
     title_speech_text = f"From the subreddit {subreddit_name}. {v.meta.title}"
 
@@ -278,7 +262,7 @@ def create(post):
 
         for selftext_line_count, selftext_line in enumerate(selftext_lines):
             logging.info("selftext_line     : " + selftext_line)
-            selftext_audio_filepath = str(Path(settings.audio_directory, v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
+            selftext_audio_filepath = str(Path(video_directory, v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
             speech.create_audio(selftext_audio_filepath, selftext_line)
             selftext_audioclip = AudioFileClip(selftext_audio_filepath)
 
@@ -391,7 +375,7 @@ def create(post):
                 continue
 
             logging.info("comment_line     : " + comment_line)
-            audio_filepath = str(Path(settings.audio_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
+            audio_filepath = str(Path(video_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
             speech.create_audio(audio_filepath, comment_line)
             audioclip = AudioFileClip(audio_filepath)
 
@@ -501,20 +485,20 @@ def create(post):
 
     post_video = CompositeVideoClip(v.clips)
 
-    v.filepath = str(Path(get_script_path(), "final", v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
-    v.json  = str(Path(get_script_path(), "final", v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
+    v.filepath = str(Path(video_directory, v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4"))
+    v.json  = str(Path(video_directory, v.meta.id + "_" + safe_filename(v.meta.title) + ".json"))
 
-    # data = {
-    #     'title': v.title,
-    #     'description': v.description,
-    #     'thumbnail': v.thumbnail,
-    #     'duration': v.duration,
-    #     'height': height,
-    #     'width': width
-    # }
+    data = {
+        'title': v.title,
+        'description': v.description,
+        'thumbnail': v.thumbnail,
+        'duration': v.duration,
+        'height': height,
+        'width': width
+    }
 
-    # with open(v.json, 'w') as outfile:
-    #     json.dump(data, outfile, indent=4)
+    with open(v.json, 'w') as outfile:
+        json.dump(data, outfile, indent=4)
     
     if settings.disablecompile:
         logging.info("Skipping Video Compilation --disablecompile passed")

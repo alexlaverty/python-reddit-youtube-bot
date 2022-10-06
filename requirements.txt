@@ -6,5 +6,4 @@ nltk
 poetry
 selenium
 emoji
-multi-rake
 bs4

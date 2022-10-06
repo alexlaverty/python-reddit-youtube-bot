@@ -12,3 +12,4 @@ backup/
 client_secret.json
 cookies*.json
 credentials.storage
+videos/

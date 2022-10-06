@@ -83,7 +83,7 @@ def get_font_size(length):
     return fontsize, lineheight
 
 
-def generate(video, filepath, bing_images):
+def generate(video_directory, subreddit, title, number_of_thumbnails=3):
     logging.info('========== Generating Thumbnail ==========')
 
     colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
@@ -91,92 +91,95 @@ def generate(video, filepath, bing_images):
 
     
     #image = random.choice(os.listdir(settings.images_directory))
-    image_path = str(Path(settings.thumbnails_directory, str(video.meta.id) + ".png").absolute())
+    image_path = str(Path(video_directory, "lexica.png").absolute())
 
-    image = lexica.get_image(image_path, video.meta.title)
+    images = lexica.get_images(video_directory, title, number_of_images=number_of_thumbnails)
 
     #image_path = str(Path(settings.images_directory, image))
     #logging.info('Randomly Selecting Background : ' + image_path)
-    text = video.meta.title
-    subreddit = video.meta.subreddit_name_prefixed
+    text = title
     nltk.download('stopwords')
     s=set(stopwords.words('english'))
     words = text.split(" ")
     unique_words = list(filter(lambda w: not w in s,text.split()))
 
-    clips = []
+    thumbnails = []
 
-    margin = 40
-    txt_y = 0 
-    txt_x = 0 + margin
-    width = 1280
-    height = 720
-    #fontsize = get_font_size(len(video.meta.title))
-    fontsize, lineheight = get_font_size(len(video.meta.title))
+    for index, image in enumerate(images):
+        clips = []
+        thumbnail_path = str(Path(video_directory, f"thumbnail_{index}.png").absolute())
+        margin = 40
+        txt_y = 0 
+        txt_x = 0 + margin
+        width = 1280
+        height = 720
+        #fontsize = get_font_size(len(title))
+        fontsize, lineheight = get_font_size(len(title))
 
 
-    background_clip = TextClip("",
-                            size=(width,height), 
-                            bg_color="#000000",
-                            method="caption").margin(20, color=random_rgb_colour())
+        background_clip = TextClip("",
+                                size=(width,height), 
+                                bg_color="#000000",
+                                method="caption").margin(20, color=random_rgb_colour())
 
-    clips.append(background_clip)
+        clips.append(background_clip)
 
-    img_width = width/2
-    img_clip = ImageClip(image_path).resize(width=img_width)\
-                                    .set_position(("right","center"))\
-                                    .set_opacity(0.8)
+        img_width = width/2
+        img_clip = ImageClip(image).resize(width=img_width)\
+                                        .set_position(("right","center"))\
+                                        .set_opacity(0.8)
 
-    clips.append(img_clip)
+        clips.append(img_clip)
 
-    subreddit_clip = TextClip(subreddit,
-                        fontsize = 85, 
-                        color="white", 
-                        align='center', 
-                        font="Verdana-Bold", 
-                        bg_color="#000000",
-                        method="caption")\
-                        .set_pos((margin, 20))\
-                        #.set_opacity(0.8)
-
-    clips.append(subreddit_clip)
-
-    txt_y += subreddit_clip.h
-
-    for word in words:
-        if word in unique_words:
-            word_color = "white"
-        else:
-            word_color = stop_word_colour
-
-        if txt_x > (width / 2):
-            txt_x = 0 + margin
-            txt_y += lineheight
-
-        txt_clip = TextClip(word,
-                            fontsize = fontsize, 
-                            color=word_color, 
+        subreddit_clip = TextClip(subreddit,
+                            fontsize = 85, 
+                            color="white", 
                             align='center', 
-                            font="Impact", 
-                            #bg_color="#000000",
-                            stroke_color="#000000",
-                            stroke_width=3,
+                            font="Verdana-Bold", 
+                            bg_color="#000000",
                             method="caption")\
-                            .set_pos((txt_x, txt_y))
+                            .set_pos((margin, 20))\
                             #.set_opacity(0.8)
 
-        clips.append(txt_clip)
-        txt_x += txt_clip.w + 15
-        
+        clips.append(subreddit_clip)
 
-    txt_clip = txt_clip.set_duration(10)
-    txt_clip = txt_clip.set_position(("center","center"))
+        txt_y += subreddit_clip.h
+
+        for word in words:
+            if word in unique_words:
+                word_color = "white"
+            else:
+                word_color = stop_word_colour
+
+            if txt_x > (width / 2):
+                txt_x = 0 + margin
+                txt_y += lineheight
+
+            txt_clip = TextClip(word,
+                                fontsize = fontsize, 
+                                color=word_color, 
+                                align='center', 
+                                font="Impact", 
+                                #bg_color="#000000",
+                                stroke_color="#000000",
+                                stroke_width=3,
+                                method="caption")\
+                                .set_pos((txt_x, txt_y))
+                                #.set_opacity(0.8)
+
+            clips.append(txt_clip)
+            txt_x += txt_clip.w + 15
+            
+
+        txt_clip = txt_clip.set_duration(10)
+        txt_clip = txt_clip.set_position(("center","center"))
 
 
-    final_video = CompositeVideoClip(clips)
-    logging.info('Save Thumbnail to : ' + filepath)
-    final_video.save_frame(filepath, 1)
-    return final_video
+        final_video = CompositeVideoClip(clips)
+        logging.info('Saving Thumbnail to : ' + thumbnail_path)
+        final_video.save_frame(thumbnail_path, 1)
+        thumbnails.append(final_video)
+    return thumbnails
 
 
 if __name__ == "__main__":

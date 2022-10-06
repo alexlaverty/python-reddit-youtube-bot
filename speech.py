@@ -1,6 +1,9 @@
-import boto3 
-import config
+import subprocess
 import logging 
+import os 
+import settings 
+import boto3 
+import config 
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -35,27 +38,37 @@ def process_speech_text(text):
     return text
 
 def create_audio(path, text):
-    logging.info("========== Creating Audio File From Text ==========")   
-    logging.info("Path : " + path)
-    
+    #logging.info(f"Generating Audio File : {text}")   
     text = process_speech_text(text)
-    logging.info("Speech : " + text)
+    if not os.path.exists(path):
+        if settings.voice_engine=="polly":
+            polly_client = boto3.Session(
+                            aws_access_key_id=config.aws_access_key_id,                     
+                            aws_secret_access_key=config.aws_secret_access_key,
+                            region_name='us-west-2').client('polly')
 
-    polly_client = boto3.Session(
-                    aws_access_key_id=config.aws_access_key_id,                     
-                    aws_secret_access_key=config.aws_secret_access_key,
-                    region_name='us-west-2').client('polly')
+            response = polly_client.synthesize_speech(
+                    Engine='neural',
+                    OutputFormat='mp3', 
+                    Text=text,
+                    VoiceId='Matthew'
+                )
 
-    response = polly_client.synthesize_speech(
-            Engine='neural',
-            OutputFormat='mp3', 
-            Text=text,
-            VoiceId='Matthew'
-        )
+            file = open(path, 'wb')
+            file.write(response['AudioStream'].read())
+            file.close()
 
-    file = open(path, 'wb')
-    file.write(response['AudioStream'].read())
-    file.close()
+        
+        if settings.voice_engine=="balcon":
+            result = subprocess.call([
+                        'balcon.exe',
+                        '-w',path, 
+                        '-t',f"{text}"                
+                        ])
+    else:
+        logging.info(f"Audio file already exists : {path}")
+
+    return path
     logging.info("========== Finished Creating Audio File From Text ==========")   
 
 
