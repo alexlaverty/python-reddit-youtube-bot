@@ -12,6 +12,7 @@ from tabulate import tabulate
 import thumbnail
 import reddit 
 import video as vid
+import argparse
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -72,6 +73,14 @@ class Video:
 
 
 if __name__ == "__main__":
-    submissions = reddit.posts()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', help='Reddit Post Url')
+    args = parser.parse_args()
+
+    if args.url:
+        submissions = [reddit.get_reddit_submission(args.url)]
+    else:
+        submissions = reddit.posts()
     if submissions:
         process_submissions(submissions)

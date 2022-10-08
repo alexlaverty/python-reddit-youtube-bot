@@ -24,6 +24,13 @@ def is_valid_submission(submission):
         return False
     return True
 
+def get_reddit_submission(url):
+    r = praw.Reddit(client_id=config.praw_client_id,
+                    client_secret=config.praw_client_secret,
+                    user_agent=config.praw_user_agent)
+    submission = r.submission(url=url)
+    return submission
+
 def get_reddit_submissions():
     r = praw.Reddit(client_id=config.praw_client_id,
                     client_secret=config.praw_client_secret,

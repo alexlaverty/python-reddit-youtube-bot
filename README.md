@@ -44,3 +44,15 @@ Make sure you have Docker installed and then run the following
 docker-compose up
 ```
 
+or alternatively you can run via :
+
+```
+python app.py
+```
+
+or if you want to generate a video for a specific reddit post you can specify it via the `--url` param :
+
+```
+python app.py --url python app.py --url https://www.reddit.com/r/AskReddit/comments/hvsxty/which_legendary_reddit_post_comment_can_you_still/
+```
+
