@@ -79,7 +79,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.url:
-        submissions = [reddit.get_reddit_submission(args.url)]
+        urls = args.url.split(",")
+        submissions = []
+        for url in urls:
+            submissions.append(reddit.get_reddit_submission(url))
     else:
         submissions = reddit.posts()
     if submissions:
