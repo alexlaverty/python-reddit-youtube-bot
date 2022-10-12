@@ -108,7 +108,7 @@ newscaster_greenscreen_remove_threshold = 100
 
 ## Settings File
 
-Theres quite a few options you can customise in the settings file :
+Theres quite a few options you can customise in the `settings.py` file :
 
 Specify which subreddits you want to scrape :
 
