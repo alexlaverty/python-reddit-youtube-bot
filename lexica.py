@@ -31,9 +31,9 @@ def get_images(folder_path, sentence, number_of_images=1):
                 if not os.path.exists(image_path):
                     image_url = j["images"][num]['src']  
                     download_image(image_url, image_path)
-                    images.append(image_path)
                 else:
                     logging.info(f"Image already exists : {str(id)} - {sentence}")
+                images.append(image_path)
     else:
         logging.info("Downloading Images Set to False.......")
 

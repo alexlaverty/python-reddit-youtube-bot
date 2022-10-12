@@ -218,7 +218,7 @@ def create(video_directory, post):
                             method='caption',
                             ##bg_color=settings.text_bg_color,
                             align='West')\
-                            .set_pos((40,40))\
+                            .set_position((40,40))\
                             .set_duration(audioclip_title.duration + settings.pause)\
                             .set_start(t)   
 
@@ -235,7 +235,7 @@ def create(video_directory, post):
                             method='caption',
                             ##bg_color=settings.text_bg_color,
                             align='Center')\
-                            .set_pos(("center","center"))\
+                            .set_position(("center","center"))\
                             .set_duration(audioclip_title.duration + settings.pause)\
                             .set_audio(audioclip_title)\
                             .set_start(t)
@@ -245,7 +245,7 @@ def create(video_directory, post):
     t += audioclip_title.duration + settings.pause
     v.duration += audioclip_title.duration + settings.pause
 
-
+    newcaster_start = t
 
     if v.meta.selftext :
         logging.info('========== Processing Submission SelfText ==========')
@@ -280,7 +280,7 @@ def create(video_directory, post):
                                 method='caption',
                                 #bg_color=settings.text_bg_color,
                                 align='West')\
-                                .set_pos((clip_margin,clip_margin_top))\
+                                .set_position((clip_margin,clip_margin_top))\
                                 .set_duration(selftext_audioclip.duration + settings.pause)\
                                 .set_audio(selftext_audioclip)\
                                 .set_start(t)\
@@ -300,7 +300,7 @@ def create(video_directory, post):
                         method='caption',
                         #bg_color=settings.text_bg_color,
                         align='West')\
-                        .set_pos((clip_margin,clip_margin_top))\
+                        .set_position((clip_margin,clip_margin_top))\
                         .set_opacity(settings.text_bg_opacity)\
                         .set_duration(selftext_audioclip.duration + settings.pause)\
                         .set_audio(selftext_audioclip)\
@@ -325,7 +325,7 @@ def create(video_directory, post):
 
     static_clip = VideoFileClip("static.mp4")\
                     .set_duration(1)\
-                    .set_pos(("center","center"))\
+                    .set_position(("center","center"))\
                     .set_start(t)\
                     .set_opacity(settings.background_opacity)\
                     .volumex(0.3)
@@ -392,7 +392,7 @@ def create(video_directory, post):
                                 method='caption',
                                 #bg_color=settings.text_bg_color,
                                 align='West')\
-                                .set_pos((clip_margin,clip_margin_top))\
+                                .set_position((clip_margin,clip_margin_top))\
                                 .set_duration(audioclip.duration + settings.pause)\
                                 .set_audio(audioclip)\
                                 .set_start(t)\
@@ -412,7 +412,7 @@ def create(video_directory, post):
                         method='caption',
                         #bg_color=settings.text_bg_color,
                         align='West')\
-                        .set_pos((clip_margin,clip_margin_top))\
+                        .set_position((clip_margin,clip_margin_top))\
                         .set_duration(audioclip.duration + settings.pause)\
                         .set_audio(audioclip)\
                         .set_opacity(settings.text_bg_opacity)\
@@ -442,7 +442,7 @@ def create(video_directory, post):
             logging.info("Exiting...")
             break
         
-    video_overlay_filepath = str(Path(settings.assets_directory,"particles.mp4"))
+    
 
     
     background_filepath = str(Path(settings.background_directory, v.background))
@@ -466,7 +466,7 @@ def create(video_directory, post):
     v.clips.insert(0,background_clip)
 
     if settings.enable_overlay :
-        clip_video_overlay = VideoFileClip(video_overlay_filepath)\
+        clip_video_overlay = VideoFileClip(settings.video_overlay_filepath)\
                                 .set_start(tb)\
                                 .resize(settings.clip_size)\
                                 .set_opacity(0.8)\
@@ -482,6 +482,32 @@ def create(video_directory, post):
             clip_video_overlay = clip_video_overlay.set_duration(v.duration)
 
         v.clips.insert(1,clip_video_overlay)
+
+    if settings.enable_newscaster and settings.newscaster_filepath :
+        logging.info(f"Adding Newscaster : { settings.newscaster_filepath }")
+        clip_video_newscaster = VideoFileClip( settings.newscaster_filepath )\
+                                .set_position( settings.newscaster_position )\
+                                .set_start(newcaster_start)\
+                                .resize(settings.newcaster_size)\
+                                .set_opacity(1)\
+                                .volumex(0)
+
+        if settings.newscaster_remove_greenscreen :
+            # Green Screen Video https://github.com/Zulko/moviepy/issues/964
+            clip_video_newscaster = clip_video_newscaster.fx(vfx.mask_color, 
+                                                             color=settings.newscaster_greenscreen_color, 
+                                                             thr=settings.newscaster_greenscreen_remove_threshold, 
+                                                             s=5)
+
+        if clip_video_newscaster.duration < v.duration:
+            logging.info("Looping Newscaster")
+            clip_video_newscaster = vfx.loop(clip_video_newscaster, duration=v.duration - newcaster_start).without_audio()
+            logging.info("Looped Newscaster Clip Duration : " + str(clip_video_newscaster.duration))
+        else:
+            logging.info("Not Looping Newscaster")
+            clip_video_newscaster = clip_video_newscaster.set_duration(v.duration - newcaster_start)
+
+        v.clips.append(clip_video_newscaster)
 
     post_video = CompositeVideoClip(v.clips)
 

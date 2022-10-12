@@ -83,7 +83,7 @@ def get_font_size(length):
     return fontsize, lineheight
 
 
-def generate(video_directory, subreddit, title, number_of_thumbnails=3):
+def generate(video_directory, subreddit, title, number_of_thumbnails=settings.number_of_thumbnails):
     logging.info('========== Generating Thumbnail ==========')
 
     colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
@@ -138,7 +138,7 @@ def generate(video_directory, subreddit, title, number_of_thumbnails=3):
                             font="Verdana-Bold", 
                             bg_color="#000000",
                             method="caption")\
-                            .set_pos((margin, 20))\
+                            .set_position((margin, 20))\
                             #.set_opacity(0.8)
 
         clips.append(subreddit_clip)
@@ -164,7 +164,7 @@ def generate(video_directory, subreddit, title, number_of_thumbnails=3):
                                 stroke_color="#000000",
                                 stroke_width=3,
                                 method="caption")\
-                                .set_pos((txt_x, txt_y))
+                                .set_position((txt_x, txt_y))
                                 #.set_opacity(0.8)
 
             clips.append(txt_clip)

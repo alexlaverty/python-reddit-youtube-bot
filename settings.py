@@ -26,15 +26,15 @@ banned_keywords =["porn", "sex", "jerking off"]
 # choices "polly","balcon"
 voice_engine = "polly" 
 
-total_posts_to_process = 3
+total_posts_to_process = 5
 minimum_submission_score = 5000
 title_length_minimum = 20
 title_length_maximum = 100
 maximum_length_self_text = 5000
 minimum_num_comments = 200
 submission_limit = 1000
-
-max_video_length = 60 # Seconds
+number_of_thumbnails = 3
+max_video_length = 600 # Seconds
 comment_limit = 600
 
 assets_directory = "assets"
@@ -45,6 +45,7 @@ image_backgrounds_directory = str(Path(assets_directory,"image_backgrounds"))
 images_directory = str(Path(assets_directory,"images"))
 thumbnails_directory = str(Path(assets_directory,"images"))
 background_directory = str(Path(assets_directory,"backgrounds"))
+video_overlay_filepath = str(Path(assets_directory,"particles.mp4"))
 videos_directory = "videos"
 background_opacity = 0.5
 background_volume = 0.5
@@ -59,7 +60,14 @@ disableupload = True
 
 enable_overlay = True
 
-
+# Newcaster Settings
+enable_newscaster = False
+newscaster_remove_greenscreen = True
+newscaster_greenscreen_color = [1, 255, 17] # Enter the Green Screen RGB Colour 
+newscaster_greenscreen_remove_threshold = 100
+newscaster_filepath = str(Path(assets_directory,"newscaster.mp4").resolve())
+newscaster_position = ("left","bottom")
+newcaster_size = (video_width * 0.5, video_height * 0.5)
 
 pause = 1 # Pause after speech
 soundeffects_directory = str(Path(assets_directory,"soundeffects"))

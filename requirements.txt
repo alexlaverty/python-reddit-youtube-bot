@@ -1,6 +1,6 @@
 praw
 pyyaml
-moviepy
+moviepy==2.0.0.dev2
 boto3
 nltk
 poetry

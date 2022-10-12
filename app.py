@@ -39,16 +39,18 @@ def process_submission(submission):
     video.video_filepath = str(Path(video.folder_path,f"{submission.id}_{title_path}.mp4")) 
     create_directory(video.folder_path)
 
-    # Generate Thumbnail
-
-    thumbnail.generate(video_directory=video.folder_path,
-                        subreddit=submission.subreddit_name_prefixed, 
-                        title=submission.title,
-                        number_of_thumbnails=3)
     if os.path.exists(video.video_filepath):
         print(f"Final video already compiled : {video.video_filepath}")
     else:
-        vid.create(video_directory=video.folder_path, post=submission)
+        # Generate Thumbnail
+        thumbnail.generate(video_directory=video.folder_path,
+                            subreddit=submission.subreddit_name_prefixed, 
+                            title=submission.title,
+                            number_of_thumbnails=settings.number_of_thumbnails)
+        if args.thumbnail_only:
+            print("Generating Thumbnail only skipping video compile!")
+        else:
+            vid.create(video_directory=video.folder_path, post=submission)
 
 
 def safe_filename(text):
@@ -76,6 +78,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', help='Reddit Post Url')
+    parser.add_argument('-t','--thumbnail-only', action='store_true', help='Generate a Thumbnail Only')
     args = parser.parse_args()
 
     if args.url:
