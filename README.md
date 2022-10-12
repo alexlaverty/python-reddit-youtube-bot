@@ -67,7 +67,13 @@ python app.py
 or if you want to generate a video for a specific reddit post you can specify it via the `--url` param :
 
 ```
-python app.py --url python app.py --url https://www.reddit.com/r/AskReddit/comments/hvsxty/which_legendary_reddit_post_comment_can_you_still/
+python app.py --url https://www.reddit.com/r/AskReddit/comments/hvsxty/which_legendary_reddit_post_comment_can_you_still/
+```
+
+or you can do multiple url's by seperating with a comma, ie :
+
+```
+python app.py --url https://www.reddit.com/r/post1,https://www.reddit.com/r/post2,https://www.reddit.com/r/post3
 ```
 
 ## Generate Only Thumbnails
