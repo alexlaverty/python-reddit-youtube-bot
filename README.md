@@ -3,10 +3,11 @@
 <!-- vscode-markdown-toc -->
 * [Description](#description)
 * [Example Videos](#example-videos)
-* [Usage ](#usage)
+* [Usage](#usage)
 * [Generate a Video for a Specific Post](#generate-a-video-for-a-specific-post)
 * [Generate Only Thumbnails](#generate-only-thumbnails)
 * [Enable a Newscaster](#enable-a-newscaster)
+* [Settings.py File](#settings.py-file)
 
 <!-- vscode-markdown-toc-config
 	numbering=false
@@ -106,7 +107,7 @@ newscaster_greenscreen_color = [1, 255, 17] # Enter the Green Screen RGB Colour
 newscaster_greenscreen_remove_threshold = 100
 ```
 
-## Settings File
+## <a name='settings.py-file'></a>Settings.py File
 
 Theres quite a few options you can customise in the `settings.py` file :
 
