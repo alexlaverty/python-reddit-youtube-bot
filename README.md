@@ -4,6 +4,9 @@
 * [Description](#description)
 * [Example Videos](#example-videos)
 * [Usage :](#usage-:)
+* [Generate a Video for a Specific Post](#generate-a-video-for-a-specific-post)
+* [Generate Only Thumbnails](#generate-only-thumbnails)
+* [Enable a Newscaster](#enable-a-newscaster)
 
 <!-- vscode-markdown-toc-config
 	numbering=false
@@ -62,7 +65,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-## Generate a Video for a Specific Post 
+## <a name='generate-a-video-for-a-specific-post'></a>Generate a Video for a Specific Post 
 
 or if you want to generate a video for a specific reddit post you can specify it via the `--url` param :
 
@@ -76,7 +79,7 @@ or you can do multiple url's by seperating with a comma, ie :
 python app.py --url https://www.reddit.com/r/post1,https://www.reddit.com/r/post2,https://www.reddit.com/r/post3
 ```
 
-## Generate Only Thumbnails
+## <a name='generate-only-thumbnails'></a>Generate Only Thumbnails
 
 if you want to generate only thumbnails you can specify `--thumbnail-only` mode, this will skip video compilation process :
 
@@ -84,7 +87,7 @@ if you want to generate only thumbnails you can specify `--thumbnail-only` mode,
 python app.py --thumbnail-only
 ```
 
-## Enable a Newscaster
+## <a name='enable-a-newscaster'></a>Enable a Newscaster
 
 If you want to enable a Newscaster, edit settings.py and set :
 
