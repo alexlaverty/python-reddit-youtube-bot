@@ -95,7 +95,7 @@ python app.py --thumbnail-only
 If you want to enable a Newscaster, edit settings.py and set :
 
 ```
-enable_newscaster = False
+enable_newscaster = True
 ```
 
 ![](assets/newscaster.png)
