@@ -63,7 +63,8 @@ def print_post_details(post):
     logging.info("NSFW?     : " + str(post.over_18))
 
 def print_comment_details(comment):
-    logging.info("Author   : " + str(comment.author))
+    if comment.author:
+        logging.info("Author   : " + str(comment.author))
     logging.info("id       : " + str(comment.id))
     logging.info("Stickied : " + str(comment.stickied))
     logging.info("Body     : " + give_emoji_free_text(str(comment.body)))
