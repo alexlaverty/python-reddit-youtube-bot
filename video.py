@@ -531,7 +531,7 @@ def create(video_directory, post):
         logging.info("Skipping Video Compilation --disablecompile passed")
     else:
         logging.info("Compiling video, this takes a while, please be patient : )")
-        post_video.write_videofile(v.filepath, threads=4, progress_bar = False)
+        post_video.write_videofile(v.filepath, threads=settings.threads, progress_bar = False)
     
     if settings.disablecompile or settings.disableupload:
         logging.info("Skipping Upload...")

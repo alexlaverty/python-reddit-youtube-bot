@@ -79,3 +79,6 @@ text_font = "Verdana-Bold"
 text_fontsize = 32
 
 download_enabled = True
+
+# Tweak for performance, set number of cores 
+threads=4
