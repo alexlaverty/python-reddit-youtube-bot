@@ -255,7 +255,7 @@ enable_overlay = True
 Add in a newscaster reader to the video 
 
 ```
-enable_newscaster = False
+enable_newscaster = True
 ```
 
 If newcaster video is a green screen attempt to remove the green screen 
