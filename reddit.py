@@ -35,11 +35,13 @@ def get_reddit_submissions():
     r = praw.Reddit(client_id=config.praw_client_id,
                     client_secret=config.praw_client_secret,
                     user_agent=config.praw_user_agent)
+
     if settings.subreddits:
         subreddits = "+".join(settings.subreddits)
     else:
         subreddits = "all"
-    subreddits = "all"
+    print("Retrieving posts from subreddit :")
+    print(subreddits)
     submissions = r.subreddit(subreddits).top(limit=settings.submission_limit, time_filter="day")
     return submissions
 
