@@ -58,7 +58,9 @@ clip_size = (video_width, video_height)
 disablecompile = False
 disableupload = True
 
+
 enable_overlay = True
+enable_comments = True
 
 # Newcaster Settings
 enable_newscaster = False

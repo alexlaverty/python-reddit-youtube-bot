@@ -73,17 +73,32 @@ class Video:
         self.folder_path = None
         self.video_filepath = None
 
+def banner():
+    print("##### YOUTUBE REDDIT BOT #####")
 
 if __name__ == "__main__":
-
+    banner()
+    
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', help='Reddit Post Url')
-    parser.add_argument('-t','--thumbnail-only', action='store_true', help='Generate a Thumbnail Only')
-    parser.add_argument('-l','--video-length', help='Set the length of the outputted video in seconds')
+    parser.add_argument('-l','--video-length', help='Set how long you want the video to be', type=int, default=600)
+    parser.add_argument('-o','--disable-overlay', action='store_true', help='Disable video overlay')
+    parser.add_argument('-s','--story-mode', action='store_true', help='Generate video for post title and selftext only, disables user comments')
+    parser.add_argument('-t','--thumbnail-only', action='store_true', help='Generate thumbnail image only')
+    parser.add_argument('-u','--url', help='Specify Reddit post url, seperate with a comma for multiple posts.')
     args = parser.parse_args()
 
     if args.video_length:
+        logging.info(f'Setting video length to : {str(args.video_length)} seconds')
         settings.max_video_length = args.video_length
+
+    if args.disable_overlay:
+        logging.info(f'Disabling Video Overlay')
+        settings.enable_overlay = False
+
+    if args.story_mode:
+        logging.info('Story Mode Enabled!')
+        settings.enable_comments = False
+
     if args.url:
         urls = args.url.split(",")
         submissions = []
@@ -91,5 +106,6 @@ if __name__ == "__main__":
             submissions.append(reddit.get_reddit_submission(url))
     else:
         submissions = reddit.posts()
+
     if submissions:
         process_submissions(submissions)

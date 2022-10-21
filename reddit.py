@@ -49,7 +49,7 @@ def get_valid_submissions(submissions):
     post_total = settings.total_posts_to_process
     post_count = 0
     valid_submissions = []
-    print("Getting Valid Submissions...")
+    print("Retrieving valid Reddit submissions...")
     print("ID, SCORE, NUM_COMMENTS, LEN_SELFTEXT, SUBREDDIT, TITLE")
     for submission in submissions:
         if post_count >= post_total:

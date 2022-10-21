@@ -319,10 +319,8 @@ def create(video_directory, post):
             logging.info("Video Clips : ")
             logging.info(str(len(v.clips)))
             
-
         logging.info("Current Video Duration : " + str(v.duration))
-
-
+        logging.info(f'========== Finished Processing SelfText ==========')
 
     static_clip = VideoFileClip("static.mp4")\
                     .set_duration(1)\
@@ -337,112 +335,114 @@ def create(video_directory, post):
 
     current_clip_text = ""
 
-    for count, c in enumerate(v.meta.comments):
-        logging.info(f'========== Processing Reddit Comment {count}/{settings.comment_limit} ==========')
-        print_comment_details(c)
-        logging.info("Comment #  : " + str(count))
+    if settings.enable_comments:
+        for count, c in enumerate(v.meta.comments):
+            logging.info(f'========== Processing Reddit Comment {count}/{settings.comment_limit} ==========')
+            print_comment_details(c)
+            logging.info("Comment #  : " + str(count))
 
-        comment = c.body 
-        if len(comment) > 1000 :
-            logging.info('Comment exceeds 1000 characeters, skipping post... :')
-            logging.info(comment)
-            continue
-        
-        if comment == "[removed]":
-            logging.info("Skipping Comment : " + comment)
-            continue
-
-        comment = give_emoji_free_text(comment)
-        comment = os.linesep.join([s for s in comment.splitlines() if s])
-
-        logging.info("Comment Length  : " + str(len(comment)))
-
-
-
-        if c.stickied:
-            logging.info("Skipping Stickied Comment...")
-            continue
-
-        if contains_url(comment):
-            logging.info("Skipping Comment with URL in it...")
-            continue
-
-        comment_lines = comment.splitlines()
-
-        for comment_line_count, comment_line in enumerate(comment_lines):
-
+            comment = c.body 
+            if len(comment) > 1000 :
+                logging.info('Comment exceeds 1000 characeters, skipping post... :')
+                logging.info(comment)
+                continue
+            
             if comment == "[removed]":
                 logging.info("Skipping Comment : " + comment)
                 continue
 
-            logging.info("comment_line     : " + comment_line)
-            audio_filepath = str(Path(video_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
-            speech.create_audio(audio_filepath, comment_line)
-            audioclip = AudioFileClip(audio_filepath)
+            comment = give_emoji_free_text(comment)
+            comment = os.linesep.join([s for s in comment.splitlines() if s])
 
-            current_clip_text += comment_line + "\n\n"
-            logging.info("Current Clip Text :")
-            logging.info(current_clip_text)
+            logging.info("Comment Length  : " + str(len(comment)))
 
-            txt_clip = TextClip(current_clip_text, 
-                                font=settings.text_font,
-                                fontsize = settings.text_fontsize, 
-                                color = settings.text_color,
-                                size = txt_clip_size,
-                                kerning=-1,
-                                method='caption',
-                                #bg_color=settings.text_bg_color,
-                                align='West')\
-                                .set_position((clip_margin,clip_margin_top))\
-                                .set_duration(audioclip.duration + settings.pause)\
-                                .set_audio(audioclip)\
-                                .set_start(t)\
-                                .set_opacity(settings.text_bg_opacity)\
-                                .volumex(1.5)
-                                
 
-            if txt_clip.h > height:
-                logging.info("Text exceeded Video Height, reset text")
-                current_clip_text = comment_line + "\n\n"
+
+            if c.stickied:
+                logging.info("Skipping Stickied Comment...")
+                continue
+
+            if contains_url(comment):
+                logging.info("Skipping Comment with URL in it...")
+                continue
+
+            comment_lines = comment.splitlines()
+
+            for comment_line_count, comment_line in enumerate(comment_lines):
+
+                if comment == "[removed]":
+                    logging.info("Skipping Comment : " + comment)
+                    continue
+
+                logging.info("comment_line     : " + comment_line)
+                audio_filepath = str(Path(video_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
+                speech.create_audio(audio_filepath, comment_line)
+                audioclip = AudioFileClip(audio_filepath)
+
+                current_clip_text += comment_line + "\n\n"
+                logging.info("Current Clip Text :")
+                logging.info(current_clip_text)
+
                 txt_clip = TextClip(current_clip_text, 
-                        font=settings.text_font,
-                        fontsize = settings.text_fontsize, 
-                        color = settings.text_color,
-                        size = txt_clip_size,
-                        kerning=-1,
-                        method='caption',
-                        #bg_color=settings.text_bg_color,
-                        align='West')\
-                        .set_position((clip_margin,clip_margin_top))\
-                        .set_duration(audioclip.duration + settings.pause)\
-                        .set_audio(audioclip)\
-                        .set_opacity(settings.text_bg_opacity)\
-                        .set_start(t)
+                                    font=settings.text_font,
+                                    fontsize = settings.text_fontsize, 
+                                    color = settings.text_color,
+                                    size = txt_clip_size,
+                                    kerning=-1,
+                                    method='caption',
+                                    #bg_color=settings.text_bg_color,
+                                    align='West')\
+                                    .set_position((clip_margin,clip_margin_top))\
+                                    .set_duration(audioclip.duration + settings.pause)\
+                                    .set_audio(audioclip)\
+                                    .set_start(t)\
+                                    .set_opacity(settings.text_bg_opacity)\
+                                    .volumex(1.5)
+                                    
 
                 if txt_clip.h > height:
-                    logging.info("Comment Text Too Long, Skipping Comment")
-                    continue   
+                    logging.info("Text exceeded Video Height, reset text")
+                    current_clip_text = comment_line + "\n\n"
+                    txt_clip = TextClip(current_clip_text, 
+                            font=settings.text_font,
+                            fontsize = settings.text_fontsize, 
+                            color = settings.text_color,
+                            size = txt_clip_size,
+                            kerning=-1,
+                            method='caption',
+                            #bg_color=settings.text_bg_color,
+                            align='West')\
+                            .set_position((clip_margin,clip_margin_top))\
+                            .set_duration(audioclip.duration + settings.pause)\
+                            .set_audio(audioclip)\
+                            .set_opacity(settings.text_bg_opacity)\
+                            .set_start(t)
 
-            t += audioclip.duration + settings.pause
-            v.duration += audioclip.duration + settings.pause
-            
+                    if txt_clip.h > height:
+                        logging.info("Comment Text Too Long, Skipping Comment")
+                        continue   
 
-            v.clips.append(txt_clip)
-            logging.info("Video Clips : ")
-            logging.info(str(len(v.clips)))
+                t += audioclip.duration + settings.pause
+                v.duration += audioclip.duration + settings.pause
+                
 
-        logging.info("Current Video Duration : " + str(v.duration))
+                v.clips.append(txt_clip)
+                logging.info("Video Clips : ")
+                logging.info(str(len(v.clips)))
 
-        if v.duration > settings.max_video_length:
-            logging.info("Reached Maximum Video Length : " + str(settings.max_video_length))
-            logging.info("Exiting...")     
-            break 
+            logging.info("Current Video Duration : " + str(v.duration))
 
-        if count == settings.comment_limit:
-            logging.info("Reached Maximum Number of Comments Limit : " + str(settings.comment_limit))
-            logging.info("Exiting...")
-            break
-        
+            if v.duration > settings.max_video_length:
+                logging.info("Reached Maximum Video Length : " + str(settings.max_video_length))
+                logging.info("Exiting...")     
+                break 
+
+            if count == settings.comment_limit:
+                logging.info("Reached Maximum Number of Comments Limit : " + str(settings.comment_limit))
+                logging.info("Exiting...")
+                break
+    else:
+        logging.info("Skipping comments!")
     
 
     

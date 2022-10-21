@@ -68,6 +68,27 @@ pip install -r requirements.txt
 python app.py
 ```
 
+## Help 
+
+You can view available parameters by passing in `--help` :
+
+```
+python app.py --help
+
+##### YOUTUBE REDDIT BOT #####
+usage: app.py [-h] [-l VIDEO_LENGTH] [-o] [-s] [-t] [-u URL]
+
+options:
+  -h, --help            show this help message and exit
+  -l VIDEO_LENGTH, --video-length VIDEO_LENGTH
+                        Set how long you want the video to be
+  -o, --disable-overlay
+                        Disable video overlay
+  -s, --story-mode      Generate video for post title and selftext only, disables user comments
+  -t, --thumbnail-only  Generate thumbnail image only
+  -u URL, --url URL     Specify Reddit post url, seperate with a comma for multiple posts.
+```
+
 ## <a name='generate-a-video-for-a-specific-post'></a>Generate a Video for a Specific Post 
 
 or if you want to generate a video for a specific reddit post you can specify it via the `--url` param :
