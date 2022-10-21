@@ -62,9 +62,6 @@ def create_audio(path, text):
             file.close()
 
         if settings.voice_engine=="gtts":
-            print("GTTS")
-            print(text)
-            print(path)
             ttmp3 = gTTS(text)
             ttmp3.save(path)
         
