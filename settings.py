@@ -34,7 +34,7 @@ maximum_length_self_text = 5000
 minimum_num_comments = 200
 submission_limit = 1000
 number_of_thumbnails = 3
-max_video_length = 60 # Seconds
+max_video_length = 600 # Seconds
 comment_limit = 600
 
 assets_directory = "assets"
