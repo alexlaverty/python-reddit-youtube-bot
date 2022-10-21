@@ -28,7 +28,7 @@ def process_submissions(submissions):
         process_submission(submission)
 
 def process_submission(submission):
-    print("PROCESSING SUBMISSION")
+    print("##### PROCESSING SUBMISSION #####")
     print(f"{str(submission.id)}, {str(submission.score)}, {str(submission.num_comments)}, {len(submission.selftext)}, {submission.subreddit_name_prefixed}, {submission.title}") 
     video = Video(submission)
     title_path = safe_filename(submission.title)
@@ -78,7 +78,7 @@ def banner():
 
 if __name__ == "__main__":
     banner()
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-l','--video-length', help='Set how long you want the video to be', type=int, default=600)
     parser.add_argument('-o','--disable-overlay', action='store_true', help='Disable video overlay')

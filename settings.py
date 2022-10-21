@@ -21,8 +21,6 @@ subreddits_excluded = [
     "r/CFB",
 ]
 
-banned_keywords =["porn", "sex", "jerking off"]
-
 # choices "polly","balcon","gtts"
 voice_engine = "gtts" 
 
@@ -58,6 +56,7 @@ clip_size = (video_width, video_height)
 disablecompile = False
 disableupload = True
 
+banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dA=="
 
 enable_overlay = True
 enable_comments = True

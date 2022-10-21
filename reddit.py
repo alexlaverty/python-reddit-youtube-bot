@@ -1,6 +1,7 @@
 import praw
 import settings 
 import config 
+import base64
 
 def is_valid_submission(submission):
     if submission.stickied:
@@ -11,8 +12,9 @@ def is_valid_submission(submission):
         return False
     if submission.over_18 :
         return False
-    for banned_keyword in settings.banned_keywords:
+    for banned_keyword in base64.b64decode(settings.banned_keywords_base64.encode('ascii')).decode('ascii').split(","):
         if banned_keyword in submission.title.lower():
+            print("Skipping post, title contains banned keyword!")
             return False
     if submission.subreddit_name_prefixed in settings.subreddits_excluded:
         return False
