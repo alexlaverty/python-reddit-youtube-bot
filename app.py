@@ -15,11 +15,11 @@ import video as vid
 import argparse
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format=u'%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S',
     handlers=[
-        logging.FileHandler("debug.log"),
+        logging.FileHandler("debug.log", 'w', 'utf-8'),
         logging.StreamHandler()
     ])
 
