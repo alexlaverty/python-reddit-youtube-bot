@@ -95,7 +95,7 @@ python app.py --thumbnail-only
 If you want to enable a Newscaster, edit settings.py and set :
 
 ```
-enable_newscaster = False
+enable_newscaster = True
 ```
 
 ![](assets/newscaster.png)
@@ -261,7 +261,7 @@ enable_overlay = True
 Add in a newscaster reader to the video 
 
 ```
-enable_newscaster = False
+enable_newscaster = True
 ```
 
 If newcaster video is a green screen attempt to remove the green screen 
