@@ -10,12 +10,13 @@ def is_valid_submission(submission):
         return False
     if len(submission.title) < settings.title_length_minimum or len(submission.title) > settings.title_length_maximum :
         return False
-    if submission.over_18 :
-        return False
-    for banned_keyword in base64.b64decode(settings.banned_keywords_base64.encode('ascii')).decode('ascii').split(","):
-        if banned_keyword in submission.title.lower():
-            print("Skipping post, title contains banned keyword!")
+    if not settings.enable_nsfw_content:
+        if submission.over_18 :
             return False
+        for banned_keyword in base64.b64decode(settings.banned_keywords_base64.encode('ascii')).decode('ascii').split(","):
+            if banned_keyword in submission.title.lower():
+                print(f"{submission.title} <-- Skipping post, title contains banned keyword!")
+                return False
     if submission.subreddit_name_prefixed in settings.subreddits_excluded:
         return False
     if submission.score < settings.minimum_submission_score:

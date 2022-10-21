@@ -56,6 +56,7 @@ clip_size = (video_width, video_height)
 disablecompile = False
 disableupload = True
 
+enable_nsfw_content = False
 banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dA=="
 
 enable_overlay = True

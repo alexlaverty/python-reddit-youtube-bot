@@ -82,6 +82,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-l','--video-length', help='Set how long you want the video to be', type=int, default=600)
     parser.add_argument('-o','--disable-overlay', action='store_true', help='Disable video overlay')
+    parser.add_argument('-n','--enable-nsfw', action='store_true', help='Allow NSFW Content')
     parser.add_argument('-s','--story-mode', action='store_true', help='Generate video for post title and selftext only, disables user comments')
     parser.add_argument('-t','--thumbnail-only', action='store_true', help='Generate thumbnail image only')
     parser.add_argument('-u','--url', help='Specify Reddit post url, seperate with a comma for multiple posts.')
@@ -94,6 +95,10 @@ if __name__ == "__main__":
     if args.disable_overlay:
         logging.info(f'Disabling Video Overlay')
         settings.enable_overlay = False
+
+    if args.enable_nsfw:
+        logging.info(f'Enable NSFW Content')
+        settings.enable_nsfw_content = True
 
     if args.story_mode:
         logging.info('Story Mode Enabled!')
