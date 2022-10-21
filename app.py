@@ -79,8 +79,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', help='Reddit Post Url')
     parser.add_argument('-t','--thumbnail-only', action='store_true', help='Generate a Thumbnail Only')
+    parser.add_argument('-l','--video-length', help='Set the length of the outputted video in seconds')
     args = parser.parse_args()
 
+    if args.video_length:
+        settings.max_video_length = args.video_length
     if args.url:
         urls = args.url.split(",")
         submissions = []

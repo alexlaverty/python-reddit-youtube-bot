@@ -4,6 +4,8 @@ import os
 import settings 
 import boto3 
 import config 
+from gtts import gTTS
+import argparse
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -41,6 +43,7 @@ def create_audio(path, text):
     #logging.info(f"Generating Audio File : {text}")   
     text = process_speech_text(text)
     if not os.path.exists(path):
+        
         if settings.voice_engine=="polly":
             polly_client = boto3.Session(
                             aws_access_key_id=config.aws_access_key_id,                     
@@ -58,6 +61,12 @@ def create_audio(path, text):
             file.write(response['AudioStream'].read())
             file.close()
 
+        if settings.voice_engine=="gtts":
+            print("GTTS")
+            print(text)
+            print(path)
+            ttmp3 = gTTS(text)
+            ttmp3.save(path)
         
         if settings.voice_engine=="balcon":
             result = subprocess.call([
@@ -72,3 +81,11 @@ def create_audio(path, text):
     logging.info("========== Finished Creating Audio File From Text ==========")   
 
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--speech',default='Hello world this is a test.', help='Enter text for speech')
+    parser.add_argument('--path',default='test_audio.mp3', help='Path to save audio file to')
+    args = parser.parse_args()
+    print(args.path)
+    print(args.speech)
+    create_audio(args.path, args.speech)

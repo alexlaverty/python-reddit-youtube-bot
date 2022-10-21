@@ -23,8 +23,8 @@ subreddits_excluded = [
 
 banned_keywords =["porn", "sex", "jerking off"]
 
-# choices "polly","balcon"
-voice_engine = "polly" 
+# choices "polly","balcon","gtts"
+voice_engine = "gtts" 
 
 total_posts_to_process = 5
 minimum_submission_score = 5000

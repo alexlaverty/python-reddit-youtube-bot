@@ -149,8 +149,14 @@ banned_keywords =["my", "nasty", "keywords"]
 
 Change the Text to Speech engine you want to use, note AWS Polly requires and AWS account and auth tokens and can incur costs :
 
+Supports Speech Engines :
+
+* [AWS Polly](https://aws.amazon.com/polly/)
+* [Balcon](http://www.cross-plus-a.com/bconsole.htm)
+* Python [gtts](https://gtts.readthedocs.io/en/latest/)
+
 ```
-# choices "polly","balcon"
+# choices "polly","balcon","gtts"
 voice_engine = "polly" 
 ```
 
