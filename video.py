@@ -262,6 +262,7 @@ def create(video_directory, post):
         selftext_lines = selftext.splitlines()
 
         for selftext_line_count, selftext_line in enumerate(selftext_lines):
+            logging.info("selftext length   : " + str(len(selftext_line)))
             logging.info("selftext_line     : " + selftext_line)
             selftext_audio_filepath = str(Path(video_directory, v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
             speech.create_audio(selftext_audio_filepath, selftext_line)
@@ -373,6 +374,10 @@ def create(video_directory, post):
                 if comment == "[removed]":
                     logging.info("Skipping Comment : " + comment)
                     continue
+                
+                if comment == "":
+                    logging.info("Skipping blank comment")
+                    continue     
 
                 logging.info("comment_line     : " + comment_line)
                 audio_filepath = str(Path(video_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
