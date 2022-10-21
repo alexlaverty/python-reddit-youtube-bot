@@ -52,7 +52,7 @@ Save the cookie in this repo with filename `cookies.json`
 
 ```
 cd assets/backgrounds
-yt-dlp -f 22 --output "%(uploader)s_%(id)s.%(ext)s" https://www.youtube.com/playlist?list=PLGmxyVGSCDKvmLInHxJ9VdiwEb82Lxd2E
+yt-dlp --playlist-items 1:10 -f 22 --output "%(uploader)s_%(id)s.%(ext)s" https://www.youtube.com/playlist?list=PLGmxyVGSCDKvmLInHxJ9VdiwEb82Lxd2E
 ```
 
 4. Make sure you have Docker installed and then run the following 
