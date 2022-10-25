@@ -8,3 +8,5 @@ selenium
 emoji
 bs4
 gtts
+edge-tts
+playwright==1.23.0

@@ -76,9 +76,9 @@ def get_font_size(length):
         fontsize = 80
         lineheight = 100
 
-    logging.info(f"Title Length       : {length}")
-    logging.info(f"Setting Fontsize   : {fontsize} " )
-    logging.info(f"Setting Lineheight : {lineheight} " )
+    logging.debug(f"Title Length       : {length}")
+    logging.debug(f"Setting Fontsize   : {fontsize} " )
+    logging.debug(f"Setting Lineheight : {lineheight} " )
 
     return fontsize, lineheight
 

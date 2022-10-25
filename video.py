@@ -12,7 +12,7 @@ import sys
 import thumbnail
 import youtube 
 import bing
-
+from comment_screenshot import *
 
 
 def give_emoji_free_text(data):
@@ -64,10 +64,10 @@ def print_post_details(post):
 
 def print_comment_details(comment):
     if comment.author:
-        logging.info("Author   : " + str(comment.author))
-    logging.info("id       : " + str(comment.id))
-    logging.info("Stickied : " + str(comment.stickied))
-    logging.info("Body     : " + give_emoji_free_text(str(comment.body)))
+        logging.debug("Author   : " + str(comment.author))
+    logging.debug("id       : " + str(comment.id))
+    logging.debug("Stickied : " + str(comment.stickied))
+    logging.info("Comment   : " + give_emoji_free_text(str(comment.body)))
     
 def safe_filename(text):
     text = text.replace(" ","_")
@@ -248,8 +248,8 @@ def create(video_directory, post):
 
     newcaster_start = t
 
-    if v.meta.selftext :
-        logging.info('========== Processing Submission SelfText ==========')
+    if v.meta.selftext and settings.enable_selftext:
+        logging.info('========== Processing SelfText ==========')
         logging.info(v.meta.selftext)
 
         selftext = v.meta.selftext
@@ -257,21 +257,26 @@ def create(video_directory, post):
         selftext = give_emoji_free_text(selftext)
         selftext = os.linesep.join([s for s in selftext.splitlines() if s])
 
-        logging.info("selftext Length  : " + str(len(selftext)))
+        logging.debug("selftext Length  : " + str(len(selftext)))
 
         selftext_lines = selftext.splitlines()
 
         for selftext_line_count, selftext_line in enumerate(selftext_lines):
-            logging.info("selftext length   : " + str(len(selftext_line)))
-            logging.info("selftext_line     : " + selftext_line)
+
+            # Skip zero space character comment
+            if selftext_line == '&#x200B;':
+                continue
+
+            logging.debug("selftext length   : " + str(len(selftext_line)))
+            logging.debug("selftext_line     : " + selftext_line)
             selftext_audio_filepath = str(Path(video_directory, v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"))
             speech.create_audio(selftext_audio_filepath, selftext_line)
             selftext_audioclip = AudioFileClip(selftext_audio_filepath)
 
             current_clip_text += selftext_line + "\n"
-            logging.info("Current Clip Text :")
-            logging.info(current_clip_text)
-            logging.info(f"SelfText Fontsize : {settings.text_fontsize}")
+            logging.debug("Current Clip Text :")
+            logging.debug(current_clip_text)
+            logging.debug(f"SelfText Fontsize : {settings.text_fontsize}")
             
             selftext_clip = TextClip(current_clip_text, 
                                 font=settings.text_font,
@@ -291,7 +296,7 @@ def create(video_directory, post):
                                 
 
             if selftext_clip.h > height:
-                logging.info("Text exceeded Video Height, reset text")
+                logging.debug("Text exceeded Video Height, reset text")
                 current_clip_text = selftext_line + "\n"
                 selftext_clip = TextClip(current_clip_text, 
                         font=settings.text_font,
@@ -309,7 +314,7 @@ def create(video_directory, post):
                         .set_start(t)
 
                 if selftext_clip.h > height:
-                    logging.info("Comment Text Too Long, Skipping Comment")
+                    logging.debug("Comment Text Too Long, Skipping Comment")
                     continue   
 
             t += selftext_audioclip.duration + settings.pause
@@ -317,161 +322,220 @@ def create(video_directory, post):
             
 
             v.clips.append(selftext_clip)
-            logging.info("Video Clips : ")
-            logging.info(str(len(v.clips)))
+            logging.debug("Video Clips : ")
+            logging.debug(str(len(v.clips)))
             
         logging.info("Current Video Duration : " + str(v.duration))
         logging.info(f'========== Finished Processing SelfText ==========')
 
-    static_clip = VideoFileClip("static.mp4")\
-                    .set_duration(1)\
-                    .set_position(("center","center"))\
-                    .set_start(t)\
-                    .set_opacity(settings.background_opacity)\
-                    .volumex(0.3)
+        static_clip = VideoFileClip("static.mp4")\
+                        .set_duration(1)\
+                        .set_position(("center","center"))\
+                        .set_start(t)\
+                        .set_opacity(settings.background_opacity)\
+                        .volumex(0.3)
 
-    v.clips.append(static_clip)
-    t += static_clip.duration
-    v.duration += static_clip.duration
+        v.clips.append(static_clip)
+        t += static_clip.duration
+        v.duration += static_clip.duration
 
     current_clip_text = ""
 
     if settings.enable_comments:
-        for count, c in enumerate(v.meta.comments):
-            logging.info(f'========== Processing Reddit Comment {count}/{settings.comment_limit} ==========')
-            print_comment_details(c)
-            logging.info("Comment #  : " + str(count))
+        
+        #download_screenshots_of_reddit_posts(v)
+
+        all_comments = v.meta.comments
+        all_comments.replace_more(limit=0)
+
+        accepted_comments = []
+
+        rejected_comments = []
+        
+        logging.info(f'========== Filtering Reddit Comments ==========')
+        for count, c in enumerate(all_comments):
+
+            logging.info("===== Comment #" + str(count) + "=====")
+
+            print_comment_details(c)           
 
             comment = c.body 
-            if len(comment) > 1000 :
-                logging.info('Comment exceeds 1000 characeters, skipping post... :')
-                logging.info(comment)
+            
+            if len(comment) > settings.comment_length_max :
+                logging.info(f"Status : REJECTED, Comment exceeds max character length : {str(settings.comment_length_max)}")
+                rejected_comments.append(c)
                 continue
             
             if comment == "[removed]":
-                logging.info("Skipping Comment : " + comment)
+                logging.info("Status : REJECTED, Skipping Comment : " + comment)
+                rejected_comments.append(c)
                 continue
 
             comment = give_emoji_free_text(comment)
             comment = os.linesep.join([s for s in comment.splitlines() if s])
 
-            logging.info("Comment Length  : " + str(len(comment)))
-
-
+            logging.debug("Comment Length  : " + str(len(comment)))
 
             if c.stickied:
-                logging.info("Skipping Stickied Comment...")
+                logging.info("Status : REJECTED, Skipping Stickied Comment...")
+                rejected_comments.append(c)
                 continue
 
             if contains_url(comment):
-                logging.info("Skipping Comment with URL in it...")
+                logging.info("Status : REJECTED, Skipping Comment with URL in it...")
+                rejected_comments.append(c)
                 continue
+            
+            logging.info("Status : ACCEPTED")
+            accepted_comments.append(c)
+            
+            if len(accepted_comments) == settings.comment_limit:
+                logging.info(f"Rejected Comments : {str(len(rejected_comments))}")
+                logging.info(f"Accepted Comments : {str(len(accepted_comments))}")
+                break
 
-            comment_lines = comment.splitlines()
+        if settings.commentstyle == "reddit":
+            download_screenshots_of_reddit_posts(accepted_comments, v.meta.url, video_directory)
 
-            for comment_line_count, comment_line in enumerate(comment_lines):
+        for count, accepted_comment in enumerate(accepted_comments):
 
-                if comment == "[removed]":
-                    logging.info("Skipping Comment : " + comment)
-                    continue
-                
-                if comment == "":
-                    logging.info("Skipping blank comment")
-                    continue     
+            logging.info(f'=== Processing Reddit Comment {str(count)}/{str(len(accepted_comments))} ===')
 
-                logging.info("comment_line     : " + comment_line)
-                audio_filepath = str(Path(video_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
-                speech.create_audio(audio_filepath, comment_line)
+            if settings.commentstyle == "reddit":
+
+                audio_filepath = str(Path(video_directory, v.meta.id + "_" + accepted_comment.id + ".mp3"))
+                speech.create_audio(audio_filepath, accepted_comment.body)
                 audioclip = AudioFileClip(audio_filepath)
 
-                current_clip_text += comment_line + "\n\n"
-                logging.info("Current Clip Text :")
-                logging.info(current_clip_text)
+                img_path = str(Path(video_directory, "comment_" + accepted_comment.id + ".png"))
 
-                txt_clip = TextClip(current_clip_text, 
-                                    font=settings.text_font,
-                                    fontsize = settings.text_fontsize, 
-                                    color = settings.text_color,
-                                    size = txt_clip_size,
-                                    kerning=-1,
-                                    method='caption',
-                                    #bg_color=settings.text_bg_color,
-                                    align='West')\
-                                    .set_position((clip_margin,clip_margin_top))\
+                img_clip = ImageClip(img_path)\
+                                    .set_position(("center","center"))\
                                     .set_duration(audioclip.duration + settings.pause)\
                                     .set_audio(audioclip)\
-                                    .set_start(t)\
-                                    .set_opacity(settings.text_bg_opacity)\
-                                    .volumex(1.5)
-                                    
-
-                if txt_clip.h > height:
-                    logging.info("Text exceeded Video Height, reset text")
-                    current_clip_text = comment_line + "\n\n"
-                    txt_clip = TextClip(current_clip_text, 
-                            font=settings.text_font,
-                            fontsize = settings.text_fontsize, 
-                            color = settings.text_color,
-                            size = txt_clip_size,
-                            kerning=-1,
-                            method='caption',
-                            #bg_color=settings.text_bg_color,
-                            align='West')\
-                            .set_position((clip_margin,clip_margin_top))\
-                            .set_duration(audioclip.duration + settings.pause)\
-                            .set_audio(audioclip)\
-                            .set_opacity(settings.text_bg_opacity)\
-                            .set_start(t)
-
-                    if txt_clip.h > height:
-                        logging.info("Comment Text Too Long, Skipping Comment")
-                        continue   
+                                    .set_start(t)
 
                 t += audioclip.duration + settings.pause
                 v.duration += audioclip.duration + settings.pause
-                
 
-                v.clips.append(txt_clip)
-                logging.info("Video Clips : ")
-                logging.info(str(len(v.clips)))
+                v.clips.append(img_clip)
 
-            logging.info("Current Video Duration : " + str(v.duration))
+                logging.debug("Video Clips : ")
+                logging.debug(str(len(v.clips)))
 
-            if v.duration > settings.max_video_length:
-                logging.info("Reached Maximum Video Length : " + str(settings.max_video_length))
-                logging.info("Exiting...")     
-                break 
+                logging.info("Current Video Duration : " + str(v.duration))
 
-            if count == settings.comment_limit:
-                logging.info("Reached Maximum Number of Comments Limit : " + str(settings.comment_limit))
-                logging.info("Exiting...")
-                break
+                if v.duration > settings.max_video_length:
+                    logging.info("Reached Maximum Video Length : " + str(settings.max_video_length))
+                    logging.info("=== Finished Processing Comments ===")        
+                    break 
+
+            if settings.commentstyle == "text":
+
+                comment_lines = accepted_comment.body.splitlines()
+
+                for comment_line_count, comment_line in enumerate(comment_lines):
+
+                    if comment_line == '&#x200B;':
+                        logging.info("Skip zero space character comment : " + comment)
+                        continue
+                    
+                    if comment_line == "":
+                        logging.info("Skipping blank comment")
+                        continue     
+
+                    logging.debug("comment_line     : " + comment_line)
+                    audio_filepath = str(Path(video_directory, v.meta.id + "_" + c.id + "_" + str(comment_line_count) + ".mp3"))
+                    speech.create_audio(audio_filepath, comment_line)
+                    audioclip = AudioFileClip(audio_filepath)
+
+                    current_clip_text += comment_line + "\n\n"
+                    logging.debug("Current Clip Text :")
+                    logging.debug(current_clip_text)
+
+                    txt_clip = TextClip(current_clip_text, 
+                                        font=settings.text_font,
+                                        fontsize = settings.text_fontsize, 
+                                        color = settings.text_color,
+                                        size = txt_clip_size,
+                                        kerning=-1,
+                                        method='caption',
+                                        #bg_color=settings.text_bg_color,
+                                        align='West')\
+                                        .set_position((clip_margin,clip_margin_top))\
+                                        .set_duration(audioclip.duration + settings.pause)\
+                                        .set_audio(audioclip)\
+                                        .set_start(t)\
+                                        .set_opacity(settings.text_bg_opacity)\
+                                        .volumex(1.5)
+                                        
+
+                    if txt_clip.h > height:
+                        logging.debug("Text exceeded Video Height, reset text")
+                        current_clip_text = comment_line + "\n\n"
+                        txt_clip = TextClip(current_clip_text, 
+                                font=settings.text_font,
+                                fontsize = settings.text_fontsize, 
+                                color = settings.text_color,
+                                size = txt_clip_size,
+                                kerning=-1,
+                                method='caption',
+                                #bg_color=settings.text_bg_color,
+                                align='West')\
+                                .set_position((clip_margin,clip_margin_top))\
+                                .set_duration(audioclip.duration + settings.pause)\
+                                .set_audio(audioclip)\
+                                .set_opacity(settings.text_bg_opacity)\
+                                .set_start(t)
+
+                        if txt_clip.h > height:
+                            logging.debug("Comment Text Too Long, Skipping Comment")
+                            continue   
+
+                    t += audioclip.duration + settings.pause
+                    v.duration += audioclip.duration + settings.pause
+                    
+
+                    v.clips.append(txt_clip)
+                    logging.debug("Video Clips : ")
+                    logging.debug(str(len(v.clips)))
+
+                logging.info("Current Video Duration : " + str(v.duration))
+
+                if v.duration > settings.max_video_length:
+                    logging.info("Reached Maximum Video Length : " + str(settings.max_video_length))
+                    logging.info("=== Finished Processing Comments ===")     
+                    break 
+
+                if count == settings.comment_limit:
+                    logging.info("Reached Maximum Number of Comments Limit : " + str(settings.comment_limit))
+                    logging.info("=== Finished Processing Comments ===")   
+                    break
     else:
         logging.info("Skipping comments!")
     
 
-    
+    logging.info("===== Adding Background Clip =====")
+
     background_filepath = str(Path(settings.background_directory, v.background))
     
     background_clip = VideoFileClip(background_filepath)\
                         .set_start(tb)\
                         .volumex(settings.background_volume)
 
-    logging.info("Video Clip Duration      : " + str(v.duration))
-    logging.info("Background Clip Duration : " + str(background_clip.duration))
-
     if background_clip.duration < v.duration:
-        logging.info("Looping Background")
+        logging.debug("Looping Background")
         #background_clip = vfx.make_loopable(background_clip, cross=0)
         background_clip = vfx.loop(background_clip, duration=v.duration).without_audio()
-        logging.info("Looped Background Clip Duration : " + str(background_clip.duration))
+        logging.debug("Looped Background Clip Duration : " + str(background_clip.duration))
     else:
-        logging.info("Not Looping Background")
+        logging.debug("Not Looping Background")
         background_clip = background_clip.set_duration(v.duration)
 
     v.clips.insert(0,background_clip)
 
     if settings.enable_overlay :
+        logging.info("===== Adding Overlay Clip =====")
         clip_video_overlay = VideoFileClip(settings.video_overlay_filepath)\
                                 .set_start(tb)\
                                 .resize(settings.clip_size)\
@@ -479,18 +543,19 @@ def create(video_directory, post):
                                 .volumex(0)
 
         if clip_video_overlay.duration < v.duration:
-            logging.info("Looping Overlay")
+            logging.debug("Looping Overlay")
             #background_clip = vfx.make_loopable(background_clip, cross=0)
             clip_video_overlay = vfx.loop(clip_video_overlay, duration=v.duration).without_audio()
-            logging.info("Looped Overlay Clip Duration : " + str(clip_video_overlay.duration))
+            logging.debug("Looped Overlay Clip Duration : " + str(clip_video_overlay.duration))
         else:
-            logging.info("Not Looping Overlay")
+            logging.debug("Not Looping Overlay")
             clip_video_overlay = clip_video_overlay.set_duration(v.duration)
 
         v.clips.insert(1,clip_video_overlay)
 
     if settings.enable_newscaster and settings.newscaster_filepath :
-        logging.info(f"Adding Newscaster : { settings.newscaster_filepath }")
+        logging.info("===== Adding Newcaster Clip =====")
+        logging.info(f"Newscaster File Path: { settings.newscaster_filepath }")
         clip_video_newscaster = VideoFileClip( settings.newscaster_filepath )\
                                 .set_position( settings.newscaster_position )\
                                 .set_start(newcaster_start)\
@@ -499,6 +564,7 @@ def create(video_directory, post):
                                 .volumex(0)
 
         if settings.newscaster_remove_greenscreen :
+            logging.info("===== Removing Newcaster Green Screen =====")
             # Green Screen Video https://github.com/Zulko/moviepy/issues/964
             clip_video_newscaster = clip_video_newscaster.fx(vfx.mask_color, 
                                                              color=settings.newscaster_greenscreen_color, 
@@ -506,11 +572,11 @@ def create(video_directory, post):
                                                              s=5)
 
         if clip_video_newscaster.duration < v.duration:
-            logging.info("Looping Newscaster")
+            logging.debug("Looping Newscaster")
             clip_video_newscaster = vfx.loop(clip_video_newscaster, duration=v.duration - newcaster_start).without_audio()
-            logging.info("Looped Newscaster Clip Duration : " + str(clip_video_newscaster.duration))
+            logging.debug("Looped Newscaster Clip Duration : " + str(clip_video_newscaster.duration))
         else:
-            logging.info("Not Looping Newscaster")
+            logging.debug("Not Looping Newscaster")
             clip_video_newscaster = clip_video_newscaster.set_duration(v.duration - newcaster_start)
 
         v.clips.append(clip_video_newscaster)
@@ -535,14 +601,16 @@ def create(video_directory, post):
     if settings.disablecompile:
         logging.info("Skipping Video Compilation --disablecompile passed")
     else:
+        logging.info("===== Compiling Video Clip =====")
         logging.info("Compiling video, this takes a while, please be patient : )")
-        post_video.write_videofile(v.filepath, threads=settings.threads, logger=None)
+        #post_video.write_videofile(v.filepath, threads=settings.threads, logger=None)
+        post_video.write_videofile(v.filepath)
     
     if settings.disablecompile or settings.disableupload:
         logging.info("Skipping Upload...")
     else:
+        logging.info("===== Uploading Video Clip to YouTube =====")
         youtube.publish(v)
-        print("skipping ")
 
 
 def get_script_path():

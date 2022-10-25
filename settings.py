@@ -21,19 +21,24 @@ subreddits_excluded = [
     "r/CFB",
 ]
 
-# choices "polly","balcon","gtts"
+# choices "polly","balcon","gtts","tiktok"
 voice_engine = "gtts" 
 
-total_posts_to_process = 5
+commentstyle = "reddit"
+enable_overlay = False
+enable_comments = True
+enable_selftext = True
+total_posts_to_process = 3
 minimum_submission_score = 5000
 title_length_minimum = 20
 title_length_maximum = 100
-maximum_length_self_text = 5000
+maximum_length_self_text = 3000
 minimum_num_comments = 200
-submission_limit = 1000
+submission_limit = 500
 number_of_thumbnails = 3
-max_video_length = 600 # Seconds
-comment_limit = 600
+max_video_length = 300 # Seconds
+comment_limit = 100
+comment_length_max = 600
 
 assets_directory = "assets"
 temp_directory = "temp"
@@ -59,8 +64,7 @@ disableupload = True
 enable_nsfw_content = False
 banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dA=="
 
-enable_overlay = True
-enable_comments = True
+
 
 # Newcaster Settings
 enable_newscaster = False
@@ -84,3 +88,14 @@ download_enabled = True
 
 # Tweak for performance, set number of cores 
 threads=4
+
+
+tiktok_voice = "en_us_006"
+
+# Comment Screenshot
+
+theme = "dark"
+
+post_lang = "en"
+
+

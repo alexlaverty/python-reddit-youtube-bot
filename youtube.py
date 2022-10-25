@@ -69,3 +69,20 @@ def publish(video):
     except:
         driver.close()
         raise
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--filepath',default='test_video.mp4', help='Specify path to video file')
+    parser.add_argument('--title',default='My Video Title', help='Video Title')
+    parser.add_argument('--thumbnail',default='test_thumbnail.png', help='Video Thumbnail Image')
+    args = parser.parse_args()
+
+    class Video():
+        filepath = args.filepath
+        title = args.title
+        thumbnail = args.thumbnail
+
+    video = Video()
+
+    publish(video)
+

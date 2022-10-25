@@ -23,7 +23,7 @@ def get_images(folder_path, sentence, number_of_images=1):
         if number_of_images > 0:
             safe_query = urllib.parse.quote(sentence.strip())
             lexica_url=f"https://lexica.art/api/v1/search?q={safe_query}"
-            logging.info(f"Downloading Image : {str(id)} - {sentence}")
+            logging.info(f"Downloading Image From Lexica : {sentence}")
             r = requests.get(lexica_url)
             j = json.loads(r.text)
             for num in range(0, number_of_images):

@@ -6,6 +6,8 @@ import boto3
 import config 
 from gtts import gTTS
 import argparse
+#import streamlabs_polly
+from tiktok import TikTok
 
 logging.basicConfig(
     format=u'%(asctime)s %(levelname)-8s %(message)s',
@@ -71,11 +73,18 @@ def create_audio(path, text):
                         '-w',path, 
                         '-t',f"{text}"                
                         ])
+                        
+        if settings.voice_engine=="tiktok":
+            tt = TikTok()
+            tt.run(text, path)
+
     else:
         logging.info(f"Audio file already exists : {path}")
 
+    logging.info(f"Created Audio File : {path}")
+
     return path
-    logging.info("========== Finished Creating Audio File From Text ==========")   
+       
 
 
 if __name__ == "__main__":
