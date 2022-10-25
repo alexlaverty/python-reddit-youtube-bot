@@ -413,7 +413,8 @@ def create(video_directory, post):
                                     .set_position(("center","center"))\
                                     .set_duration(audioclip.duration + settings.pause)\
                                     .set_audio(audioclip)\
-                                    .set_start(t)
+                                    .set_start(t)\
+                                    .resize(width=settings.video_width * settings.reddit_comment_width)
 
                 t += audioclip.duration + settings.pause
                 v.duration += audioclip.duration + settings.pause

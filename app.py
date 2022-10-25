@@ -1,18 +1,16 @@
-import praw 
-# import yaml
-import config
-import logging
-# import video 
-import os
 from pathlib import Path
-import re 
-# import argparse
-import settings 
+from sqlite3 import version_info
 from tabulate import tabulate
-import thumbnail
-import reddit 
-import video as vid
 import argparse
+import logging
+import os
+import re 
+import reddit 
+import settings 
+import sys
+import thumbnail
+import video as vid
+import platform
 
 logging.basicConfig(
     format=u'%(asctime)s %(levelname)-8s %(message)s',
@@ -91,9 +89,16 @@ class Video:
 def banner():
     print("##### YOUTUBE REDDIT BOT #####")
 
+def print_version_info():
+    print(f"OS Version     : {platform.system()} {platform.release()}")
+    print(f"Python Version : {sys.version}")
+
+    
+
+
 if __name__ == "__main__":
     banner()
-
+    print_version_info()
     parser = argparse.ArgumentParser()
     parser.add_argument('--disable-selftext', action='store_true', help='Disable selftext video generation')
     parser.add_argument('--voice-engine', help='Specify which text to speech engine to use', choices=["polly", "balcon", "gtts", "tiktok"])

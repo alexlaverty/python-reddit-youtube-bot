@@ -25,6 +25,7 @@ subreddits_excluded = [
 voice_engine = "gtts" 
 
 commentstyle = "reddit"
+reddit_comment_width = 0.8
 enable_overlay = False
 enable_comments = True
 enable_selftext = True
