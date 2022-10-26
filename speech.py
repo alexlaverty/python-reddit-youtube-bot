@@ -7,8 +7,10 @@ import config
 from gtts import gTTS
 import argparse
 
-#import streamlabs_polly
+
+from streamlabs_polly import StreamlabsPolly 
 from tiktok import TikTok
+
 import textwrap 
 from moviepy.editor import (
     AudioFileClip,
@@ -84,6 +86,39 @@ def create_audio(path, text):
         if settings.voice_engine=="gtts":
             ttmp3 = gTTS(text)
             ttmp3.save(path)
+
+        if settings.voice_engine=="streamlabspolly":
+            slp = StreamlabsPolly() 
+            speech_text_character_limit = 550
+
+            if len(text) > speech_text_character_limit :
+                logging.info("Text exceeds StreamlabsPolly limit, breaking up into chunks")
+                speech_chunks = []
+                chunk_list = textwrap.wrap(text, width=speech_text_character_limit, break_long_words=True, break_on_hyphens=False)
+                
+                print(chunk_list)
+                
+                for count, chunk in enumerate(chunk_list): 
+                    print(count)
+                    if chunk == '&#x200B;':
+                        logging.info("Skip zero space character comment : " + chunk)
+                        continue
+                    
+                    if chunk == "":
+                        logging.info("Skipping blank comment")
+                        continue    
+                    
+                    tmp_path =  f"{path}{count}"
+                    slp.run(chunk, tmp_path)
+                    speech_chunks.append(tmp_path)
+
+                
+                clips = [AudioFileClip(c) for c in speech_chunks]
+                final_clip = concatenate_audioclips(clips)
+                final_clip.write_audiofile(path)
+            else:
+                print(text)
+                slp.run(text, path)
 
         if settings.voice_engine=="edge-tts":
             subprocess.run(['edge-tts', "--voice", settings.edge_tts_voice, '--text', f"'{text}'", '--write-media', path])

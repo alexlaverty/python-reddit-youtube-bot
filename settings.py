@@ -2,6 +2,7 @@
 from pathlib import Path
 
 subreddits = [
+    "askreddit",
     "AmItheAsshole",
     "antiwork",
     "AskMen",
@@ -21,9 +22,10 @@ subreddits_excluded = [
     "r/CFB",
 ]
 
-# choices "polly","balcon","gtts","tiktok","edge-tts"
+# Choices ["polly","balcon","gtts","tiktok","edge-tts","streamlabspolly"]
 voice_engine = "edge-tts" 
 edge_tts_voice = "en-GB-RyanNeural"
+streamlabs_polly_voice = "Brian"
 
 commentstyle = "reddit"
 reddit_comment_width = 0.8

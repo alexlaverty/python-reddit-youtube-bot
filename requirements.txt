@@ -11,3 +11,4 @@ gtts
 edge-tts
 playwright==1.23.0
 edge-tts
+pytime
