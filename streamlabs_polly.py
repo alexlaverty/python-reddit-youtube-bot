@@ -5,7 +5,6 @@ from requests.exceptions import JSONDecodeError
 #from utils.voice import check_ratelimit
 from requests import Response
 import settings 
-from pytime import pytime
 
 voices = [
     "Brian",
@@ -36,7 +35,7 @@ def check_ratelimit(response: Response):
     if response.status_code == 429:
         try:
             time = int(response.headers["X-RateLimit-Reset"])
-            print(f"Ratelimit hit. Sleeping for {time - int(pytime.time())} seconds.")
+            print(f"Ratelimit hit, sleeping...")
             sleep_until(time)
             return False
         except KeyError:  # if the header is not present, we don't know how long to wait
