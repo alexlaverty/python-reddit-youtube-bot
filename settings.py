@@ -21,8 +21,9 @@ subreddits_excluded = [
     "r/CFB",
 ]
 
-# choices "polly","balcon","gtts","tiktok"
-voice_engine = "tiktok" 
+# choices "polly","balcon","gtts","tiktok","edge-tts"
+voice_engine = "edge-tts" 
+edge_tts_voice = "en-GB-RyanNeural"
 
 commentstyle = "reddit"
 reddit_comment_width = 0.8

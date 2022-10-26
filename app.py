@@ -101,7 +101,7 @@ if __name__ == "__main__":
     print_version_info()
     parser = argparse.ArgumentParser()
     parser.add_argument('--disable-selftext', action='store_true', help='Disable selftext video generation')
-    parser.add_argument('--voice-engine', help='Specify which text to speech engine to use', choices=["polly", "balcon", "gtts", "tiktok"])
+    parser.add_argument('--voice-engine', help='Specify which text to speech engine to use', choices=["polly", "balcon", "gtts", "tiktok","edge-tts"])
     parser.add_argument('-c','--comment-style', help='Specify text based or reddit image comments', choices=['text', 'reddit'])
     parser.add_argument('-l','--video-length', help='Set how long you want the video to be', type=int )
     parser.add_argument('-n','--enable-nsfw', action='store_true', help='Allow NSFW Content')

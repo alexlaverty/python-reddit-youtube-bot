@@ -6,6 +6,7 @@ import boto3
 import config 
 from gtts import gTTS
 import argparse
+
 #import streamlabs_polly
 from tiktok import TikTok
 import textwrap 
@@ -83,7 +84,10 @@ def create_audio(path, text):
         if settings.voice_engine=="gtts":
             ttmp3 = gTTS(text)
             ttmp3.save(path)
-        
+
+        if settings.voice_engine=="edge-tts":
+            subprocess.run(['edge-tts', "--voice", settings.edge_tts_voice, '--text', f"'{text}'", '--write-media', path])
+
         if settings.voice_engine=="balcon":
             result = subprocess.call([
                         'balcon.exe',
