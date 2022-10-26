@@ -22,7 +22,7 @@ subreddits_excluded = [
 ]
 
 # choices "polly","balcon","gtts","tiktok"
-voice_engine = "gtts" 
+voice_engine = "tiktok" 
 
 commentstyle = "reddit"
 reddit_comment_width = 0.8
@@ -37,8 +37,8 @@ maximum_length_self_text = 3000
 minimum_num_comments = 200
 submission_limit = 500
 number_of_thumbnails = 3
-max_video_length = 300 # Seconds
-comment_limit = 100
+max_video_length = 600 # Seconds
+comment_limit = 150
 comment_length_max = 600
 
 assets_directory = "assets"

@@ -24,8 +24,14 @@ def get_images(folder_path, sentence, number_of_images=1):
             safe_query = urllib.parse.quote(sentence.strip())
             lexica_url=f"https://lexica.art/api/v1/search?q={safe_query}"
             logging.info(f"Downloading Image From Lexica : {sentence}")
-            r = requests.get(lexica_url)
-            j = json.loads(r.text)
+            try:
+                r = requests.get(lexica_url)
+                j = json.loads(r.text)
+            except:
+                print("Error Retrieving Lexica Images")
+                pass
+                return
+
             for num in range(0, number_of_images):
                 image_path =  str(Path(folder_path,f"lexica_{num}.png"))
                 if not os.path.exists(image_path):

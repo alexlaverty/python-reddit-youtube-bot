@@ -3,6 +3,8 @@ import settings
 import random
 import requests
 from requests.adapters import HTTPAdapter, Retry
+import textwrap
+import urllib.parse
 
 # from profanity_filter import ProfanityFilter
 # pf = ProfanityFilter()
@@ -81,7 +83,11 @@ class TikTok:  # TikTok Text-to-Speech Wrapper
             )
         )
         try:
-            r = requests.post(f"{self.URI_BASE}{voice}&req_text={text}&speaker_map_type=0")
+            text = urllib.parse.quote(text)
+            print(len(text))
+            tt_uri = f"{self.URI_BASE}{voice}&req_text={text}&speaker_map_type=0"
+            print(tt_uri)
+            r = requests.post(tt_uri)
         except requests.exceptions.SSLError:
             # https://stackoverflow.com/a/47475019/18516611
             session = requests.Session()
@@ -99,3 +105,9 @@ class TikTok:  # TikTok Text-to-Speech Wrapper
 
     def randomvoice(self):
         return random.choice(self.voices["human"])
+
+if __name__ == "__main__":
+    tt = TikTok()
+    text_to_say = "Hello world this is some spoken text"
+    print(str(len(text_to_say)))
+    tt.run(text_to_say, "tiktok_test.mp3")

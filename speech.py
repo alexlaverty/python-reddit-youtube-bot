@@ -8,6 +8,11 @@ from gtts import gTTS
 import argparse
 #import streamlabs_polly
 from tiktok import TikTok
+import textwrap 
+from moviepy.editor import (
+    AudioFileClip,
+    concatenate_audioclips
+)
 
 logging.basicConfig(
     format=u'%(asctime)s %(levelname)-8s %(message)s',
@@ -39,6 +44,18 @@ def process_speech_text(text):
     text = text.replace("WIBTA", " would I be the asshole ")
     text = text.replace(" stfu ", " shut the fuck up ")
     text = text.replace(" OP ", " o p ")
+    text = text.replace("pettyrevenge", "petty revenge")
+    text = text.replace("askreddit", "ask reddit")
+    text = text.replace("twoxchromosomes", "two x chromosomes")
+    text = text.replace("showerthoughts", "shower thoughts")
+    text = text.replace("amitheasshole", "am i the asshole")
+    text = text.replace("“", '"')
+    text = text.replace("“", '"')  
+    text = text.replace("’", "'") 
+    text = text.replace("...", ".") 
+    # req_text = text.replace("+", "plus")
+    # req_text = req_text.replace(" ", "+")
+    # req_text = req_text.replace("&", "and")   
     return text
 
 def create_audio(path, text):
@@ -75,8 +92,37 @@ def create_audio(path, text):
                         ])
                         
         if settings.voice_engine=="tiktok":
+            speech_text_character_limit = 200
             tt = TikTok()
-            tt.run(text, path)
+
+            if len(text) > speech_text_character_limit :
+                logging.info("Text exceeds tiktok limit, breaking up into chunks")
+                speech_chunks = []
+                chunk_list = textwrap.wrap(text, width=speech_text_character_limit, break_long_words=True, break_on_hyphens=False)
+                
+                print(chunk_list)
+                
+                for count, chunk in enumerate(chunk_list): 
+                    print(count)
+                    if chunk == '&#x200B;':
+                        logging.info("Skip zero space character comment : " + chunk)
+                        continue
+                    
+                    if chunk == "":
+                        logging.info("Skipping blank comment")
+                        continue    
+                    
+                    tmp_path =  f"{path}{count}"
+                    tt.run(chunk, tmp_path)
+                    speech_chunks.append(tmp_path)
+
+                
+                clips = [AudioFileClip(c) for c in speech_chunks]
+                final_clip = concatenate_audioclips(clips)
+                final_clip.write_audiofile(path)
+            else:
+                print(text)
+                tt.run(text, path)
 
     else:
         logging.info(f"Audio file already exists : {path}")

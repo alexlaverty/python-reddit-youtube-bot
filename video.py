@@ -68,7 +68,8 @@ def print_comment_details(comment):
     logging.debug("id       : " + str(comment.id))
     logging.debug("Stickied : " + str(comment.stickied))
     logging.info("Comment   : " + give_emoji_free_text(str(comment.body)))
-    
+    logging.info("Length    : " + str(len(comment.body)))
+
 def safe_filename(text):
     text = text.replace(" ","_")
     return "".join([c for c in text if re.match(r'\w', c)])[:50]

@@ -105,80 +105,81 @@ def generate(video_directory, subreddit, title, number_of_thumbnails=settings.nu
 
     thumbnails = []
 
-    for index, image in enumerate(images):
-        clips = []
-        thumbnail_path = str(Path(video_directory, f"thumbnail_{index}.png").absolute())
-        margin = 40
-        txt_y = 0 
-        txt_x = 0 + margin
-        width = 1280
-        height = 720
-        #fontsize = get_font_size(len(title))
-        fontsize, lineheight = get_font_size(len(title))
+    if images:
+        for index, image in enumerate(images):
+            clips = []
+            thumbnail_path = str(Path(video_directory, f"thumbnail_{index}.png").absolute())
+            margin = 40
+            txt_y = 0 
+            txt_x = 0 + margin
+            width = 1280
+            height = 720
+            #fontsize = get_font_size(len(title))
+            fontsize, lineheight = get_font_size(len(title))
 
 
-        background_clip = TextClip("",
-                                size=(width,height), 
-                                bg_color="#000000",
-                                method="caption").margin(20, color=random_rgb_colour())
+            background_clip = TextClip("",
+                                    size=(width,height), 
+                                    bg_color="#000000",
+                                    method="caption").margin(20, color=random_rgb_colour())
 
-        clips.append(background_clip)
+            clips.append(background_clip)
 
-        img_width = width/2
-        img_clip = ImageClip(image).resize(width=img_width)\
-                                        .set_position(("right","center"))\
-                                        .set_opacity(0.8)
+            img_width = width/2
+            img_clip = ImageClip(image).resize(width=img_width)\
+                                            .set_position(("right","center"))\
+                                            .set_opacity(0.8)
 
-        clips.append(img_clip)
+            clips.append(img_clip)
 
-        subreddit_clip = TextClip(subreddit,
-                            fontsize = 85, 
-                            color="white", 
-                            align='center', 
-                            font="Verdana-Bold", 
-                            bg_color="#000000",
-                            method="caption")\
-                            .set_position((margin, 20))\
-                            #.set_opacity(0.8)
-
-        clips.append(subreddit_clip)
-
-        txt_y += subreddit_clip.h
-
-        for word in words:
-            if word in unique_words:
-                word_color = "white"
-            else:
-                word_color = stop_word_colour
-
-            if txt_x > (width / 2):
-                txt_x = 0 + margin
-                txt_y += lineheight
-
-            txt_clip = TextClip(word,
-                                fontsize = fontsize, 
-                                color=word_color, 
+            subreddit_clip = TextClip(subreddit,
+                                fontsize = 85, 
+                                color="white", 
                                 align='center', 
-                                font="Impact", 
-                                #bg_color="#000000",
-                                stroke_color="#000000",
-                                stroke_width=3,
+                                font="Verdana-Bold", 
+                                bg_color="#000000",
                                 method="caption")\
-                                .set_position((txt_x, txt_y))
+                                .set_position((margin, 20))\
                                 #.set_opacity(0.8)
 
-            clips.append(txt_clip)
-            txt_x += txt_clip.w + 15
-            
+            clips.append(subreddit_clip)
 
-        txt_clip = txt_clip.set_duration(10)
-        txt_clip = txt_clip.set_position(("center","center"))
+            txt_y += subreddit_clip.h
+
+            for word in words:
+                if word in unique_words:
+                    word_color = "white"
+                else:
+                    word_color = stop_word_colour
+
+                if txt_x > (width / 2):
+                    txt_x = 0 + margin
+                    txt_y += lineheight
+
+                txt_clip = TextClip(word,
+                                    fontsize = fontsize, 
+                                    color=word_color, 
+                                    align='center', 
+                                    font="Impact", 
+                                    #bg_color="#000000",
+                                    stroke_color="#000000",
+                                    stroke_width=3,
+                                    method="caption")\
+                                    .set_position((txt_x, txt_y))
+                                    #.set_opacity(0.8)
+
+                clips.append(txt_clip)
+                txt_x += txt_clip.w + 15
+                
+
+            txt_clip = txt_clip.set_duration(10)
+            txt_clip = txt_clip.set_position(("center","center"))
 
 
-        final_video = CompositeVideoClip(clips)
-        logging.info('Saving Thumbnail to : ' + thumbnail_path)
-        final_video.save_frame(thumbnail_path, 1)
-        thumbnails.append(final_video)
+            final_video = CompositeVideoClip(clips)
+            logging.info('Saving Thumbnail to : ' + thumbnail_path)
+            final_video.save_frame(thumbnail_path, 1)
+            thumbnails.append(final_video)
     return thumbnails
 
 
