@@ -11,8 +11,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 def domain_to_url(domain: str) -> str:
     """ Converts a (partial) domain to valid URL """
-    if domain.startswith("."):
-        domain = "www" + domain
+    if domain == '.chrome.google.com/robots.txt':
+        domain = 'chrome.google.com/robots.txt'
+    else:
+        if domain.startswith("."):
+            domain = "www" + domain
     return "http://" + domain
 
 

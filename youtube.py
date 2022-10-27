@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.remote.file_detector import LocalFileDetector
 from selenium.webdriver.firefox.options import Options
-
+from time import sleep
 
 from login import confirm_logged_in, login_using_cookie_file
 from upload import upload_file
@@ -36,22 +36,22 @@ def publish(video):
     # )
 
     # Firefox Local
-    # options = Options()
-    # options.headless = True
-    # firefox_profile = webdriver.FirefoxProfile()
-    # firefox_profile.set_preference("intl.accept_languages", "en-us")
-    # firefox_profile.update_preferences()
-    # driver = webdriver.Firefox(firefox_profile,firefox_binary='/opt/firefox/firefox-bin')
+    options = Options()
+    options.headless = True
+    firefox_profile = webdriver.FirefoxProfile()
+    firefox_profile.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0")
+    firefox_profile.update_preferences()
+    #driver = webdriver.Firefox(firefox_profile,firefox_binary='C:\\Program Files\\Mozilla Firefox\\firefox.exe')
 
     options = Options()
-    options.add_argument("--headless")
-    driver = webdriver.Firefox(options=options, firefox_binary='/opt/firefox/firefox')
+    #options.add_argument("--headless")
+    driver = webdriver.Firefox(firefox_profile, options=options, firefox_binary='C:\\Program Files\\Mozilla Firefox\\firefox.exe')
 
     driver.set_window_size(1920, 1080)
     login_using_cookie_file(driver, cookie_file=login_cookies)
     driver.get("https://www.youtube.com")
-
-    assert "YouTube" in driver.title
+    sleep(5)
+    #assert "YouTube" in driver.title
 
     try:
         confirm_logged_in(driver)
@@ -72,15 +72,16 @@ def publish(video):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--filepath',default='test_video.mp4', help='Specify path to video file')
-    parser.add_argument('--title',default='My Video Title', help='Video Title')
-    parser.add_argument('--thumbnail',default='test_thumbnail.png', help='Video Thumbnail Image')
+    parser.add_argument('--filepath',default='C:\\src\\ttsvibelounge\\test_video.mp4', help='Specify path to video file')
+    parser.add_argument('--title',default="What's the best non-alcoholic way to make a party crazy and fun? (r/AskReddit)", help='Video Title')
+    parser.add_argument('--thumbnail',default='C:\\src\\ttsvibelounge\\test_thumbnail.png', help='Video Thumbnail Image')
     args = parser.parse_args()
 
     class Video():
         filepath = args.filepath
         title = args.title
         thumbnail = args.thumbnail
+        description = "This is my videos description"
 
     video = Video()
 
