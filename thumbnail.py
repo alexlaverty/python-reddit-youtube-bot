@@ -85,15 +85,61 @@ def get_font_size(length):
 
 def generate(video_directory, subreddit, title, number_of_thumbnails=settings.number_of_thumbnails):
     logging.info('========== Generating Thumbnail ==========')
-
-    colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
-    stop_word_colour = random.choice(colors)
-
     
     #image = random.choice(os.listdir(settings.images_directory))
     image_path = str(Path(video_directory, "lexica.png").absolute())
 
     images = lexica.get_images(video_directory, title, number_of_images=number_of_thumbnails)
+
+    thumbnails = []
+
+    if images:
+        for index, image in enumerate(images):
+            thumbnail = create_thumbnail(video_directory, subreddit, title, image, index)
+            thumbnails.append(thumbnail)
+
+    return thumbnails
+
+def create_thumbnail(video_directory, subreddit, title, image, index=0):
+    clips = []
+    thumbnail_path = str(Path(video_directory, f"thumbnail_{str(index)}.png").absolute())
+    margin = 40
+    txt_y = 0 
+    txt_x = 0 + margin
+    width = 1280
+    height = 720
+    #fontsize = get_font_size(len(title))
+    fontsize, lineheight = get_font_size(len(title))
+
+
+    background_clip = TextClip("",
+                            size=(width,height), 
+                            bg_color="#000000",
+                            method="caption").margin(20, color=random_rgb_colour())
+
+    clips.append(background_clip)
+
+    img_width = width/2
+    img_clip = ImageClip(image).resize(width=img_width)\
+                                    .set_position(("right","center"))\
+                                    .set_opacity(0.8)
+
+    clips.append(img_clip)
+
+    subreddit_clip = TextClip(subreddit,
+                        fontsize = 85, 
+                        color="white", 
+                        align='center', 
+                        font="Verdana-Bold", 
+                        bg_color="#000000",
+                        method="caption")\
+                        .set_position((margin, 20))\
+                        #.set_opacity(0.8)
+
+    clips.append(subreddit_clip)
+
+    txt_y += subreddit_clip.h
+
 
     #image_path = str(Path(settings.images_directory, image))
     #logging.info('Randomly Selecting Background : ' + image_path)
@@ -102,98 +148,50 @@ def generate(video_directory, subreddit, title, number_of_thumbnails=settings.nu
     s=set(stopwords.words('english'))
     words = text.split(" ")
     unique_words = list(filter(lambda w: not w in s,text.split()))
+    colors = ["#FFA500","#B8FF72","#FFC0CB","#89cff0","#ADD8E6","green","yellow","red"]
+    stop_word_colour = random.choice(colors)
 
-    thumbnails = []
+    for word in words:
+        if word in unique_words:
+            word_color = "white"
+        else:
+            word_color = stop_word_colour
 
-    if images:
-        for index, image in enumerate(images):
-            clips = []
-            thumbnail_path = str(Path(video_directory, f"thumbnail_{index}.png").absolute())
-            margin = 40
-            txt_y = 0 
+        if txt_x > (width / 2):
             txt_x = 0 + margin
-            width = 1280
-            height = 720
-            #fontsize = get_font_size(len(title))
-            fontsize, lineheight = get_font_size(len(title))
+            txt_y += lineheight
+
+        txt_clip = TextClip(word,
+                            fontsize = fontsize, 
+                            color=word_color, 
+                            align='center', 
+                            font="Impact", 
+                            #bg_color="#000000",
+                            stroke_color="#000000",
+                            stroke_width=3,
+                            method="caption")\
+                            .set_position((txt_x, txt_y))
+                            #.set_opacity(0.8)
+
+        clips.append(txt_clip)
+        txt_x += txt_clip.w + 15
+        
+
+    txt_clip = txt_clip.set_duration(10)
+    txt_clip = txt_clip.set_position(("center","center"))
 
 
-            background_clip = TextClip("",
-                                    size=(width,height), 
-                                    bg_color="#000000",
-                                    method="caption").margin(20, color=random_rgb_colour())
-
-            clips.append(background_clip)
-
-            img_width = width/2
-            img_clip = ImageClip(image).resize(width=img_width)\
-                                            .set_position(("right","center"))\
-                                            .set_opacity(0.8)
-
-            clips.append(img_clip)
-
-            subreddit_clip = TextClip(subreddit,
-                                fontsize = 85, 
-                                color="white", 
-                                align='center', 
-                                font="Verdana-Bold", 
-                                bg_color="#000000",
-                                method="caption")\
-                                .set_position((margin, 20))\
-                                #.set_opacity(0.8)
-
-            clips.append(subreddit_clip)
-
-            txt_y += subreddit_clip.h
-
-            for word in words:
-                if word in unique_words:
-                    word_color = "white"
-                else:
-                    word_color = stop_word_colour
-
-                if txt_x > (width / 2):
-                    txt_x = 0 + margin
-                    txt_y += lineheight
-
-                txt_clip = TextClip(word,
-                                    fontsize = fontsize, 
-                                    color=word_color, 
-                                    align='center', 
-                                    font="Impact", 
-                                    #bg_color="#000000",
-                                    stroke_color="#000000",
-                                    stroke_width=3,
-                                    method="caption")\
-                                    .set_position((txt_x, txt_y))
-                                    #.set_opacity(0.8)
-
-                clips.append(txt_clip)
-                txt_x += txt_clip.w + 15
-                
-
-            txt_clip = txt_clip.set_duration(10)
-            txt_clip = txt_clip.set_position(("center","center"))
-
-
-            final_video = CompositeVideoClip(clips)
-            logging.info('Saving Thumbnail to : ' + thumbnail_path)
-            final_video.save_frame(thumbnail_path, 1)
-            thumbnails.append(final_video)
-    return thumbnails
-
+    final_video = CompositeVideoClip(clips)
+    logging.info('Saving Thumbnail to : ' + thumbnail_path)
+    final_video.save_frame(thumbnail_path, 1)
 
 if __name__ == "__main__":
-    class meta():
-        title = "What do you desire more than anything else in this world?"
-        subreddit_name_prefixed = "r/AskMen"
-        id = "4hdu7"
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d','--directory', help='Specify directory to save thumbnail image to', default=".")
+    parser.add_argument('-s','--subreddit', help='Specify subreddit', default="r/AskReddit")
+    parser.add_argument('-t','--title', help='Specify Post Title', default="This is the reddit post title")
+    parser.add_argument('-i','--image', help='Specify Thumbnail Image', default=str(Path(settings.images_directory,"harambe.png").absolute()) )
+    args = parser.parse_args()
 
-    class Video():
-        meta=None
-
-    meta = meta()
-    video = Video()
-    video.meta = meta
-
-    generate(video, "thumbnail.png", None)
+    create_thumbnail(args.directory, args.subreddit, args.title, args.image, index=0)
