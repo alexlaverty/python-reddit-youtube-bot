@@ -9,8 +9,8 @@ from selenium.webdriver.remote.file_detector import LocalFileDetector
 from selenium.webdriver.firefox.options import Options
 from time import sleep
 
-from login import confirm_logged_in, login_using_cookie_file
-from upload import upload_file
+from publish.login import confirm_logged_in, login_using_cookie_file
+from publish.upload import upload_file
 
 login_cookies="cookies.json"
 

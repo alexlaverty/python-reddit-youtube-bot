@@ -1,15 +1,16 @@
 import random
 import requests
 from requests.exceptions import JSONDecodeError
-#from utils import settings
-#from utils.voice import check_ratelimit
+
+# from utils import settings
+# from utils.voice import check_ratelimit
 from requests import Response
-import settings 
+import config.settings as settings
 import time as pytime
 from datetime import datetime
-import sys 
+import sys
 from time import sleep
-import re 
+import re
 
 if sys.version_info[0] >= 3:
     from datetime import timezone
@@ -35,6 +36,7 @@ voices = [
 
 # valid voices https://lazypy.ro/tts/
 
+
 def sleep_until(time):
     """
     Pause your program until a specific end time.
@@ -48,7 +50,9 @@ def sleep_until(time):
         if sys.version_info[0] >= 3 and time.tzinfo:
             end = time.astimezone(timezone.utc).timestamp()
         else:
-            zoneDiff = pytime.time() - (datetime.now() - datetime(1970, 1, 1)).total_seconds()
+            zoneDiff = (
+                pytime.time() - (datetime.now() - datetime(1970, 1, 1)).total_seconds()
+            )
             end = (time - datetime(1970, 1, 1)).total_seconds() + zoneDiff
 
     # Type check
@@ -68,7 +72,8 @@ def sleep_until(time):
         else:
             # 'logarithmic' sleeping to minimize loop iterations
             sleep(diff / 2)
-            
+
+
 def check_ratelimit(response: Response):
     """
     Checks if the response is a ratelimit response.
@@ -101,7 +106,7 @@ class StreamlabsPolly:
                     f"Please set the config variable streamlabs_polly_voice to a valid voice. options are: {voices}"
                 )
             voice = str(settings.streamlabs_polly_voice).capitalize()
-        text=sanitize_text(text)
+        text = sanitize_text(text)
         body = {"voice": voice, "text": text, "service": "polly"}
         response = requests.post(self.url, data=body)
         if not check_ratelimit(response):
@@ -121,7 +126,6 @@ class StreamlabsPolly:
 
     def randomvoice(self):
         return random.choice(self.voices)
-
 
 
 def sanitize_text(text: str) -> str:

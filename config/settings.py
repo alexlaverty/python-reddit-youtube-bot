@@ -3,7 +3,7 @@ from pathlib import Path
 
 subreddits = [
     "askreddit",
-    "AmItheAsshole",
+    #"AmItheAsshole",
     "antiwork",
     "AskMen",
     "ChoosingBeggars",
@@ -17,19 +17,24 @@ subreddits = [
     "confessions",
     "confession"
     ]
-    
+
 subreddits_excluded = [
     "r/CFB",
 ]
 
+# Speech Settings
 # Choices ["polly","balcon","gtts","tiktok","edge-tts","streamlabspolly"]
-voice_engine = "edge-tts" 
+voice_engine = "edge-tts"
 edge_tts_voice = "en-GB-RyanNeural"
 streamlabs_polly_voice = "Brian"
+tiktok_voice = "en_us_006"
 
 commentstyle = "reddit"
-reddit_comment_width = 0.8
+reddit_comment_width = 0.9
+reddit_comment_opacity = 1
 enable_overlay = False
+enable_background = False
+background_colour = [26, 26, 27]
 enable_comments = True
 enable_selftext = True
 total_posts_to_process = 3
@@ -41,7 +46,7 @@ minimum_num_comments = 200
 submission_limit = 500
 number_of_thumbnails = 3
 max_video_length = 600 # Seconds
-comment_limit = 150
+comment_limit = 100
 comment_length_max = 600
 
 assets_directory = "assets"
@@ -63,7 +68,7 @@ video_width = 1280
 clip_size = (video_width, video_height)
 
 disablecompile = False
-disableupload = True
+disableupload = False
 
 enable_nsfw_content = False
 banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dA=="
@@ -73,7 +78,7 @@ banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dA=="
 # Newcaster Settings
 enable_newscaster = False
 newscaster_remove_greenscreen = True
-newscaster_greenscreen_color = [1, 255, 17] # Enter the Green Screen RGB Colour 
+newscaster_greenscreen_color = [1, 255, 17] # Enter the Green Screen RGB Colour
 newscaster_greenscreen_remove_threshold = 100
 newscaster_filepath = str(Path(assets_directory,"newscaster.mp4").resolve())
 newscaster_position = ("left","bottom")
@@ -90,16 +95,13 @@ text_fontsize = 32
 
 download_enabled = True
 
-# Tweak for performance, set number of cores 
+# Tweak for performance, set number of cores
 threads=4
 
 
-tiktok_voice = "en_us_006"
 
 # Comment Screenshot
 
 theme = "dark"
 
 post_lang = "en"
-
-
