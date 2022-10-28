@@ -56,6 +56,7 @@ def process_speech_text(text):
     text = text.replace("“", '"')  
     text = text.replace("’", "'") 
     text = text.replace("...", ".") 
+    text = text.replace("*", "") 
     # req_text = text.replace("+", "plus")
     # req_text = req_text.replace(" ", "+")
     # req_text = req_text.replace("&", "and")   
