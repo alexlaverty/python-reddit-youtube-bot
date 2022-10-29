@@ -16,6 +16,9 @@ jobs:
     container: alexlaverty/ttsvibelounge:1.0.0
     steps:
 
+      - name: checkout repo content
+        uses: actions/checkout@v2 # checkout the repository content to github runner.
+
       - name: Run ttsvibelounge Script
         env:
           PRAW_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
@@ -27,7 +30,6 @@ jobs:
           RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
-          cd /app
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           python3 app.py
           rm -f client_secret.json
