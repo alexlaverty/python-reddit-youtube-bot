@@ -32,5 +32,6 @@ jobs:
         run: |
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           cp config/auth-env.py config/auth.py
+          playwright install
           python3 app.py
           rm -f client_secret.json
