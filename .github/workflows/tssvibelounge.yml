@@ -27,6 +27,7 @@ jobs:
           RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
+          cd /app
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           python3 app.py
           rm -f client_secret.json
