@@ -9,7 +9,7 @@ on:
 # Also run the build if I push anything into the master branch
   push:
     branches:
-      - master
+      - main
 jobs:
   build:
     runs-on: alexlaverty/ttsvibelounge:1.0.0
