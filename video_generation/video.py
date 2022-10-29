@@ -103,7 +103,8 @@ def create(video_directory, post, thumbnails):
     v = Video()
     v.meta = post
     v.clips = []
-    v.get_background()
+    if settings.enable_background:
+        v.get_background()
 
     if thumbnails:
         v.thumbnail = thumbnails[0]
