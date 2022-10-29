@@ -66,10 +66,9 @@ def process_submission(submission):
     # Create Video Directories
     video.folder_path = str(Path(settings.videos_directory,
                             f"{submission.id}_{title_path}"))
-    video.thumbnail_path = str(Path(video.folder_path,
-                               "thumbnail.png"))
+
     video.video_filepath = str(Path(video.folder_path,
-                               f"{submission.id}_{title_path}.mp4"))
+                               "final.mp4"))
     create_directory(video.folder_path)
 
     if os.path.exists(video.video_filepath):
@@ -81,6 +80,9 @@ def process_submission(submission):
                             subreddit=submission.subreddit_name_prefixed,
                             title=submission.title,
                             number_of_thumbnails=settings.number_of_thumbnails)
+        if thumbnails:
+            video.thumbnail_path = thumbnails[0]
+
         if args.thumbnail_only:
             print("Generating Thumbnail only skipping video compile!")
         else:
@@ -182,7 +184,7 @@ def get_args():
 
     if args.publish:
         logging.info('Publish video enabled!')
-        settings.disableupload = False
+        settings.disable_upload = False
 
     return args
 

@@ -1,16 +1,7 @@
 import argparse
 import logging
-from argparse import ArgumentError
-from datetime import datetime
-
-from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.remote.file_detector import LocalFileDetector
-from selenium.webdriver.firefox.options import Options
-from time import sleep
-
-from publish.login import confirm_logged_in, login_using_cookie_file
-from publish.upload import upload_file
+from simple_youtube_api.Channel import Channel
+from simple_youtube_api.LocalVideo import LocalVideo
 
 login_cookies="cookies.json"
 
@@ -29,52 +20,50 @@ def publish(video):
     logging.info(f'video.title     : {video.title}')
     logging.info(f'video.thumbnail : {video.thumbnail}')
 
-    # # Docker Remote
-    # driver = webdriver.Remote(
-    #     command_executor="http://firefox:4444/wd/hub",
-    #     desired_capabilities=DesiredCapabilities.FIREFOX,
-    # )
+    # loggin into the channel
+    channel = Channel()
+    channel.login("client_secret.json", "credentials.storage")
 
-    # Firefox Local
-    options = Options()
-    options.headless = True
-    firefox_profile = webdriver.FirefoxProfile()
-    firefox_profile.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0")
-    firefox_profile.update_preferences()
-    #driver = webdriver.Firefox(firefox_profile,firefox_binary='C:\\Program Files\\Mozilla Firefox\\firefox.exe')
+    # setting up the video that is going to be uploaded
+    youtube_upload = LocalVideo(file_path=video.filepath)
 
-    options = Options()
-    #options.add_argument("--headless")
-    driver = webdriver.Firefox(firefox_profile, options=options, firefox_binary='C:\\Program Files\\Mozilla Firefox\\firefox.exe')
+    # setting snippet
+    youtube_upload.set_title(video.title)
+    youtube_upload.set_description(video.description)
+    youtube_upload.set_tags(["reddit", "tts"])
+    youtube_upload.set_category("gaming")
+    youtube_upload.set_default_language("en-US")
 
-    driver.set_window_size(1920, 1080)
-    login_using_cookie_file(driver, cookie_file=login_cookies)
-    driver.get("https://www.youtube.com")
-    sleep(5)
-    #assert "YouTube" in driver.title
+    # setting status
+    youtube_upload.set_embeddable(True)
+    youtube_upload.set_license("creativeCommon")
+    youtube_upload.set_privacy_status("public")
+    youtube_upload.set_public_stats_viewable(True)
+
+    # setting thumbnail
+    youtube_upload.set_thumbnail_path(video.thumbnail)
 
     try:
-        confirm_logged_in(driver)
-        driver.get("https://studio.youtube.com")
-        assert "Channel dashboard" in driver.title
-        driver.file_detector = LocalFileDetector()
-        upload_file(
-            driver,
-            video_path=video.filepath,
-            title=video.title,
-            thumbnail_path=video.thumbnail,
-            description=video.description,
-            kids=False
-        )
+        # uploading video and printing the results
+        uploaded_video = channel.upload_video(youtube_upload)
+        print(uploaded_video.id)
+        print(uploaded_video)
     except:
-        driver.close()
+        logging.info("ERROR UPLOADING:")
+        logging.info(uploaded_video)
         raise
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--filepath',default='C:\\src\\ttsvibelounge\\test_video.mp4', help='Specify path to video file')
-    parser.add_argument('--title',default="What's the best non-alcoholic way to make a party crazy and fun? (r/AskReddit)", help='Video Title')
-    parser.add_argument('--thumbnail',default='C:\\src\\ttsvibelounge\\test_thumbnail.png', help='Video Thumbnail Image')
+    parser.add_argument('--filepath',
+                        default='C:\\src\\ttsvibelounge\\test_video.mp4',
+                        help='Specify path to video file')
+    parser.add_argument('--title',
+                        default="What's the best non-alcoholic way to make a party crazy and fun? (r/AskReddit)",
+                        help='Video Title')
+    parser.add_argument('--thumbnail',
+                        default='C:\\src\\ttsvibelounge\\test_thumbnail.png',
+                        help='Video Thumbnail Image')
     args = parser.parse_args()
 
     class Video():
@@ -86,4 +75,3 @@ if __name__ == "__main__":
     video = Video()
 
     publish(video)
-

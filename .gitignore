@@ -14,3 +14,6 @@ cookies*.json
 credentials.storage
 videos/
 config/auth.py
+.env
+
+**/__pycache__/

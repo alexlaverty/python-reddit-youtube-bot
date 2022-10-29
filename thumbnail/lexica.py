@@ -21,7 +21,7 @@ def download_image(url, file_path):
 
 def get_images(folder_path, sentence, number_of_images=1):
     images = []
-    if settings.download_enabled:
+    if settings.lexica_download_enabled:
         if number_of_images > 0:
             safe_query = urllib.parse.quote(sentence.strip())
             lexica_url = f"https://lexica.art/api/v1/search?q={safe_query}"

@@ -191,6 +191,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
     final_video = CompositeVideoClip(clips)
     logging.info("Saving Thumbnail to : " + thumbnail_path)
     final_video.save_frame(thumbnail_path, 1)
+    return thumbnail_path
 
 
 if __name__ == "__main__":

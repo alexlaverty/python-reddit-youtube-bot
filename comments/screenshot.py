@@ -7,7 +7,6 @@ import config.settings as settings
 import json
 import os
 import re
-import translators as ts
 
 storymode = False
 
@@ -61,25 +60,6 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
                 page.locator(
                     '[data-click-id="text"] button'
                 ).click()  # Remove "Click to see nsfw" Button in Screenshot
-
-        # translate code
-
-        # if settings.post_lang:
-        #     print("Translating post...")
-        #     texts_in_tl = ts.google(
-        #         reddit_object["thread_title"],
-        #         to_language=settings.post_lang,
-        #     )
-
-        #     page.evaluate(
-        #         "tl_content => document.querySelector('[data-test-id=\"post-content\"] > div:nth-child(3) > div > div').textContent = tl_content",
-        #         texts_in_tl,
-        #     )
-        # else:
-        #     print("Skipping translation...")
-
-        # postcontentpath = f"assets/temp/{id}/png/title.png"
-        # page.locator('[data-test-id="post-content"]').screenshot(path= postcontentpath)
 
         if storymode:
             page.locator('[data-click-id="text"]').screenshot(

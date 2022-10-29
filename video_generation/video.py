@@ -11,6 +11,8 @@ import sys
 from comments.screenshot import download_screenshots_of_reddit_posts
 from thumbnail.thumbnail import get_font_size
 from utils.common import give_emoji_free_text, safe_filename, contains_url
+import publish.youtube as youtube
+
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -613,11 +615,11 @@ def create(video_directory, post, thumbnails):
     post_video = CompositeVideoClip(v.clips)
 
     v.filepath = str(
-        Path(video_directory, v.meta.id + "_" + safe_filename(v.meta.title) + ".mp4")
+        Path(video_directory, "final.mp4")
     )
 
     v.json = str(
-        Path(video_directory, v.meta.id + "_" + safe_filename(v.meta.title) + ".json")
+        Path(video_directory, "meta.json")
     )
 
     data = {
@@ -632,8 +634,8 @@ def create(video_directory, post, thumbnails):
     with open(v.json, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
-    if settings.disablecompile:
-        logging.info("Skipping Video Compilation --disablecompile passed")
+    if settings.disable_compile:
+        logging.info("Skipping Video Compilation --disable_compile passed")
     else:
         logging.info("===== Compiling Video Clip =====")
         logging.info(
@@ -642,6 +644,11 @@ def create(video_directory, post, thumbnails):
         )
         post_video.write_videofile(v.filepath, fps=24)
 
+    if settings.disable_compile or settings.disable_upload:
+        logging.info("Skipping Upload...")
+    else:
+        logging.info("===== Uploading Video Clip to YouTube =====")
+        youtube.publish(v)
 
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))

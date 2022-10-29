@@ -6,3 +6,7 @@ praw_user_agent="xxxxxx"
 # Amazon Polly
 aws_access_key_id="xxxxxx"
 aws_secret_access_key="xxxxxx"
+
+# Rumble
+rumble_username="xxxxxx"
+rumble_password="xxxxxx"

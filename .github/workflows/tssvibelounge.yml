@@ -1,0 +1,31 @@
+# Give your gitflow action a name
+name: TTSVibeLounge
+
+# Set a schedule to run, note it's in UTC time, so do the time conversion for your location
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+# Also run the build if I push anything into the master branch
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: alexlaverty/ttsvibelounge:1.0.0
+    steps:
+
+      - name: Run ttsvibelounge Script
+        env:
+          PRAW_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
+          PRAW_CLIENT_SECRET: ${{ secrets.PRAW_CLIENT_SECRET }}
+          PRAW_USER_AGENT: ${{ secrets.PRAW_USER_AGENT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
+          RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        run: |
+          echo $YOUTUBE_CLIENT_SECRET > client_secret.json
+          python3 app.py
+          rm -f client_secret.json

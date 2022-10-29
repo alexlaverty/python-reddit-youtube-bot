@@ -1,1 +1,6 @@
 final/*
+config/auth.py
+.env
+client_secret.json
+cookies.json
+credentials.storage
