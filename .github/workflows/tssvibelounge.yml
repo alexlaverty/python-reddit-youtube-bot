@@ -21,17 +21,20 @@ jobs:
 
       - name: Run ttsvibelounge Script
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          CREDENTIALS_STORAGE: ${{ secrets.CREDENTIALS_STORAGE }}
           PRAW_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
           PRAW_CLIENT_SECRET: ${{ secrets.PRAW_CLIENT_SECRET }}
           PRAW_USER_AGENT: ${{ secrets.PRAW_USER_AGENT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
+          RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
+          echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
           playwright install
           python3 app.py
           rm -f client_secret.json
+          rm -f credentials.storage
