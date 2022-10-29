@@ -31,5 +31,6 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
+          cp config/auth-env.py config/auth.py
           python3 app.py
           rm -f client_secret.json
