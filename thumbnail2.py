@@ -9,8 +9,7 @@ import logging
 import config.settings as settings
 import thumbnail.lexica as lexica
 from utils.common import random_rgb_colour, sanitize_text
-import sys
-
+from moviepy.video.tools.drawing import color_gradient
 from PIL import Image
 
 logging.basicConfig(
@@ -79,33 +78,43 @@ def get_font_size(length):
 
     if length < 10:
         fontsize = 190
+        lineheight = 200
 
     if length >= 10 and length < 20:
         fontsize = 180
+        lineheight = 190
 
     if length >= 20 and length < 30:
         fontsize = 170
+        lineheight = 180
 
     if length >= 30 and length < 40:
-        fontsize = 140
+        fontsize = 130
+        lineheight = 150
 
     if length >= 40 and length < 50:
-        fontsize = 120
+        fontsize = 140
+        lineheight = 150
 
     if length >= 50 and length < 60:
-        fontsize = 100
+        fontsize = 130
+        lineheight = 140
 
     if length >= 60 and length < 70:
-        fontsize = 90
+        fontsize = 120
+        lineheight = 120
 
     if length >= 70 and length < 80:
-        fontsize = 85
+        fontsize = 115
+        lineheight = 110
 
     if length >= 80 and length < 90:
-        fontsize = 90
+        fontsize = 115
+        lineheight = 110
 
     if length >= 90 and length < 100:
         fontsize = 80
+        lineheight = 100
 
     logging.debug(f"Title Length       : {length}")
     logging.debug(f"Setting Fontsize   : {fontsize} ")
@@ -125,10 +134,6 @@ def generate(
     # image = random.choice(os.listdir(settings.images_directory))
     image_path = str(Path(video_directory, "lexica.png").absolute())
 
-    title=sanitize_text(title).strip()
-
-    logging.info(title)
-
     images = lexica.get_images(
         video_directory, title, number_of_images=number_of_thumbnails
     )
@@ -145,20 +150,15 @@ def generate(
     return thumbnails
 
 
-def create_thumbnail(video_directory, subreddit, title, image, index=0):
+def create_thumbnail(video_directory, subreddit, title, images, index=0):
     clips = []
     thumbnail_path = str(
         Path(video_directory, f"thumbnail_{str(index)}.png").absolute()
     )
-    if os.path.exists(thumbnail_path):
-        logging.info(f"Thumbnail already exists : {thumbnail_path}")
-        return thumbnail_path
 
-
+    width = 1270
     height = 720
-    width = 1280
-    border_width = 15
-
+    border_width = 10
     background_clip = TextClip(
         "", size=(width, height), bg_color="#000000", method="caption"
     ).margin(border_width, color=random_rgb_colour())
@@ -179,8 +179,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         .set_position(("right", "center"))
         .set_opacity(1)
     )
-
-    #img_clip = img_clip.set_position((width - img_clip.w , 0 + border_width))
+    img_clip = img_clip.set_position((width - img_clip.w , 0 + border_width))
 
     clips.append(img_clip)
 
@@ -196,32 +195,38 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
             stroke_width=2,
             method="caption",
             size=(width * 0.60, 0),
-        ).set_position((10 + border_width, "center"))
+        ).set_position((10 + border_width, 0))
         return txt_clip
 
 
-    #fontsize = 40
-    fontsize, lineheight = get_font_size(len(title))
-
-    logging.info(f"Autosizing font size for title Length : {str(len(title))}")
-    sys.stdout.write(".")
+    fontsize = 20
+    #fontsize, lineheight = get_font_size(len(title))
 
     while True :
         previous_fontsize = fontsize
         fontsize += 1
-        # print("================")
-        # print(previous_fontsize)
-        # print(fontsize)
+        print("================")
+        print(previous_fontsize)
+        print(fontsize)
         txt_clip = get_text_clip(fontsize)
-        sys.stdout.write(".")
-        # print(f"{str(txt_clip.w)} / {str(width)}")
-        # print(f"{str(txt_clip.h)} / {str(height)}")
+        print(f"{str(txt_clip.w)} / {str(width)}")
+        print(f"{str(txt_clip.h)} / {str(height)}")
         if txt_clip.h > height :
-            print(previous_fontsize)
+            print("text clip height !")
             txt_clip = get_text_clip(previous_fontsize)
             break
 
     clips.append(txt_clip)
+
+    # drop_shadow = get_text_clip(previous_fontsize, txt_color="#FF0000")
+
+    # clips.append(drop_shadow.set_position((10, 0)))
+
+
+    # grad = color_gradient(background_clip.size,p1=(0,500),p2=(500,1080),col1=[235, 219, 52],col2=[155, 235, 52],offset=0.5,shape='linear')
+    # gradmask = ImageClip(grad,transparent=True).set_duration(10).margin(right=0, bottom=0)
+    # gradmask = gradmask.set_opacity(.25)
+    # clips.append(gradmask)
 
     txt_clip = txt_clip.set_duration(10)
     txt_clip = txt_clip.set_position(("center", "center"))

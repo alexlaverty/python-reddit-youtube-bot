@@ -264,13 +264,13 @@ clip_size = (video_width, video_height)
 Skip compiling the video and just exit instead
 
 ```
-disable_compile = False
+enable_compilation = True
 ```
 
 Skip uploading to youtube
 
 ```
-disable_upload = True
+enable_upload = False
 ```
 
 Add a video overlay to the video, for example snow falling effect

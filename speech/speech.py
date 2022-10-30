@@ -1,18 +1,16 @@
-import subprocess
-import logging
-import os
-import config.settings as settings
-import boto3
-import config
 from gtts import gTTS
-import argparse
-
-
+from moviepy.editor import AudioFileClip, concatenate_audioclips
 from speech.streamlabs_polly import StreamlabsPolly
 from speech.tiktok import TikTok
-
+import argparse
+import boto3
+import config
+import config.settings as settings
+import logging
+import os
+import re
+import subprocess
 import textwrap
-from moviepy.editor import AudioFileClip, concatenate_audioclips
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -53,6 +51,10 @@ def process_speech_text(text):
     text = text.replace("’", "'")
     text = text.replace("...", ".")
     text = text.replace("*", "")
+    text = re.sub('(\[|\()[0-9]{1,2}\s*(m|f)?(\)|\])', '',
+                  text,
+                  flags=re.IGNORECASE)
+
     # req_text = text.replace("+", "plus")
     # req_text = req_text.replace(" ", "+")
     # req_text = req_text.replace("&", "and")

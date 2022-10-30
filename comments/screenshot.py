@@ -33,7 +33,7 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
     with sync_playwright() as p:
         print("Launching Headless Browser...")
 
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context()
         if settings.theme == "dark":
             cookie_file = open(
@@ -66,6 +66,9 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
                 path=f"assets/temp/{id}/png/story_content.png"
             )
         else:
+            page.locator('[data-test-id="post-content"]').screenshot(
+                path=f"{video_directory}/title.png"
+            )
             for idx, comment in enumerate(
                 track(accepted_comments, "Downloading screenshots...")
             ):
@@ -106,7 +109,7 @@ def single_comment_screenshot(comment_object, url, video_directory):
     with sync_playwright() as p:
         print("Launching Headless Browser...")
 
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
         if settings.theme == "dark":

@@ -23,51 +23,53 @@ subreddits_excluded = [
 ]
 
 # Speech Settings
-# Choices ["polly","balcon","gtts","tiktok","edge-tts","streamlabspolly"]
-voice_engine = "edge-tts"
 edge_tts_voice = "en-GB-RyanNeural"
+pause = 1 # Pause after speech
 streamlabs_polly_voice = "Brian"
 tiktok_voice = "en_us_006"
-pause = 1 # Pause after speech
 
-# Reddit Comment Screenshot
+# Choices ["polly","balcon","gtts","tiktok","edge-tts","streamlabspolly"]
+voice_engine = "edge-tts"
+
+# Comment Settings
+banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBl"
 theme = "dark"
+minimum_num_comments = 200
+reddit_comment_opacity = 1
+reddit_comment_width = 0.9
+comment_length_max = 600
+comment_limit = 100
 
 # Video settings
-commentstyle = "reddit"
-reddit_comment_width = 0.9
-reddit_comment_opacity = 1
-enable_overlay = False
-enable_background = False
 background_colour = [26, 26, 27]
-enable_comments = True
-enable_selftext = True
-disable_compile = False
-disable_upload = False
-lexica_download_enabled = True # Download files from Lexica
-total_posts_to_process = 3
-minimum_submission_score = 5000
-title_length_minimum = 20
-title_length_maximum = 100
-maximum_length_self_text = 3000
-minimum_num_comments = 200
-submission_limit = 500
-number_of_thumbnails = 1
-max_video_length = 600 # Seconds
-comment_limit = 100
-comment_length_max = 600
 background_opacity = 0.5
 background_volume = 0.5
-video_height = 720
-video_width = 1280
-clip_size = (video_width, video_height)
+commentstyle = "reddit"
+enable_background = False
+enable_comments = True
+enable_compilation = True
 enable_nsfw_content = False
-banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dA=="
+enable_overlay = False
+enable_selftext = True
+enable_upload = False
+lexica_download_enabled = True # Download files from Lexica
+max_video_length = 600 # Seconds
+maximum_length_self_text = 3000
+minimum_submission_score = 5000
+number_of_thumbnails = 1
+submission_limit = 200
 text_bg_color = "#1A1A1B"
 text_bg_opacity = 1
 text_color = "white"
 text_font = "Verdana-Bold"
 text_fontsize = 32
+title_length_maximum = 150
+title_length_minimum = 20
+total_posts_to_process = 3
+video_height = 720
+video_width = 1280
+clip_size = (video_width, video_height)
+
 
 # Directories and paths
 assets_directory = "assets"
@@ -94,8 +96,6 @@ newcaster_size = (video_width * 0.5, video_height * 0.5)
 
 # Tweak for performance, set number of cores
 threads=4
-
-
 
 
 from sys import platform

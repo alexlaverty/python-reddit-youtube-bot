@@ -35,6 +35,6 @@ jobs:
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
           playwright install
-          python3 app.py
+          python3 app.py --enable-upload
           rm -f client_secret.json
           rm -f credentials.storage
