@@ -1,7 +1,10 @@
 from moviepy.editor import (AudioFileClip,
+                            ColorClip,
+                            CompositeVideoClip,
                             ImageClip,
                             TextClip,
-                            VideoFileClip)
+                            VideoFileClip
+                            )
 from pathlib import Path
 import json
 import logging
@@ -15,7 +18,7 @@ from comments.screenshot import download_screenshots_of_reddit_posts
 from thumbnail.thumbnail import get_font_size
 from utils.common import (give_emoji_free_text, contains_url, sanitize_text)
 import publish.youtube as youtube
-
+import moviepy.video.fx.all as vfx
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -524,8 +527,9 @@ def create(video_directory, post, thumbnails):
     logging.info("===== Adding Background Clip =====")
 
     if settings.enable_background:
-        background_filepath = str(Path(settings.background_directory, v.background))
-
+        background_filepath = str(Path(settings.background_directory,
+                                       v.background))
+        logging.info(f"Background : {background_filepath}")
         background_clip = (
             VideoFileClip(background_filepath)
             .set_start(tb)
@@ -657,6 +661,7 @@ def create(video_directory, post, thumbnails):
                          client_secret.json or credentials.storage file.")
     else:
         logging.info("Skipping Upload...")
+
 
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))

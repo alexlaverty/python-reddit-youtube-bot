@@ -42,7 +42,7 @@ def process_submissions(submissions):
         folder_path = str(Path(settings.videos_directory,
                           f"{submission.id}_{title_path}"))
         video_filepath = str(Path(folder_path,
-                                  f"{submission.id}_{title_path}.mp4"))
+                                  "final.mp4"))
         if os.path.exists(video_filepath):
             print(f"Final video already compiled : {video_filepath}")
         else:
@@ -70,7 +70,7 @@ def process_submission(submission):
     create_directory(video.folder_path)
 
     video.video_filepath = str(Path(video.folder_path,
-                               f"{submission.id}_{title_path}.mp4"))
+                               "final.mp4"))
 
     if os.path.exists(video.video_filepath):
         print(f"Final video already compiled : {video.video_filepath}")

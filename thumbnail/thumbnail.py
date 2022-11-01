@@ -248,7 +248,8 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
                     "#FF7545",
                     "#09C1F9",
                     "#EFFF00",
-                    "#E7AD61"]
+                    "#E7AD61",
+                    "#00677B"]
     random.shuffle(line_colours)
 
     for word in words:
