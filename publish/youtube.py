@@ -3,7 +3,6 @@ import logging
 from simple_youtube_api.Channel import Channel
 from simple_youtube_api.LocalVideo import LocalVideo
 
-login_cookies="cookies.json"
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -28,8 +27,8 @@ def publish(video):
     youtube_upload = LocalVideo(file_path=video.filepath)
 
     # setting snippet
-    youtube_upload.set_title(video.title)
-    youtube_upload.set_description(video.description)
+    youtube_upload.set_title(video.title[0:99])
+    youtube_upload.set_description(video.description[0:4999])
     youtube_upload.set_tags(["reddit", "tts"])
     youtube_upload.set_category("gaming")
     youtube_upload.set_default_language("en-US")

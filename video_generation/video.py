@@ -1,24 +1,31 @@
-from moviepy.editor import *
+from moviepy.editor import (AudioFileClip,
+                            ColorClip,
+                            CompositeVideoClip,
+                            ImageClip,
+                            TextClip,
+                            VideoFileClip
+                            )
 from pathlib import Path
 import json
 import logging
 import os
+from os.path import exists
 import random
-import re
 import config.settings as settings
 import speech.speech as speech
 import sys
 from comments.screenshot import download_screenshots_of_reddit_posts
 from thumbnail.thumbnail import get_font_size
-from utils.common import give_emoji_free_text, safe_filename, contains_url
+from utils.common import (give_emoji_free_text, contains_url, sanitize_text)
 import publish.youtube as youtube
-
+import moviepy.video.fx.all as vfx
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[logging.FileHandler("debug.log", "w", "utf-8"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("debug.log", "w", "utf-8"),
+              logging.StreamHandler()],
 )
 
 
@@ -78,7 +85,8 @@ class Video:
         self.theme = theme
 
     def get_background(self):
-        self.background = random.choice(os.listdir(settings.background_directory))
+        self.background = random.choice(
+            os.listdir(settings.background_directory))
         logging.info("Randomly Selecting Background : " + self.background)
 
     def compile(self):
@@ -111,13 +119,9 @@ def create(video_directory, post, thumbnails):
 
     subreddit_name = v.meta.subreddit_name_prefixed.replace("r/", "")
 
-    v.description = f"{v.meta.subreddit_name_prefixed} \
-                    \n\n{v.meta.title} \n{v.meta.url}\n\n{v.meta.selftext}\n\n\
-                    Credits :\n\n Motion Graphics provided by \
-                    https://www.tubebacks.com\n\nYouTube \
-                    Channel: https://goo.gl/aayJRf\n\n#reddit \
-                    #{subreddit_name} #tts"
-    v.title = f"{v.meta.title} ({v.meta.subreddit_name_prefixed})"
+    v.description = f"{v.meta.title}\n\n{v.meta.selftext}\n\n\
+                    #reddit #{subreddit_name} #tts"
+    v.title = f"{sanitize_text(v.meta.title)}"
     height = 720
     width = 1280
     clip_margin = 50
@@ -138,51 +142,43 @@ def create(video_directory, post, thumbnails):
 
     audio_title = str(Path(video_directory, v.meta.id + "_title.mp3"))
 
-    title_speech_text = f"From the subreddit {subreddit_name}. {v.meta.title}"
+    title_speech_text = f"{sanitize_text(v.meta.title)}"
 
     speech.create_audio(audio_title, title_speech_text)
 
     audioclip_title = AudioFileClip(audio_title).volumex(2)
 
-    subreddit_clip = (
-        TextClip(
-            v.meta.subreddit_name_prefixed,
-            font="Impact",
-            fontsize=60,
-            color=settings.text_color,
-            size=txt_clip_size,
-            kerning=-1,
-            method="caption",
-            ##bg_color=settings.text_bg_color,
-            align="West",
-        )
-        .set_position((40, 40))
-        .set_duration(audioclip_title.duration + settings.pause)
-        .set_start(t)
-    )
+    # subreddit_clip = (
+    #     TextClip(
+    #         v.meta.subreddit_name_prefixed,
+    #         font="Impact",
+    #         fontsize=60,
+    #         color=settings.text_color,
+    #         size=txt_clip_size,
+    #         kerning=-1,
+    #         method="caption",
+    #         ##bg_color=settings.text_bg_color,
+    #         align="West",
+    #     )
+    #     .set_position((40, 40))
+    #     .set_duration(audioclip_title.duration + settings.pause)
+    #     .set_start(t)
+    # )
 
-    v.clips.append(subreddit_clip)
+    # v.clips.append(subreddit_clip)
 
     title_fontsize, lineheight = get_font_size(len(v.meta.title))
 
     title_clip = (
-        TextClip(
-            v.meta.title,
-            font="Impact",
-            fontsize=title_fontsize,
-            color=settings.text_color,
-            size=txt_clip_size,
-            kerning=-1,
-            method="caption",
-            ##bg_color=settings.text_bg_color,
-            align="Center",
-        )
+    ImageClip(v.thumbnail)
         .set_position(("center", "center"))
         .set_duration(audioclip_title.duration + settings.pause)
         .set_audio(audioclip_title)
         .set_start(t)
+        .set_opacity(settings.reddit_comment_opacity)
+        .resize(width=settings.video_width * settings.reddit_comment_width)
     )
-
+    # Generate Title Clip
     v.clips.append(title_clip)
 
     t += audioclip_title.duration + settings.pause
@@ -194,7 +190,7 @@ def create(video_directory, post, thumbnails):
         logging.info("========== Processing SelfText ==========")
         logging.info(v.meta.selftext)
 
-        selftext = v.meta.selftext
+        selftext = sanitize_text(v.meta.selftext)
 
         selftext = give_emoji_free_text(selftext)
         selftext = os.linesep.join([s for s in selftext.splitlines() if s])
@@ -209,12 +205,15 @@ def create(video_directory, post, thumbnails):
             if selftext_line == "&#x200B;":
                 continue
 
+            if selftext_line == ' ' or selftext_line == '  ':
+                continue
+
             logging.debug("selftext length   : " + str(len(selftext_line)))
             logging.debug("selftext_line     : " + selftext_line)
             selftext_audio_filepath = str(
                 Path(
                     video_directory,
-                    v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3",
+                    v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"
                 )
             )
             speech.create_audio(selftext_audio_filepath, selftext_line)
@@ -385,16 +384,21 @@ def create(video_directory, post, thumbnails):
                 img_path = str(
                     Path(video_directory, "comment_" + accepted_comment.id + ".png")
                 )
+                if exists(img_path):
+                    img_clip = (
+                        ImageClip(img_path)
+                        .set_position(("center", "center"))
+                        .set_duration(audioclip.duration + settings.pause)
+                        .set_audio(audioclip)
+                        .set_start(t)
+                        .set_opacity(settings.reddit_comment_opacity)
+                        .resize(width=settings.video_width * settings.reddit_comment_width)
+                    )
+                else:
+                    continue
 
-                img_clip = (
-                    ImageClip(img_path)
-                    .set_position(("center", "center"))
-                    .set_duration(audioclip.duration + settings.pause)
-                    .set_audio(audioclip)
-                    .set_start(t)
-                    .set_opacity(settings.reddit_comment_opacity)
-                    .resize(width=settings.video_width * settings.reddit_comment_width)
-                )
+                if img_clip.h > settings.video_height:
+                    continue
 
                 t += audioclip.duration + settings.pause
                 v.duration += audioclip.duration + settings.pause
@@ -505,6 +509,7 @@ def create(video_directory, post, thumbnails):
                         "Reached Maximum Video Length : "
                         + str(settings.max_video_length)
                     )
+                    logging.info(f"Used {str(ccount)}/{str(len(accepted_comments))} comments")
                     logging.info("=== Finished Processing Comments ===")
                     break
 
@@ -513,6 +518,7 @@ def create(video_directory, post, thumbnails):
                         "Reached Maximum Number of Comments Limit : "
                         + str(settings.comment_limit)
                     )
+                    logging.info(f"Used {str(ccount)}/{str(len(accepted_comments))} comments")
                     logging.info("=== Finished Processing Comments ===")
                     break
     else:
@@ -521,8 +527,9 @@ def create(video_directory, post, thumbnails):
     logging.info("===== Adding Background Clip =====")
 
     if settings.enable_background:
-        background_filepath = str(Path(settings.background_directory, v.background))
-
+        background_filepath = str(Path(settings.background_directory,
+                                       v.background))
+        logging.info(f"Background : {background_filepath}")
         background_clip = (
             VideoFileClip(background_filepath)
             .set_start(tb)
@@ -635,21 +642,26 @@ def create(video_directory, post, thumbnails):
     with open(v.json, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
-    if settings.disable_compile:
-        logging.info("Skipping Video Compilation --disable_compile passed")
-    else:
+    if settings.enable_compilation:
         logging.info("===== Compiling Video Clip =====")
         logging.info(
             "Compiling video, \
             this takes a while, please be patient : )"
         )
         post_video.write_videofile(v.filepath, fps=24)
-
-    if settings.disable_compile or settings.disable_upload:
-        logging.info("Skipping Upload...")
     else:
-        logging.info("===== Uploading Video Clip to YouTube =====")
-        youtube.publish(v)
+        logging.info("Skipping Video Compilation --enable_compilation passed")
+
+    if settings.enable_compilation and settings.enable_upload:
+        if exists("client_secret.json") and exists("credentials.storage"):
+            logging.info("===== Uploading Video Clip to YouTube =====")
+            youtube.publish(v)
+        else:
+            logging.info("Skipping upload, missing either \
+                         client_secret.json or credentials.storage file.")
+    else:
+        logging.info("Skipping Upload...")
+
 
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))

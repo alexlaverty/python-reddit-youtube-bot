@@ -10,6 +10,7 @@ import video_generation.video as vid
 import platform
 from utils.common import (safe_filename, create_directory)
 
+
 logging.basicConfig(
     format=u'%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -41,16 +42,15 @@ def process_submissions(submissions):
         folder_path = str(Path(settings.videos_directory,
                           f"{submission.id}_{title_path}"))
         video_filepath = str(Path(folder_path,
-                             f"{submission.id}_{title_path}.mp4"))
-        if os.path.exists(str(Path(folder_path,
-                          f"{submission.id}_{title_path}.mp4"))):
+                                  "final.mp4"))
+        if os.path.exists(video_filepath):
             print(f"Final video already compiled : {video_filepath}")
         else:
+            process_submission(submission)
+            post_count += 1
             if post_count >= post_total:
                 print("Reached post count total!")
                 break
-            process_submission(submission)
-            post_count += 1
 
 
 def process_submission(submission):
@@ -67,19 +67,21 @@ def process_submission(submission):
     video.folder_path = str(Path(settings.videos_directory,
                             f"{submission.id}_{title_path}"))
 
+    create_directory(video.folder_path)
+
     video.video_filepath = str(Path(video.folder_path,
                                "final.mp4"))
-    create_directory(video.folder_path)
 
     if os.path.exists(video.video_filepath):
         print(f"Final video already compiled : {video.video_filepath}")
     else:
         # Generate Thumbnail
 
-        thumbnails = thumbnail.generate(video_directory=video.folder_path,
-                            subreddit=submission.subreddit_name_prefixed,
-                            title=submission.title,
-                            number_of_thumbnails=settings.number_of_thumbnails)
+        thumbnails = thumbnail.generate(
+                    video_directory=video.folder_path,
+                    subreddit=submission.subreddit_name_prefixed,
+                    title=submission.title,
+                    number_of_thumbnails=settings.number_of_thumbnails)
         if thumbnails:
             video.thumbnail_path = thumbnails[0]
 
@@ -87,8 +89,7 @@ def process_submission(submission):
             print("Generating Thumbnail only skipping video compile!")
         else:
             vid.create(video_directory=video.folder_path,
-                       post=submission,
-                       thumbnails=thumbnails)
+                       post=submission, thumbnails=thumbnails)
 
 
 def banner():
@@ -142,16 +143,39 @@ def get_args():
                         action='store_true',
                         help='Generate thumbnail image only')
 
-    parser.add_argument('-p', '--publish',
+    parser.add_argument('-p', '--enable-upload',
                         action='store_true',
-                        help='Publish video to youtube, \
-                            requires cookies.json to be valid')
+                        help='Upload video to youtube, \
+                             requires client_secret.json and \
+                             credentials.storage to be valid')
 
     parser.add_argument('-u', '--url',
                         help='Specify Reddit post url, \
                         seperate with a comma for multiple posts.')
 
+    parser.add_argument('--subreddits',
+                        help='Specify Subreddits, seperate with +')
+
+    parser.add_argument('-b', '--enable-background',
+                        action='store_true',
+                        help='Enable video backgrounds')
+
+    parser.add_argument('--total-posts', type=int,
+                        help='Enable video backgrounds')
+
+    parser.add_argument('--background-directory',
+                        help='Folder path to video backgrounds')
+
     args = parser.parse_args()
+
+    if args.background_directory:
+        logging.info(f'Setting video background directory : \
+                     {args.background_directory}')
+        settings.background_directory = args.background_directory
+
+    if args.total_posts:
+        logging.info(f'Total Posts to process : {str(args.total_posts)}')
+        settings.total_posts_to_process = args.total_posts
 
     if args.comment_style:
         logging.info(f'Setting comment style to : {args.comment_style}')
@@ -182,9 +206,18 @@ def get_args():
         logging.info('Disabled SelfText!')
         settings.enable_selftext = False
 
-    if args.publish:
-        logging.info('Publish video enabled!')
-        settings.disable_upload = False
+    if args.enable_upload:
+        logging.info('Upload video enabled!')
+        settings.enable_upload = True
+
+    if args.subreddits:
+        logging.info('Subreddits :')
+        settings.subreddits = args.subreddits.split("+")
+        print(settings.subreddits)
+
+    if args.enable_background:
+        logging.info('Upload video enabled!')
+        settings.enable_background = True
 
     return args
 

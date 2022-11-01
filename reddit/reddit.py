@@ -35,6 +35,8 @@ def is_valid_submission(submission):
         return False
     if submission.num_comments < settings.minimum_num_comments:
         return False
+    if "update" in submission.title.lower() :
+        return False
     return True
 
 
@@ -61,9 +63,16 @@ def get_reddit_submissions():
         subreddits = "all"
     print("Retrieving posts from subreddit :")
     print(subreddits)
-    submissions = r.subreddit(subreddits).top(
-        limit=settings.submission_limit, time_filter="day"
-    )
+
+    # Get Reddit Hot Posts
+    submissions = r.subreddit(subreddits).hot(limit=settings.submission_limit)
+
+    #Get Reddit Top Posts
+    # "all", "day", "hour", "month", "week", or "year" (default: "all"
+    # submissions = r.subreddit(subreddits).top(
+    #     limit=settings.submission_limit,
+    #     time_filter="day"
+    # )
     return submissions
 
 

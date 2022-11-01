@@ -66,6 +66,9 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
                 path=f"assets/temp/{id}/png/story_content.png"
             )
         else:
+            page.locator('[data-test-id="post-content"]').screenshot(
+                path=f"{video_directory}/title.png"
+            )
             for idx, comment in enumerate(
                 track(accepted_comments, "Downloading screenshots...")
             ):
@@ -81,12 +84,10 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
 
                     try:
                         page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
-                    except TimeoutError:
-                        # del reddit_object["comments"]
-                        screenshot_num += 1
-                        print("TimeoutError: Skipping screenshot...")
-                        continue
-        print("Screenshots downloaded Successfully.")
+                    except Exception:
+                        pass
+
+            print("Screenshots downloaded Successfully.")
 
 
 def single_comment_screenshot(comment_object, url, video_directory):
@@ -106,7 +107,7 @@ def single_comment_screenshot(comment_object, url, video_directory):
     with sync_playwright() as p:
         print("Launching Headless Browser...")
 
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
         if settings.theme == "dark":
@@ -136,6 +137,9 @@ def single_comment_screenshot(comment_object, url, video_directory):
 
         page.goto(f"https://reddit.com{comment_object.permalink}", timeout=0)
         comment_path = f"{video_directory}/{comment_object.id}.png"
-        page.locator(f"#t1_{comment_object.id}").screenshot(path=comment_path)
+        try:
+            page.locator(f"#t1_{comment_object.id}").screenshot(path=comment_path)
+        except Exception:
+            pass
 
         return comment_path
