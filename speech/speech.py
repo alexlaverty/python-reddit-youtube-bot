@@ -11,6 +11,8 @@ import os
 import re
 import subprocess
 import textwrap
+from utils.common import sanitize_text
+
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -55,9 +57,7 @@ def process_speech_text(text):
                   text,
                   flags=re.IGNORECASE)
 
-    # req_text = text.replace("+", "plus")
-    # req_text = req_text.replace(" ", "+")
-    # req_text = req_text.replace("&", "and")
+    text = sanitize_text(text)
     return text
 
 

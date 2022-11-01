@@ -42,16 +42,15 @@ def process_submissions(submissions):
         folder_path = str(Path(settings.videos_directory,
                           f"{submission.id}_{title_path}"))
         video_filepath = str(Path(folder_path,
-                             f"{submission.id}_{title_path}.mp4"))
-        if os.path.exists(str(Path(folder_path,
-                          f"{submission.id}_{title_path}.mp4"))):
+                                  f"{submission.id}_{title_path}.mp4"))
+        if os.path.exists(video_filepath):
             print(f"Final video already compiled : {video_filepath}")
         else:
+            process_submission(submission)
+            post_count += 1
             if post_count >= post_total:
                 print("Reached post count total!")
                 break
-            process_submission(submission)
-            post_count += 1
 
 
 def process_submission(submission):
@@ -68,19 +67,21 @@ def process_submission(submission):
     video.folder_path = str(Path(settings.videos_directory,
                             f"{submission.id}_{title_path}"))
 
-    video.video_filepath = str(Path(video.folder_path,
-                               "final.mp4"))
     create_directory(video.folder_path)
+
+    video.video_filepath = str(Path(video.folder_path,
+                               f"{submission.id}_{title_path}.mp4"))
 
     if os.path.exists(video.video_filepath):
         print(f"Final video already compiled : {video.video_filepath}")
     else:
         # Generate Thumbnail
 
-        thumbnails = thumbnail.generate(video_directory=video.folder_path,
-                            subreddit=submission.subreddit_name_prefixed,
-                            title=submission.title,
-                            number_of_thumbnails=settings.number_of_thumbnails)
+        thumbnails = thumbnail.generate(
+                    video_directory=video.folder_path,
+                    subreddit=submission.subreddit_name_prefixed,
+                    title=submission.title,
+                    number_of_thumbnails=settings.number_of_thumbnails)
         if thumbnails:
             video.thumbnail_path = thumbnails[0]
 
@@ -162,7 +163,15 @@ def get_args():
     parser.add_argument('--total-posts', type=int,
                         help='Enable video backgrounds')
 
+    parser.add_argument('--background-directory',
+                        help='Folder path to video backgrounds')
+
     args = parser.parse_args()
+
+    if args.background_directory:
+        logging.info(f'Setting video background directory : \
+                     {args.background_directory}')
+        settings.background_directory = args.background_directory
 
     if args.total_posts:
         logging.info(f'Total Posts to process : {str(args.total_posts)}')

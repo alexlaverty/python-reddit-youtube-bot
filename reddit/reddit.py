@@ -65,14 +65,14 @@ def get_reddit_submissions():
     print(subreddits)
 
     # Get Reddit Hot Posts
-    #submissions = r.subreddit(subreddits).hot(limit=settings.submission_limit)
+    submissions = r.subreddit(subreddits).hot(limit=settings.submission_limit)
 
     #Get Reddit Top Posts
     # "all", "day", "hour", "month", "week", or "year" (default: "all"
-    submissions = r.subreddit(subreddits).top(
-        limit=settings.submission_limit,
-        time_filter="all"
-    )
+    # submissions = r.subreddit(subreddits).top(
+    #     limit=settings.submission_limit,
+    #     time_filter="day"
+    # )
     return submissions
 
 

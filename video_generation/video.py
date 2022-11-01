@@ -1,11 +1,13 @@
-from moviepy.editor import *
+from moviepy.editor import (AudioFileClip,
+                            ImageClip,
+                            TextClip,
+                            VideoFileClip)
 from pathlib import Path
 import json
 import logging
 import os
 from os.path import exists
 import random
-import re
 import config.settings as settings
 import speech.speech as speech
 import sys
@@ -19,7 +21,8 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[logging.FileHandler("debug.log", "w", "utf-8"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("debug.log", "w", "utf-8"),
+              logging.StreamHandler()],
 )
 
 
@@ -79,7 +82,8 @@ class Video:
         self.theme = theme
 
     def get_background(self):
-        self.background = random.choice(os.listdir(settings.background_directory))
+        self.background = random.choice(
+            os.listdir(settings.background_directory))
         logging.info("Randomly Selecting Background : " + self.background)
 
     def compile(self):
@@ -135,7 +139,6 @@ def create(video_directory, post, thumbnails):
 
     audio_title = str(Path(video_directory, v.meta.id + "_title.mp3"))
 
-    #title_speech_text = f"From the subreddit {subreddit_name}. {v.meta.title}"
     title_speech_text = f"{sanitize_text(v.meta.title)}"
 
     speech.create_audio(audio_title, title_speech_text)
@@ -199,12 +202,15 @@ def create(video_directory, post, thumbnails):
             if selftext_line == "&#x200B;":
                 continue
 
+            if selftext_line == ' ' or selftext_line == '  ':
+                continue
+
             logging.debug("selftext length   : " + str(len(selftext_line)))
             logging.debug("selftext_line     : " + selftext_line)
             selftext_audio_filepath = str(
                 Path(
                     video_directory,
-                    v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3",
+                    v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"
                 )
             )
             speech.create_audio(selftext_audio_filepath, selftext_line)
@@ -375,16 +381,21 @@ def create(video_directory, post, thumbnails):
                 img_path = str(
                     Path(video_directory, "comment_" + accepted_comment.id + ".png")
                 )
+                if exists(img_path):
+                    img_clip = (
+                        ImageClip(img_path)
+                        .set_position(("center", "center"))
+                        .set_duration(audioclip.duration + settings.pause)
+                        .set_audio(audioclip)
+                        .set_start(t)
+                        .set_opacity(settings.reddit_comment_opacity)
+                        .resize(width=settings.video_width * settings.reddit_comment_width)
+                    )
+                else:
+                    continue
 
-                img_clip = (
-                    ImageClip(img_path)
-                    .set_position(("center", "center"))
-                    .set_duration(audioclip.duration + settings.pause)
-                    .set_audio(audioclip)
-                    .set_start(t)
-                    .set_opacity(settings.reddit_comment_opacity)
-                    .resize(width=settings.video_width * settings.reddit_comment_width)
-                )
+                if img_clip.h > settings.video_height:
+                    continue
 
                 t += audioclip.duration + settings.pause
                 v.duration += audioclip.duration + settings.pause
@@ -495,6 +506,7 @@ def create(video_directory, post, thumbnails):
                         "Reached Maximum Video Length : "
                         + str(settings.max_video_length)
                     )
+                    logging.info(f"Used {str(ccount)}/{str(len(accepted_comments))} comments")
                     logging.info("=== Finished Processing Comments ===")
                     break
 
@@ -503,6 +515,7 @@ def create(video_directory, post, thumbnails):
                         "Reached Maximum Number of Comments Limit : "
                         + str(settings.comment_limit)
                     )
+                    logging.info(f"Used {str(ccount)}/{str(len(accepted_comments))} comments")
                     logging.info("=== Finished Processing Comments ===")
                     break
     else:
