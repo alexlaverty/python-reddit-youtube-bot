@@ -1,4 +1,4 @@
-
+from sys import platform
 from pathlib import Path
 
 subreddits = [
@@ -40,6 +40,7 @@ reddit_comment_width = 0.9
 comment_length_max = 600
 comment_limit = 100
 
+
 # Video settings
 background_colour = [26, 26, 27]
 background_opacity = 0.5
@@ -52,8 +53,8 @@ enable_nsfw_content = False
 enable_overlay = False
 enable_selftext = True
 enable_upload = False
-lexica_download_enabled = True # Download files from Lexica
-max_video_length = 600 # Seconds
+lexica_download_enabled = True  # Download files from Lexica
+max_video_length = 600  # Seconds
 maximum_length_self_text = 3000
 minimum_submission_score = 5000
 number_of_thumbnails = 1
@@ -63,44 +64,45 @@ text_bg_opacity = 1
 text_color = "white"
 text_font = "Verdana-Bold"
 text_fontsize = 32
-title_length_maximum = 150
+title_length_maximum = 100
 title_length_minimum = 20
-total_posts_to_process = 3
+total_posts_to_process = 10
 video_height = 720
 video_width = 1280
 clip_size = (video_width, video_height)
 
+# Thumbnail settings choices ['random','lexica']
+thumbnail_image_source = "lexica"
+thumbnail_text_width = video_width * 0.60
+enable_thumbnail_image_gradient = True
 
 # Directories and paths
 assets_directory = "assets"
-temp_directory = "temp"
-audio_directory = str(Path("temp"))
-fonts_directory = str(Path(assets_directory,"fonts"))
-image_backgrounds_directory = str(Path(assets_directory,"image_backgrounds"))
-images_directory = str(Path(assets_directory,"images"))
-thumbnails_directory = str(Path(assets_directory,"images"))
-background_directory = str(Path(assets_directory,"backgrounds"))
-soundeffects_directory = str(Path(assets_directory,"soundeffects"))
-video_overlay_filepath = str(Path(assets_directory,"particles.mp4"))
+temp_directory = str(Path(assets_directory, "temp"))
+audio_directory = temp_directory
+fonts_directory = str(Path(assets_directory, "fonts"))
+image_backgrounds_directory = str(Path(assets_directory, "image_backgrounds"))
+images_directory = str(Path(assets_directory, "images"))
+thumbnails_directory = str(Path(assets_directory, "images"))
+background_directory = str(Path(assets_directory, "backgrounds"))
+soundeffects_directory = str(Path(assets_directory, "soundeffects"))
+video_overlay_filepath = str(Path(assets_directory, "particles.mp4"))
 videos_directory = "videos"
 
 
 # Newcaster Settings
 enable_newscaster = False
 newscaster_remove_greenscreen = True
-newscaster_greenscreen_color = [1, 255, 17] # Enter the Green Screen RGB Colour
+newscaster_greenscreen_color = [1, 255, 17]  # Enter Green Screen RGB Colour
 newscaster_greenscreen_remove_threshold = 100
-newscaster_filepath = str(Path(assets_directory,"newscaster.mp4").resolve())
-newscaster_position = ("left","bottom")
+newscaster_filepath = str(Path(assets_directory, "newscaster.mp4").resolve())
+newscaster_position = ("left", "bottom")
 newcaster_size = (video_width * 0.5, video_height * 0.5)
 
 # Tweak for performance, set number of cores
-threads=4
-
-
-from sys import platform
+threads = 4
 
 if platform == "linux" or platform == "linux2":
-    firefox_binary='/opt/firefox/firefox'
+    firefox_binary = '/opt/firefox/firefox'
 elif platform == "win32":
-    firefox_binary='C:\\Program Files\\Mozilla Firefox\\firefox.exe'
+    firefox_binary = 'C:\\Program Files\\Mozilla Firefox\\firefox.exe'
