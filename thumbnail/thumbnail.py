@@ -1,24 +1,24 @@
-from moviepy.editor import *
-import random
+from moviepy.editor import CompositeVideoClip, TextClip, ImageClip
+
 from pathlib import Path
-import textwrap
-import nltk
-from nltk.corpus import stopwords
+# from nltk.corpus import stopwords
 import random
 import logging
 import config.settings as settings
 import thumbnail.lexica as lexica
 from utils.common import random_rgb_colour, sanitize_text
 import sys
-
+import os
 from PIL import Image
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[logging.FileHandler("debug.log", "w", "utf-8"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("debug.log", "w", "utf-8"),
+              logging.StreamHandler()],
 )
+
 
 def apply_black_gradient(path_in, path_out='out.png',
                          gradient=1., initial_opacity=1.):
@@ -61,7 +61,7 @@ def apply_black_gradient(path_in, path_out='out.png',
     alpha = alpha_gradient.resize(input_im.size)
 
     # create black image, apply gradient
-    black_im = Image.new('RGBA', (width, height), color=0) # i.e. black
+    black_im = Image.new('RGBA', (width, height), color=0)  # i.e. black
     black_im.putalpha(alpha)
 
     # make composite with original image
@@ -69,7 +69,6 @@ def apply_black_gradient(path_in, path_out='out.png',
     output_im.save(path_out, 'PNG')
 
     return
-
 
 
 def get_font_size(length):
@@ -90,10 +89,10 @@ def get_font_size(length):
         fontsize = 140
 
     if length >= 40 and length < 50:
-        fontsize = 120
+        fontsize = 135
 
     if length >= 50 and length < 60:
-        fontsize = 100
+        fontsize = 110
 
     if length >= 60 and length < 70:
         fontsize = 90
@@ -122,16 +121,26 @@ def generate(
 ):
     logging.info("========== Generating Thumbnail ==========")
 
-    # image = random.choice(os.listdir(settings.images_directory))
-    image_path = str(Path(video_directory, "lexica.png").absolute())
+    # image_path = str(Path(video_directory, "lexica.png").absolute())
 
-    title=sanitize_text(title).strip()
+    title = sanitize_text(title).strip()
+
+    # Get rid of double spaces
+    title = title.replace("  ", " ")
 
     logging.info(title)
 
-    images = lexica.get_images(
-        video_directory, title, number_of_images=number_of_thumbnails
-    )
+    if settings.thumbnail_image_source == "random":
+        random_image = random.choice(os.listdir(settings.images_directory))
+        random_image_filepath = str(
+            Path(settings.images_directory, random_image).absolute()
+        )
+        images = [random_image_filepath]
+
+    if settings.thumbnail_image_source == "lexica":
+        images = lexica.get_images(
+            video_directory, title, number_of_images=number_of_thumbnails
+        )
 
     thumbnails = []
 
@@ -154,33 +163,38 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         logging.info(f"Thumbnail already exists : {thumbnail_path}")
         return thumbnail_path
 
-
     height = 720
     width = 1280
     border_width = 15
 
     background_clip = TextClip(
         "", size=(width, height), bg_color="#000000", method="caption"
-    ).margin(border_width, color=random_rgb_colour())
+    )
+    #  .margin(border_width, color=random_rgb_colour())
 
     clips.append(background_clip)
 
     gradient_out = str(
-        Path(video_directory, f"gradient.png").absolute()
+        Path(video_directory, "gradient.png").absolute()
     )
 
-    apply_black_gradient(image, path_out=gradient_out)
+    if settings.enable_thumbnail_image_gradient:
+        apply_black_gradient(image, path_out=gradient_out,
+                             gradient=1.3, initial_opacity=0.9)
+        image = gradient_out
 
-    img_width = width / 2
+    # img_width = width / 2
 
     img_clip = (
-        ImageClip(gradient_out)
-        .resize(width=img_width, height=height - (border_width * 2 ))
+        ImageClip(image)
+        .resize(height=height)
         .set_position(("right", "center"))
         .set_opacity(1)
     )
 
-    #img_clip = img_clip.set_position((width - img_clip.w , 0 + border_width))
+    img_clip = img_clip.set_position(("right", "center"))
+
+    # img_clip = img_clip.set_position((width - img_clip.w , 0 + border_width))
 
     clips.append(img_clip)
 
@@ -195,38 +209,97 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
             stroke_color="#000000",
             stroke_width=2,
             method="caption",
-            size=(width * 0.60, 0),
+            size=(settings.thumbnail_text_width, 0),
         ).set_position((10 + border_width, "center"))
         return txt_clip
 
-
-    #fontsize = 40
+    # fontsize = 40
     fontsize, lineheight = get_font_size(len(title))
+    logging.info(f"Optimising Font Size : {str(len(title))}")
+    sys.stdout.write(str(fontsize))
 
-    logging.info(f"Autosizing font size for title Length : {str(len(title))}")
-    sys.stdout.write(".")
-
-    while True :
+    while True:
         previous_fontsize = fontsize
         fontsize += 1
-        # print("================")
-        # print(previous_fontsize)
-        # print(fontsize)
         txt_clip = get_text_clip(fontsize)
         sys.stdout.write(".")
-        # print(f"{str(txt_clip.w)} / {str(width)}")
-        # print(f"{str(txt_clip.h)} / {str(height)}")
-        if txt_clip.h > height :
-            print(previous_fontsize)
-            txt_clip = get_text_clip(previous_fontsize)
+        if txt_clip.h > height:
+            optimal_font_size = previous_fontsize
+            print(optimal_font_size)
             break
 
-    clips.append(txt_clip)
+    word_height = TextClip(
+            "Hello",
+            fontsize=optimal_font_size,
+            font="Impact",
+            method="caption",
+        )
+
+    txt_y = 0
+    txt_x = 0
+
+    words = title.upper().split(" ")
+    word_color = "#FFFFFF"
+    line_number = 1
+    line_colours = ["#46F710",
+                    "#F9CD10",
+                    "#04FF74",
+                    "#FF5252",
+                    "#FF7545",
+                    "#09C1F9",
+                    "#EFFF00",
+                    "#E7AD61"]
+    random.shuffle(line_colours)
+
+    for word in words:
+
+        if (line_number % 2) == 0:
+            word_color = line_colours[line_number]
+        else:
+            word_color = "#FFFFFF"
+
+        txt_clip = TextClip(
+            word,
+            fontsize=optimal_font_size,
+            color=word_color,
+            align="center",
+            font="Impact",
+            stroke_color="#000000",
+            stroke_width=3,
+            method="caption",
+        ).set_position((txt_x, txt_y))
+
+        current_text_width = txt_x + txt_clip.w
+
+        if current_text_width > settings.thumbnail_text_width:
+            txt_x = 0
+            txt_y += word_height.h
+            line_number += 1
+
+            if (line_number % 2) == 0:
+                word_color = line_colours[line_number]
+            else:
+                word_color = "#FFFFFF"
+
+            txt_clip = TextClip(
+                word,
+                fontsize=optimal_font_size,
+                color=word_color,
+                align="center",
+                font="Impact",
+                stroke_color="#000000",
+                stroke_width=3,
+                method="caption",
+            ).set_position((txt_x, txt_y))
+
+        clips.append(txt_clip)
+        txt_x += txt_clip.w + 15
 
     txt_clip = txt_clip.set_duration(10)
     txt_clip = txt_clip.set_position(("center", "center"))
 
     final_video = CompositeVideoClip(clips)
+    final_video = final_video.margin(border_width, color=random_rgb_colour())
     logging.info("Saving Thumbnail to : " + thumbnail_path)
     final_video.save_frame(thumbnail_path, 1)
     return thumbnail_path
@@ -249,7 +322,7 @@ if __name__ == "__main__":
         "-t",
         "--title",
         help="Specify Post Title",
-        default="I can't confirm what environment will cause this problem.",
+        default="What would you say is absolute poison to life/society?",
     )
     parser.add_argument(
         "-i",
@@ -259,4 +332,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    create_thumbnail(args.directory, args.subreddit, args.title, args.image, index=0)
+    generate(args.directory,
+             args.subreddit,
+             args.title,
+             number_of_thumbnails=1)
