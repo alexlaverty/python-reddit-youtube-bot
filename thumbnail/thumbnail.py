@@ -163,13 +163,14 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         logging.info(f"Thumbnail already exists : {thumbnail_path}")
         return thumbnail_path
 
-    height = 720
-    width = 1280
     border_width = 20
+    height = 720 - (border_width * 2)
+    width = 1280 - (border_width * 2)
 
-    background_clip = TextClip(
-        "", size=(width, height), bg_color="#000000", method="caption"
-    )
+    background_clip = TextClip("", size=(width, height),
+                               bg_color="#000000",
+                               method="caption")
+
     #  .margin(border_width, color=random_rgb_colour())
 
     clips.append(background_clip)
@@ -186,10 +187,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
     # img_width = width / 2
 
     img_clip = (
-        ImageClip(image)
-        .resize(height=height)
-        .set_position(("right", "center"))
-        .set_opacity(1)
+        ImageClip(image).resize(height=height).set_position(("right", "center")).set_opacity(1)
     )
 
     img_clip = img_clip.set_position(("right", "center"))
@@ -301,6 +299,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
 
     final_video = CompositeVideoClip(clips)
     final_video = final_video.margin(border_width, color=random_rgb_colour())
+
     logging.info("Saving Thumbnail to : " + thumbnail_path)
     final_video.save_frame(thumbnail_path, 1)
     return thumbnail_path
