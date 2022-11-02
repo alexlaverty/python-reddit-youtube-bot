@@ -9,7 +9,7 @@ import thumbnail.thumbnail as thumbnail
 import video_generation.video as vid
 import platform
 from utils.common import (safe_filename, create_directory)
-
+from csvmgr import CsvWriter
 
 logging.basicConfig(
     format=u'%(asctime)s %(levelname)-8s %(message)s',
@@ -82,6 +82,7 @@ def process_submission(submission):
                     subreddit=submission.subreddit_name_prefixed,
                     title=submission.title,
                     number_of_thumbnails=settings.number_of_thumbnails)
+
         if thumbnails:
             video.thumbnail_path = thumbnails[0]
 
@@ -89,7 +90,8 @@ def process_submission(submission):
             print("Generating Thumbnail only skipping video compile!")
         else:
             vid.create(video_directory=video.folder_path,
-                       post=submission, thumbnails=thumbnails)
+                       post=submission,
+                       thumbnails=thumbnails)
 
 
 def banner():
@@ -163,10 +165,55 @@ def get_args():
     parser.add_argument('--total-posts', type=int,
                         help='Enable video backgrounds')
 
+    parser.add_argument('--submission-score', type=int,
+                        help='Minimum submission score threshold')
+
     parser.add_argument('--background-directory',
                         help='Folder path to video backgrounds')
 
+    parser.add_argument('--sort', choices=['top', 'hot'],
+                        help='Sort Reddit posts by')
+
+    parser.add_argument('--time',
+                        choices=["all",
+                                 "day",
+                                 "hour",
+                                 "month",
+                                 "week",
+                                 "year"],
+                        default="day",
+                        help='Filter by time')
+
+    parser.add_argument('--orientation', choices=['landscape', 'portrait'],
+                        default='landscape',
+                        help='Sort Reddit posts by')
+
     args = parser.parse_args()
+
+    if args.orientation:
+        settings.orientation = args.orientation
+        settings.video_height = settings.vertical_video_height
+        settings.video_width = settings.vertical_video_width
+        logging.info(f'Setting Orientation to : \
+                     {str(settings.orientation)}')
+        logging.info(f'Setting video_height to : \
+                     {str(settings.video_height)}')
+        logging.info(f'Setting video_width to : \
+                    {str(settings.video_width)}')
+
+    if args.submission_score:
+        settings.minimum_submission_score = args.submission_score
+        logging.info(f'Setting Reddit Post Minimum Submission Score : \
+                     {str(settings.minimum_submission_score)}')
+
+    if args.sort:
+        settings.reddit_post_sort = args.sort
+        logging.info(f'Setting Reddit Post Sort : \
+                     {settings.reddit_post_sort}')
+    if args.time:
+        settings.reddit_post_time_filter = args.time
+        logging.info(f'Setting Reddit Post Time Filter : \
+                     {settings.reddit_post_time_filter}')
 
     if args.background_directory:
         logging.info(f'Setting video background directory : \
@@ -216,15 +263,18 @@ def get_args():
         print(settings.subreddits)
 
     if args.enable_background:
-        logging.info('Upload video enabled!')
+        logging.info('Enabling Video Background!')
         settings.enable_background = True
 
     return args
+
 
 if __name__ == "__main__":
     banner()
     print_version_info()
     args = get_args()
+    csvwriter = CsvWriter()
+    csvwriter.initialise_csv()
 
     if args.url:
         urls = args.url.split(",")

@@ -19,6 +19,7 @@ from thumbnail.thumbnail import get_font_size
 from utils.common import (give_emoji_free_text, contains_url, sanitize_text)
 import publish.youtube as youtube
 import moviepy.video.fx.all as vfx
+import csvmgr
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -46,15 +47,6 @@ def print_comment_details(comment):
     logging.debug("Stickied : " + str(comment.stickied))
     logging.info("Comment   : " + give_emoji_free_text(str(comment.body)))
     logging.info("Length    : " + str(len(comment.body)))
-
-
-class Scene:
-    def __init__(self, text, audio, starttime, duration, textclip):
-        self.text = text
-        self.audio = audio
-        self.starttime = starttime
-        self.duration = duration
-        self.textclip = textclip
 
 
 class Video:
@@ -122,8 +114,8 @@ def create(video_directory, post, thumbnails):
     v.description = f"{v.meta.title}\n\n{v.meta.selftext}\n\n\
                     #reddit #{subreddit_name} #tts"
     v.title = f"{sanitize_text(v.meta.title)}"
-    height = 720
-    width = 1280
+    height = settings.video_height
+    width = settings.video_width
     clip_margin = 50
     clip_margin_top = 30
     txt_clip_size = (width - (clip_margin * 2), None)
@@ -244,7 +236,7 @@ def create(video_directory, post, thumbnails):
                 .volumex(1.5)
             )
 
-            if selftext_clip.h > height:
+            if selftext_clip.h > settings.video_height:
                 logging.debug("Text exceeded Video Height, reset text")
                 current_clip_text = selftext_line + "\n"
                 selftext_clip = (
@@ -266,7 +258,7 @@ def create(video_directory, post, thumbnails):
                     .set_start(t)
                 )
 
-                if selftext_clip.h > height:
+                if selftext_clip.h > settings.video_height:
                     logging.debug("Comment Text Too Long, Skipping Comment")
                     continue
 
@@ -466,7 +458,7 @@ def create(video_directory, post, thumbnails):
                         .volumex(1.5)
                     )
 
-                    if txt_clip.h > height:
+                    if txt_clip.h > settings.video_height:
                         logging.debug("Text exceeded Video Height, reset text")
                         current_clip_text = comment_line + "\n\n"
                         txt_clip = (
@@ -488,7 +480,7 @@ def create(video_directory, post, thumbnails):
                             .set_start(t)
                         )
 
-                        if txt_clip.h > height:
+                        if txt_clip.h > settings.video_height:
                             logging.debug(
                                 "Comment Text Too Long, \
                                 Skipping Comment"
@@ -530,11 +522,21 @@ def create(video_directory, post, thumbnails):
         background_filepath = str(Path(settings.background_directory,
                                        v.background))
         logging.info(f"Background : {background_filepath}")
+
         background_clip = (
             VideoFileClip(background_filepath)
             .set_start(tb)
             .volumex(settings.background_volume)
         )
+
+        if settings.orientation == "portrait":
+            print("Portrait mode, cropping and resizing!")
+            background_clip = background_clip.crop(x1=1166.6,
+                                                   y1=0,
+                                                   x2=2246.6,
+                                                   y2=1920)\
+                                             .resize((settings.vertical_video_width,
+                                                      settings.vertical_video_height))
 
         if background_clip.duration < v.duration:
             logging.debug("Looping Background")
@@ -549,6 +551,7 @@ def create(video_directory, post, thumbnails):
             logging.debug("Not Looping Background")
             background_clip = background_clip.set_duration(v.duration)
     else:
+        logging.info("Background not enabled...")
         background_clip = ColorClip(
             size=(settings.video_width, settings.video_height),
             color=settings.background_colour
@@ -635,12 +638,24 @@ def create(video_directory, post, thumbnails):
         "description": v.description,
         "thumbnail": v.thumbnail,
         "duration": v.duration,
-        "height": height,
-        "width": width,
+        "height": settings.video_height,
+        "width": settings.video_width,
     }
 
     with open(v.json, "w") as outfile:
         json.dump(data, outfile, indent=4)
+
+    csvwriter = csvmgr.CsvWriter()
+
+    row = {"id": v.meta.id,
+           "title": v.title,
+           "thumbnail": v.thumbnail,
+           "duration": v.duration,
+           "compiled": "false",
+           "uploaded": "false",
+           }
+
+    csvwriter.write_entry(row=row)
 
     if settings.enable_compilation:
         logging.info("===== Compiling Video Clip =====")
@@ -649,13 +664,18 @@ def create(video_directory, post, thumbnails):
             this takes a while, please be patient : )"
         )
         post_video.write_videofile(v.filepath, fps=24)
+
+
     else:
         logging.info("Skipping Video Compilation --enable_compilation passed")
 
-    if settings.enable_compilation and settings.enable_upload:
+    if settings.enable_compilation \
+       and settings.enable_upload \
+       and not csvwriter.is_uploaded(v.meta.id):
         if exists("client_secret.json") and exists("credentials.storage"):
             logging.info("===== Uploading Video Clip to YouTube =====")
             youtube.publish(v)
+            csvwriter.set_uploaded(v.meta.id)
         else:
             logging.info("Skipping upload, missing either \
                          client_secret.json or credentials.storage file.")
