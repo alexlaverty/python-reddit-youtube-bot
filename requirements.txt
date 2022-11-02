@@ -16,3 +16,5 @@ rich
 selenium
 simple-youtube-api
 varname
+pandas
+numpy

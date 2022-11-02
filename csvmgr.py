@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-import numpy as np
 
 
 class CsvWriter:
@@ -38,8 +37,9 @@ class CsvWriter:
         c = pd.read_csv(self.csv_file)
         for index, row in c.iterrows():
             if row['id'] == id:
-                c.at[index, 'uploaded'] = "True"
+                c.at[index, 'uploaded'] = "true"
         c.to_csv(self.csv_file, index=False)
+
 
 if __name__ == "__main__":
     csvwriter = CsvWriter()
@@ -47,6 +47,3 @@ if __name__ == "__main__":
     print(csvwriter.is_uploaded("snppah"))
     csvwriter.set_uploaded("snppah")
     print(csvwriter.is_uploaded("snppah"))
-
-    # row = {'timestamp': "mytimestamp", 'title': "My title 3", 'url': "myurl", 'posted': "False"}
-    # csvwriter.write_entry(row)

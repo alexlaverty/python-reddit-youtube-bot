@@ -31,6 +31,4 @@ RUN pip install -r requirements.txt
 
 RUN playwright install-deps && playwright install
 
-
-
 CMD ["python3", "/app/app.py"]

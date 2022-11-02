@@ -86,7 +86,7 @@ def get_font_size(length):
         fontsize = 170
 
     if length >= 30 and length < 40:
-        fontsize = 120
+        fontsize = 130
 
     if length >= 40 and length < 50:
         fontsize = 110
@@ -165,7 +165,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
 
     height = 720
     width = 1280
-    border_width = 15
+    border_width = 20
 
     background_clip = TextClip(
         "", size=(width, height), bg_color="#000000", method="caption"
@@ -236,7 +236,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         )
 
     txt_y = 0
-    txt_x = 0
+    txt_x = 15
 
     words = title.upper().split(" ")
     word_color = "#FFFFFF"
@@ -273,7 +273,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         current_text_width = txt_x + txt_clip.w
 
         if current_text_width > settings.thumbnail_text_width:
-            txt_x = 0
+            txt_x = 15
             txt_y += word_height.h
             line_number += 1
 
@@ -333,7 +333,10 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    generate(args.directory,
-             args.subreddit,
-             args.title,
-             number_of_thumbnails=1)
+    create_thumbnail(".", "Something", args.title,
+                     args.image, index=0)
+
+    # generate(args.directory,
+    #          args.subreddit,
+    #          args.title,
+    #          number_of_thumbnails=1)
