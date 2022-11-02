@@ -16,6 +16,7 @@ def is_valid_submission(submission):
         return False
     if not settings.enable_nsfw_content:
         if submission.over_18:
+            print("Skipping NSFW...")
             return False
         for banned_keyword in (
             base64.b64decode(settings.banned_keywords_base64.encode("ascii"))
@@ -30,10 +31,16 @@ def is_valid_submission(submission):
     if submission.subreddit_name_prefixed in settings.subreddits_excluded:
         return False
     if submission.score < settings.minimum_submission_score:
+        print(
+            f"{submission.title} <-- Submission score too low!"
+        )
         return False
     if len(submission.selftext) > settings.maximum_length_self_text:
         return False
-    if submission.num_comments < settings.minimum_num_comments:
+    if settings.enable_comments and submission.num_comments < settings.minimum_num_comments:
+        print(
+            f"{submission.title} <-- Number of comments too low!"
+        )
         return False
     if "update" in submission.title.lower() :
         return False
@@ -65,14 +72,18 @@ def get_reddit_submissions():
     print(subreddits)
 
     # Get Reddit Hot Posts
-    submissions = r.subreddit(subreddits).hot(limit=settings.submission_limit)
+    if settings.reddit_post_sort == "hot":
+        submissions = r.subreddit(subreddits)\
+                       .hot(limit=settings.submission_limit)
 
-    #Get Reddit Top Posts
-    # "all", "day", "hour", "month", "week", or "year" (default: "all"
-    # submissions = r.subreddit(subreddits).top(
-    #     limit=settings.submission_limit,
-    #     time_filter="day"
-    # )
+    if settings.reddit_post_sort == "top":
+        # Get Reddit Top Posts
+        # "all", "day", "hour", "month", "week", or "year" (default: "all"
+
+        submissions = r.subreddit(subreddits).top(
+            limit=settings.submission_limit,
+            time_filter=settings.reddit_post_time_filter
+        )
     return submissions
 
 

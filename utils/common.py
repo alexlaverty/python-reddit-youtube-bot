@@ -70,7 +70,6 @@ def sanitize_text(text: str) -> str:
     """
 
     #Remove age related info
-    print("Removing age related info")
     text = re.sub('(\[|\()[0-9]{1,2}\s*(m|f)?(\)|\])', '',
                   text,
                   flags=re.IGNORECASE)

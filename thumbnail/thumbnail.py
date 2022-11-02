@@ -80,16 +80,16 @@ def get_font_size(length):
         fontsize = 190
 
     if length >= 10 and length < 20:
-        fontsize = 180
+        fontsize = 140
 
     if length >= 20 and length < 30:
         fontsize = 170
 
     if length >= 30 and length < 40:
-        fontsize = 140
+        fontsize = 120
 
     if length >= 40 and length < 50:
-        fontsize = 135
+        fontsize = 110
 
     if length >= 50 and length < 60:
         fontsize = 110
@@ -323,7 +323,7 @@ if __name__ == "__main__":
         "-t",
         "--title",
         help="Specify Post Title",
-        default="What would you say is absolute poison to life/society?",
+        default="What's your most gatekeeping culinary opinion?",
     )
     parser.add_argument(
         "-i",

@@ -22,6 +22,11 @@ subreddits_excluded = [
     "r/CFB",
 ]
 
+# Sort reddit posts by choices ["hot","top"]
+reddit_post_sort = "hot"
+# Sort by "all", "day", "hour", "month", "week", or "year"
+reddit_post_time_filter = "day"
+
 # Speech Settings
 edge_tts_voice = "en-GB-RyanNeural"
 pause = 1 # Pause after speech
@@ -58,7 +63,7 @@ max_video_length = 600  # Seconds
 maximum_length_self_text = 3000
 minimum_submission_score = 5000
 number_of_thumbnails = 1
-submission_limit = 200
+submission_limit = 500
 text_bg_color = "#1A1A1B"
 text_bg_opacity = 1
 text_color = "white"
@@ -69,6 +74,11 @@ title_length_minimum = 20
 total_posts_to_process = 10
 video_height = 720
 video_width = 1280
+vertical_video_width = 1080
+vertical_video_height = 1920
+# Video Orientation choices ["landscape","portrait"]
+orientation = "landscape"
+
 clip_size = (video_width, video_height)
 
 # Thumbnail settings choices ['random','lexica']

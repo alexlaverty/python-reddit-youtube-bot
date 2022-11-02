@@ -35,6 +35,16 @@ jobs:
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
           playwright install
-          python3 app.py --enable-upload --background-directory /app/assets/backgrounds
+          ls -l /app/assets/backgrounds
+          python3 app.py --enable-upload --enable-background --background-directory /app/assets/backgrounds
           rm -f client_secret.json
           rm -f credentials.storage
+
+      - name: Git Push Updates
+        run: |
+          [[ -z $(git status -s data.csv) ]] || (
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data.csv
+          git commit -m "TTSVibeLounge Scheduled Update" -a
+          git push -f)
