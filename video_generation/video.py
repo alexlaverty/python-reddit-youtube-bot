@@ -387,9 +387,11 @@ def create(video_directory, post, thumbnails):
                         .resize(width=settings.video_width * settings.reddit_comment_width)
                     )
                 else:
+                    logging.info(f"Comment image not found : {img_path}")
                     continue
 
                 if img_clip.h > settings.video_height:
+                    logging.info(f"Skipping comment larger than video height : {img_path}")
                     continue
 
                 t += audioclip.duration + settings.pause

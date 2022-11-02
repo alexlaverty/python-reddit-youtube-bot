@@ -9,7 +9,6 @@ import os
 import re
 
 storymode = False
-pw_timeout = settings.comment_screenshot_timeout
 
 
 def safe_filename(text):
@@ -17,11 +16,8 @@ def safe_filename(text):
     return "".join([c for c in text if re.match(r"\w", c)])[:50]
 
 
-def download_screenshots_of_reddit_posts(accepted_comments,
-                                         url,
-                                         video_directory):
-    """Downloads screenshots of reddit posts as seen on the web.
-       Downloads to assets/temp/png
+def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory):
+    """Downloads screenshots of reddit posts as seen on the web. Downloads to assets/temp/png
 
     Args:
         reddit_object (Dict): Reddit object received from reddit/subreddit.py
@@ -41,33 +37,29 @@ def download_screenshots_of_reddit_posts(accepted_comments,
         context = browser.new_context()
         if settings.theme == "dark":
             cookie_file = open(
-                f"{os.getcwd()}/comments/cookie-dark-mode.json",
-                encoding="utf-8"
+                f"{os.getcwd()}/comments/cookie-dark-mode.json", encoding="utf-8"
             )
         else:
             cookie_file = open(
-                f"{os.getcwd()}/comments/cookie-light-mode.json",
-                encoding="utf-8"
+                f"{os.getcwd()}/comments/cookie-light-mode.json", encoding="utf-8"
             )
         cookies = json.load(cookie_file)
         context.add_cookies(cookies)  # load preference cookies
         # Get the thread screenshot
         page = context.new_page()
-        page.set_default_timeout(timeout=settings.comment_screenshot_timeout)
         page.goto(url, timeout=0)
         page.set_viewport_size(ViewportSize(width=1920, height=1080))
-        if page.locator('[data-testid="content-gate"]')\
-               .is_visible():
-            # Post is NSFW and requires to click the proceed button.
+        if page.locator('[data-testid="content-gate"]').is_visible():
+            # This means the post is NSFW and requires to click the proceed button.
 
             print("Post is NSFW. You are spicy...")
-            page.locator('[data-testid="content-gate"] button').click(timeout=pw_timeout)
+            page.locator('[data-testid="content-gate"] button').click()
             page.wait_for_load_state()  # Wait for page to fully load
 
             if page.locator('[data-click-id="text"] button').is_visible():
                 page.locator(
                     '[data-click-id="text"] button'
-                ).click(timeout=pw_timeout)  # Remove "Click to see nsfw" Button in Screenshot
+                ).click()  # Remove "Click to see nsfw" Button in Screenshot
 
         if storymode:
             page.locator('[data-click-id="text"]').screenshot(
@@ -83,19 +75,15 @@ def download_screenshots_of_reddit_posts(accepted_comments,
                 comment_path = f"{video_directory}/comment_{comment.id}.png"
 
                 if os.path.exists(comment_path):
-                    print(f"Comment Screenshot already downloaded : \
-                          {comment_path}")
+                    print(f"Comment Screenshot already downloaded : {comment_path}")
                 else:
                     if page.locator('[data-testid="content-gate"]').is_visible():
-                        page.locator('[data-testid="content-gate"] button').click(timeout=pw_timeout)
+                        page.locator('[data-testid="content-gate"] button').click()
 
-                    page.goto(f"https://reddit.com{comment.permalink}",
-                              timeout=0)
+                    page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
 
                     try:
-                        page.locator(f"#t1_{comment.id}",
-                                     timeout=pw_timeout)\
-                                     .screenshot(path=comment_path)
+                        page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
                     except Exception:
                         pass
 
@@ -103,15 +91,14 @@ def download_screenshots_of_reddit_posts(accepted_comments,
 
 
 def single_comment_screenshot(comment_object, url, video_directory):
-    """Downloads screenshots of reddit posts as seen on the web.
-       Downloads to assets/temp/png
+    """Downloads screenshots of reddit posts as seen on the web. Downloads to assets/temp/png
 
     Args:
         reddit_object (Dict): Reddit object received from reddit/subreddit.py
         screenshot_num (int): Number of screenshots to download
     """
     print("Downloading screenshot of reddit comment...")
-    # id = re.sub(r"[^\w\s-]", "", comment_object.id)
+    id = re.sub(r"[^\w\s-]", "", comment_object.id)
     # ! Make sure the reddit screenshots folder exists
     # title_path = safe_filename(comment_object.title)
     # folder_path = str(Path(settings.videos_directory,f"{id}_{title_path}"))
@@ -134,25 +121,24 @@ def single_comment_screenshot(comment_object, url, video_directory):
         page.goto(url, timeout=0)
         page.set_viewport_size(ViewportSize(width=1920, height=1080))
         if page.locator('[data-testid="content-gate"]').is_visible():
-            # {Post is NSFW and requires to click the proceed button.
+            # This means the post is NSFW and requires to click the proceed button.
 
             print("Post is NSFW. You are spicy...")
-            page.locator('[data-testid="content-gate"] button').click(timeout=pw_timeout)
+            page.locator('[data-testid="content-gate"] button').click()
             page.wait_for_load_state()  # Wait for page to fully load
 
             if page.locator('[data-click-id="text"] button').is_visible():
                 page.locator(
                     '[data-click-id="text"] button'
-                ).click(timeout=pw_timeout)  # Remove "Click to see nsfw" Button in Screenshot
+                ).click()  # Remove "Click to see nsfw" Button in Screenshot
 
             if page.locator('[data-testid="content-gate"]').is_visible():
-                page.locator('[data-testid="content-gate"] button').click(timeout=pw_timeout)
+                page.locator('[data-testid="content-gate"] button').click()
 
         page.goto(f"https://reddit.com{comment_object.permalink}", timeout=0)
         comment_path = f"{video_directory}/{comment_object.id}.png"
         try:
-            page.locator(f"#t1_{comment_object.id}", timeout=pw_timeout)\
-                .screenshot(path=comment_path)
+            page.locator(f"#t1_{comment_object.id}").screenshot(path=comment_path)
         except Exception:
             pass
 
