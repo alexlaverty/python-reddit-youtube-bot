@@ -669,13 +669,18 @@ def create(video_directory, post, thumbnails):
     else:
         logging.info("Skipping Video Compilation --enable_compilation passed")
 
-    if settings.enable_compilation \
-       and settings.enable_upload \
-       and not csvwriter.is_uploaded(v.meta.id):
+    if settings.enable_compilation and settings.enable_upload :
         if exists("client_secret.json") and exists("credentials.storage"):
-            logging.info("===== Uploading Video Clip to YouTube =====")
-            youtube.publish(v)
-            csvwriter.set_uploaded(v.meta.id)
+            if csvwriter.is_uploaded(v.meta.id):
+                logging.info("Already uploaded according to data.csv")
+            else:
+                logging.info("===== Uploading Video Clip to YouTube =====")
+                try:
+                    youtube.publish(v)
+                except Exception as e:
+                    print(e)
+                else:
+                    csvwriter.set_uploaded(v.meta.id)
         else:
             logging.info("Skipping upload, missing either \
                          client_secret.json or credentials.storage file.")

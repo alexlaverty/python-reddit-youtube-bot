@@ -44,7 +44,7 @@ reddit_comment_opacity = 1
 reddit_comment_width = 0.9
 comment_length_max = 600
 comment_limit = 100
-
+comment_screenshot_timeout = 30000
 
 # Video settings
 background_colour = [26, 26, 27]

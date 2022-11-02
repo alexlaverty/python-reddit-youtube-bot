@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: alexlaverty/ttsvibelounge:1.0.1
+    container: alexlaverty/ttsvibelounge:1.0.2
     steps:
 
       - name: checkout repo content
