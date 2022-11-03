@@ -17,3 +17,4 @@ config/auth.py
 .env
 
 **/__pycache__/
+assets/work_dir/

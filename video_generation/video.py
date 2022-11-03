@@ -131,8 +131,10 @@ def create(video_directory, post, thumbnails):
     # t += intro_clip.duration
 
     tb = t
+    speech_directory = Path(settings.speech_directory, v.meta.id)
+    speech_directory.mkdir(parents=True, exist_ok=True)
 
-    audio_title = str(Path(video_directory, v.meta.id + "_title.mp3"))
+    audio_title = str(Path(speech_directory, "title.mp3"))
 
     title_speech_text = f"{sanitize_text(v.meta.title)}"
 
@@ -204,8 +206,8 @@ def create(video_directory, post, thumbnails):
             logging.debug("selftext_line     : " + selftext_line)
             selftext_audio_filepath = str(
                 Path(
-                    video_directory,
-                    v.meta.id + "_selftext_" + str(selftext_line_count) + ".mp3"
+                    speech_directory,
+                    "selftext_" + str(selftext_line_count) + ".mp3"
                 )
             )
             speech.create_audio(selftext_audio_filepath, selftext_line)
@@ -350,10 +352,10 @@ def create(video_directory, post, thumbnails):
                     {str(len(accepted_comments))}"
                 )
                 break
-
+        screenshot_directory = Path(settings.screenshot_directory, v.meta.id)
         if settings.commentstyle == "reddit":
             download_screenshots_of_reddit_posts(
-                accepted_comments, v.meta.url, video_directory
+                accepted_comments, v.meta.url, screenshot_directory
             )
 
         for count, accepted_comment in enumerate(accepted_comments):
@@ -367,14 +369,16 @@ def create(video_directory, post, thumbnails):
 
                 audio_filepath = str(
                     Path(
-                        video_directory, v.meta.id + "_" + accepted_comment.id + ".mp3"
+                        speech_directory,
+                        accepted_comment.id + ".mp3"
                     )
                 )
                 speech.create_audio(audio_filepath, accepted_comment.body)
                 audioclip = AudioFileClip(audio_filepath)
 
                 img_path = str(
-                    Path(video_directory, "comment_" + accepted_comment.id + ".png")
+                    Path(screenshot_directory,
+                         "comment_" + accepted_comment.id + ".png")
                 )
                 if exists(img_path):
                     img_clip = (
@@ -384,14 +388,15 @@ def create(video_directory, post, thumbnails):
                         .set_audio(audioclip)
                         .set_start(t)
                         .set_opacity(settings.reddit_comment_opacity)
-                        .resize(width=settings.video_width * settings.reddit_comment_width)
+                        .resize(width=settings.video_width
+                                * settings.reddit_comment_width)
                     )
                 else:
                     logging.info(f"Comment image not found : {img_path}")
                     continue
 
                 if img_clip.h > settings.video_height:
-                    logging.info(f"Skipping comment larger than video height : {img_path}")
+                    logging.info(f"Comment larger than video height : {img_path}")
                     continue
 
                 t += audioclip.duration + settings.pause
@@ -409,6 +414,7 @@ def create(video_directory, post, thumbnails):
                         "Reached Maximum Video Length : "
                         + str(settings.max_video_length)
                     )
+                    logging.info(f"Used {str(count)}/{str(len(accepted_comments))} comments")
                     logging.info("=== Finished Processing Comments ===")
                     break
 
@@ -429,8 +435,8 @@ def create(video_directory, post, thumbnails):
                     logging.debug("comment_line     : " + comment_line)
                     audio_filepath = str(
                         Path(
-                            video_directory,
-                            v.meta.id + "_" + c.id + "_" + str(ccount) + ".mp3",
+                            speech_directory,
+                            c.id + "_" + str(ccount) + ".mp3",
                         )
                     )
                     speech.create_audio(audio_filepath, comment_line)
@@ -639,6 +645,7 @@ def create(video_directory, post, thumbnails):
         "title": v.title,
         "description": v.description,
         "thumbnail": v.thumbnail,
+        "file": v.filepath,
         "duration": v.duration,
         "height": settings.video_height,
         "width": settings.video_width,
@@ -652,6 +659,7 @@ def create(video_directory, post, thumbnails):
     row = {"id": v.meta.id,
            "title": v.title,
            "thumbnail": v.thumbnail,
+           "file": v.filepath,
            "duration": v.duration,
            "compiled": "false",
            "uploaded": "false",
@@ -666,7 +674,6 @@ def create(video_directory, post, thumbnails):
             this takes a while, please be patient : )"
         )
         post_video.write_videofile(v.filepath, fps=24)
-
 
     else:
         logging.info("Skipping Video Compilation --enable_compilation passed")

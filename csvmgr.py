@@ -27,11 +27,11 @@ class CsvWriter:
 
     def is_uploaded(self, id):
         csv = pd.read_csv(self.csv_file)
-        return bool(
-            len(
-                csv.loc[(csv['id'] == id) & (csv['uploaded'] == True)]
-                )
-            )
+        results = len(csv.loc[(csv['id'] == id) & (csv['uploaded'] == True)])
+        if results > 0:
+            return True
+        else:
+            return False
 
     def set_uploaded(self, id):
         c = pd.read_csv(self.csv_file)

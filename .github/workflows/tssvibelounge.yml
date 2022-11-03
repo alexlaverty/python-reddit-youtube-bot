@@ -4,7 +4,7 @@ name: TTSVibeLounge
 # Set a schedule to run, note it's in UTC time, so do the time conversion for your location
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 */6 * * *'
 
 # Also run the build if I push anything into the master branch
   push:
@@ -17,7 +17,7 @@ jobs:
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to github runner.
+        uses: actions/checkout@v2 # checkout repo content to github runner.
 
       - name: Run ttsvibelounge Script
         env:
@@ -36,7 +36,10 @@ jobs:
           cp config/auth-env.py config/auth.py
           playwright install
           ls -l /app/assets/backgrounds
-          python3 app.py --enable-upload --enable-background --background-directory /app/assets/backgrounds
+          python3 app.py --total-posts 1 \
+                         --enable-upload \
+                         --enable-background \
+                         --background-directory /app/assets/backgrounds
           rm -f client_secret.json
           rm -f credentials.storage
 
