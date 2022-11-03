@@ -101,6 +101,9 @@ soundeffects_directory = str(Path(assets_directory, "soundeffects"))
 video_overlay_filepath = str(Path(assets_directory, "particles.mp4"))
 videos_directory = "videos"
 
+# Youtube
+# Choices ['private', 'unlisted', 'public']
+youtube_privacy_status = 'public'
 
 # Newcaster Settings
 enable_newscaster = False
