@@ -41,7 +41,7 @@ banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBl"
 theme = "dark"
 minimum_num_comments = 200
 reddit_comment_opacity = 1
-reddit_comment_width = 0.9
+reddit_comment_width = 0.95
 comment_length_max = 600
 comment_limit = 100
 comment_screenshot_timeout = 30000
@@ -83,13 +83,15 @@ clip_size = (video_width, video_height)
 
 # Thumbnail settings choices ['random','lexica']
 thumbnail_image_source = "lexica"
-thumbnail_text_width = video_width * 0.60
+thumbnail_text_width = video_width * 0.65
 enable_thumbnail_image_gradient = True
 
 # Directories and paths
 assets_directory = "assets"
-temp_directory = str(Path(assets_directory, "temp"))
+temp_directory = str(Path(assets_directory, "work_dir"))
 audio_directory = temp_directory
+speech_directory = temp_directory
+screenshot_directory = temp_directory
 fonts_directory = str(Path(assets_directory, "fonts"))
 image_backgrounds_directory = str(Path(assets_directory, "image_backgrounds"))
 images_directory = str(Path(assets_directory, "images"))

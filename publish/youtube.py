@@ -47,10 +47,9 @@ def publish(video):
         uploaded_video = channel.upload_video(youtube_upload)
         print(uploaded_video.id)
         print(uploaded_video)
-    except:
-        logging.info("ERROR UPLOADING:")
-        logging.info(uploaded_video)
-        raise
+    except Exception as e:
+        logging.info(f'Error uploading video : {video.title}')
+        print(e)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

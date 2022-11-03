@@ -92,7 +92,7 @@ def get_font_size(length):
         fontsize = 110
 
     if length >= 50 and length < 60:
-        fontsize = 110
+        fontsize = 100
 
     if length >= 60 and length < 70:
         fontsize = 90
@@ -196,42 +196,45 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
 
     clips.append(img_clip)
 
-    def get_text_clip(fs, txt_color="#FFFFFF"):
+    def get_text_clip(text, fs, txt_color="#FFFFFF"):
         txt_clip = TextClip(
-            title.upper(),
+            text,
             fontsize=fs,
             color=txt_color,
             align="west",
             font="Impact",
-            #bg_color="#ADD8E6",
             stroke_color="#000000",
-            stroke_width=2,
+            stroke_width=3,
             method="caption",
             size=(settings.thumbnail_text_width, 0),
-        ).set_position((10 + border_width, "center"))
+        )
         return txt_clip
 
     # fontsize = 40
     fontsize, lineheight = get_font_size(len(title))
-    logging.info(f"Optimising Font Size : {str(len(title))}")
+    logging.info(f"Title Length : {str(len(title))}")
+    logging.info("Optimising Font Size :")
     sys.stdout.write(str(fontsize))
 
     while True:
         previous_fontsize = fontsize
         fontsize += 1
-        txt_clip = get_text_clip(fontsize)
+        txt_clip = get_text_clip(title.upper(), fontsize)
         sys.stdout.write(".")
         if txt_clip.h > height:
             optimal_font_size = previous_fontsize
             print(optimal_font_size)
             break
 
-    word_height = TextClip(
-            "Hello",
-            fontsize=optimal_font_size,
-            font="Impact",
-            method="caption",
-        )
+    word_height = get_text_clip("Hello", fs=optimal_font_size, txt_color="#FFFFFF")
+    # word_height = TextClip(
+    #         "Hello",
+    #         fontsize=optimal_font_size,
+    #         align="center",
+    #         font="Impact",
+    #         stroke_color="#000000",
+    #         stroke_width=3,
+    #     )
 
     txt_y = 0
     txt_x = 15
@@ -239,6 +242,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
     words = title.upper().split(" ")
     word_color = "#FFFFFF"
     line_number = 1
+    space_width = 9
     line_colours = ["#46F710",
                     "#F9CD10",
                     "#04FF74",
@@ -257,22 +261,27 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         else:
             word_color = "#FFFFFF"
 
+        # txt_clip = get_text_clip(word,
+        #                          optimal_font_size,
+        #                          txt_color=word_color)\
+        #     .set_position((txt_x, txt_y))
+
         txt_clip = TextClip(
             word,
             fontsize=optimal_font_size,
             color=word_color,
-            align="center",
+            align="west",
             font="Impact",
             stroke_color="#000000",
             stroke_width=3,
-            method="caption",
+            method="caption"
         ).set_position((txt_x, txt_y))
 
-        current_text_width = txt_x + txt_clip.w
+        current_text_width = txt_x + space_width + txt_clip.w
 
         if current_text_width > settings.thumbnail_text_width:
             txt_x = 15
-            txt_y += word_height.h
+            txt_y += word_height.h * 0.85
             line_number += 1
 
             if (line_number % 2) == 0:
@@ -280,19 +289,23 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
             else:
                 word_color = "#FFFFFF"
 
+            # txt_clip = get_text_clip(word,
+            #                          fs=optimal_font_size,
+            #                          txt_color=word_color)\
+            #     .set_position((txt_x, txt_y))
             txt_clip = TextClip(
                 word,
                 fontsize=optimal_font_size,
                 color=word_color,
-                align="center",
+                align="west",
                 font="Impact",
                 stroke_color="#000000",
                 stroke_width=3,
-                method="caption",
+                method="caption"
             ).set_position((txt_x, txt_y))
 
         clips.append(txt_clip)
-        txt_x += txt_clip.w + 15
+        txt_x += txt_clip.w + space_width
 
     txt_clip = txt_clip.set_duration(10)
     txt_clip = txt_clip.set_position(("center", "center"))
