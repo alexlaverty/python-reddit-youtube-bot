@@ -35,10 +35,13 @@ jobs:
           #                --enable-background \
           #                --background-directory /app/assets/backgrounds
           echo "Hello" > data.csv
+          git --version
           rm -f client_secret.json
           rm -f credentials.storage
           git config --global --add safe.directory '*'
+          echo "Git Debug Log"
           git status
+          git branch
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
