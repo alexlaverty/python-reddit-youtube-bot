@@ -1,15 +1,10 @@
-# Give your gitflow action a name
 name: TTSVibeLounge
-
-# Set a schedule to run, note it's in UTC time, so do the time conversion for your location
 on:
   schedule:
     - cron: '0 */6 * * *'
-
-# Also run the build if I push anything into the master branch
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,15 +31,19 @@ jobs:
           cp config/auth-env.py config/auth.py
           playwright install
           ls -l /app/assets/backgrounds
-          python3 app.py --total-posts 1 \
-                         --enable-upload \
-                         --enable-background \
-                         --background-directory /app/assets/backgrounds
+          pwd
+          ls -l .git
+          # python3 app.py --total-posts 1 \
+          #                --enable-upload \
+          #                --enable-background \
+          #                --background-directory /app/assets/backgrounds
+          echo "Hello" > data.csv
           rm -f client_secret.json
           rm -f credentials.storage
 
       - name: Git Push Updates
         run: |
+          git status
           [[ -z $(git status -s data.csv) ]] || (
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
