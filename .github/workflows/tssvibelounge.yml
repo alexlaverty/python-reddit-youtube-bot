@@ -26,6 +26,9 @@ jobs:
           RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
+          echo $PWD
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
@@ -39,7 +42,11 @@ jobs:
 
       - name: check for changes
         run: |
-          if git diff --exit-code; then
+          echo $PWD
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE
+          if git diff --exit-code data.csv; then
             echo "::set-env name=changes_exist::false"
           else
             echo "::set-env name=changes_exist::true"
@@ -48,6 +55,10 @@ jobs:
       - name: Push updates
         if: env.changes_exist == 'true'
         run: |
+          echo $PWD
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
