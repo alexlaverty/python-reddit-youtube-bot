@@ -40,14 +40,10 @@ jobs:
           echo "Hello" > data.csv
           rm -f client_secret.json
           rm -f credentials.storage
-
-      - name: Git Push Updates
-        run: |
           git config --global --add safe.directory '*'
           git status
-          [[ -z $(git status -s data.csv) ]] || (
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
           git commit -m "TTSVibeLounge Scheduled Update" -a
-          git push -f)
+          git push -f
