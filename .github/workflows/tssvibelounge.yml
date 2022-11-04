@@ -16,7 +16,6 @@ jobs:
         uses: actions/checkout@v3 # checkout repo content to github runner.
 
       - name: Run ttsvibelounge Script
-        uses: docker://alexlaverty/ttsvibelounge:1.0.3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -28,27 +27,23 @@ jobs:
           RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
-          echo $YOUTUBE_CLIENT_SECRET > client_secret.json
-          echo $CREDENTIALS_STORAGE > credentials.storage
-          cp config/auth-env.py config/auth.py
+          # echo $YOUTUBE_CLIENT_SECRET > client_secret.json
+          # echo $CREDENTIALS_STORAGE > credentials.storage
+          # cp config/auth-env.py config/auth.py
           #playwright install
           # python3 app.py --total-posts 1 \
           #                --enable-upload \
           #                --enable-background \
           #                --background-directory /app/assets/backgrounds
           echo "Hello" > data.csv
-          rm -f client_secret.json
-          rm -f credentials.storage
+          # rm -f client_secret.json
+          # rm -f credentials.storage
 
       - name: Push updates
         run: |
-          git --version
-          echo "Git Debug Log"
-          git status
-          git branch
+          cat data.csv
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
-          cat data.csv
           git commit -m "TTSVibeLounge Scheduled Update" -a
           git push -f
