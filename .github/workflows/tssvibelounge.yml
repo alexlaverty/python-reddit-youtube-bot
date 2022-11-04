@@ -12,7 +12,7 @@ jobs:
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout repo content to github runner.
+        uses: actions/checkout@v3
 
       - name: Run ttsvibelounge Script
         env:
