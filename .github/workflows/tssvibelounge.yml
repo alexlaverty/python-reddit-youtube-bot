@@ -29,7 +29,7 @@ jobs:
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
-          playwright install
+          #playwright install
           ls -l /app/assets/backgrounds
           pwd
           ls -l .git
