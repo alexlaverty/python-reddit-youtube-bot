@@ -8,12 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    #container: alexlaverty/ttsvibelounge:1.0.3
-    #options: --user root
+    container: alexlaverty/ttsvibelounge:1.0.3
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v3 # checkout repo content to github runner.
+        uses: actions/checkout@v3
 
       - name: Run ttsvibelounge Script
         env:
@@ -27,21 +26,28 @@ jobs:
           RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
-          # echo $YOUTUBE_CLIENT_SECRET > client_secret.json
-          # echo $CREDENTIALS_STORAGE > credentials.storage
-          # cp config/auth-env.py config/auth.py
-          #playwright install
-          # python3 app.py --total-posts 1 \
-          #                --enable-upload \
-          #                --enable-background \
-          #                --background-directory /app/assets/backgrounds
-          echo "Hello" > data.csv
-          # rm -f client_secret.json
-          # rm -f credentials.storage
+          echo $YOUTUBE_CLIENT_SECRET > client_secret.json
+          echo $CREDENTIALS_STORAGE > credentials.storage
+          cp config/auth-env.py config/auth.py
+          playwright install
+          python3 app.py --total-posts 1 \
+                         --enable-upload \
+                         --enable-background \
+                         --background-directory /app/assets/backgrounds
+          rm -f client_secret.json
+          rm -f credentials.storage
+
+      - name: check for changes
+        run: |
+          if git diff --exit-code; then
+            echo "::set-env name=changes_exist::false"
+          else
+            echo "::set-env name=changes_exist::true"
+          fi
 
       - name: Push updates
+        if: env.changes_exist == 'true'
         run: |
-          cat data.csv
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
