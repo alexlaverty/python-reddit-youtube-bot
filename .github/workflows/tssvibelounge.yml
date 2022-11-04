@@ -8,13 +8,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: alexlaverty/ttsvibelounge:1.0.3
+    #container: alexlaverty/ttsvibelounge:1.0.3
+    #options: --user root
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # checkout repo content to github runner.
 
       - name: Run ttsvibelounge Script
+        uses: docker://alexlaverty/ttsvibelounge:1.0.3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -35,10 +37,12 @@ jobs:
           #                --enable-background \
           #                --background-directory /app/assets/backgrounds
           echo "Hello" > data.csv
-          git --version
           rm -f client_secret.json
           rm -f credentials.storage
-          git config --global --add safe.directory '*'
+
+      - name: Push updates
+        run: |
+          git --version
           echo "Git Debug Log"
           git status
           git branch
