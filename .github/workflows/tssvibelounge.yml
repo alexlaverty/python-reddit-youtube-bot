@@ -30,9 +30,6 @@ jobs:
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
           #playwright install
-          ls -l /app/assets/backgrounds
-          pwd
-          ls -l .git
           # python3 app.py --total-posts 1 \
           #                --enable-upload \
           #                --enable-background \
@@ -45,5 +42,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
+          cat data.csv
           git commit -m "TTSVibeLounge Scheduled Update" -a
           git push -f
