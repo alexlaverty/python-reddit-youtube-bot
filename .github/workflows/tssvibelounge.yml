@@ -1,12 +1,7 @@
-# Give your gitflow action a name
 name: TTSVibeLounge
-
-# Set a schedule to run, note it's in UTC time, so do the time conversion for your location
 on:
   schedule:
     - cron: '0 */6 * * *'
-
-Also run the build if I push anything into the master branch
   push:
     branches:
       - main
