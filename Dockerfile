@@ -15,6 +15,7 @@ RUN apt update -y && \
         libmagick++-dev \
         python3-pip \
         python3 \
+        git \
         ttf-mscorefonts-installer \
         vim && \
         fc-cache -f

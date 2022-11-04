@@ -2,7 +2,7 @@ import argparse
 import logging
 from simple_youtube_api.Channel import Channel
 from simple_youtube_api.LocalVideo import LocalVideo
-
+import config.settings as settings
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -12,6 +12,7 @@ logging.basicConfig(
         logging.FileHandler("debug.log"),
         logging.StreamHandler()
     ])
+
 
 def publish(video):
     logging.info('========== Uploading Video To Youtube ==========')
@@ -36,7 +37,7 @@ def publish(video):
     # setting status
     youtube_upload.set_embeddable(True)
     youtube_upload.set_license("creativeCommon")
-    youtube_upload.set_privacy_status("public")
+    youtube_upload.set_privacy_status(settings.youtube_privacy_status)
     youtube_upload.set_public_stats_viewable(True)
 
     # setting thumbnail
@@ -50,6 +51,7 @@ def publish(video):
     except Exception as e:
         logging.info(f'Error uploading video : {video.title}')
         print(e)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
