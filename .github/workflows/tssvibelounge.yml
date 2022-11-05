@@ -38,6 +38,9 @@ jobs:
           RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
+          echo $PWD
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
