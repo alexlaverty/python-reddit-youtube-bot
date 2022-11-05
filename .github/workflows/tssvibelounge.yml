@@ -11,8 +11,20 @@ jobs:
     container: alexlaverty/ttsvibelounge:1.0.3
     steps:
 
+      # Git version in container must match git version on ubuntu server
+      - name: get git
+        run: |
+          apt update -y
+          apt install -y libz-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext cmake gcc
+          wget https://github.com/git/git/archive/refs/tags/v2.38.1.tar.gz
+          tar -xvf v2.38.1.tar.gz
+          cd git-2.38.1
+          make prefix=/usr/local all
+          make prefix=/usr/local install
+          git --version
+
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout repo content to github runner.
+        uses: actions/checkout@v3
 
       - name: Run ttsvibelounge Script
         env:
@@ -29,19 +41,26 @@ jobs:
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           echo $CREDENTIALS_STORAGE > credentials.storage
           cp config/auth-env.py config/auth.py
-          #playwright install
-          ls -l /app/assets/backgrounds
-          pwd
-          ls -l .git
-          # python3 app.py --total-posts 1 \
-          #                --enable-upload \
-          #                --enable-background \
-          #                --background-directory /app/assets/backgrounds
-          echo "Hello" > data.csv
+          playwright install
+          python3 app.py --total-posts 1 \
+                         --enable-upload \
+                         --enable-background \
+                         --background-directory /app/assets/backgrounds
           rm -f client_secret.json
           rm -f credentials.storage
-          git config --global --add safe.directory '*'
-          git status
+
+      - name: check for changes
+        run: |
+          git config --global --add safe.directory $(realpath .)
+          if git diff --exit-code data.csv; then
+            echo "changes_exist=true" >> $GITHUB_ENV
+          else
+            echo "changes_exist=false" >> $GITHUB_ENV
+          fi
+
+      - name: Push updates
+        if: env.changes_exist == 'true'
+        run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.csv
