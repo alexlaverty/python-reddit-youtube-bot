@@ -56,9 +56,11 @@ jobs:
         run: |
           git config --global --add safe.directory $(realpath .)
           if git diff --exit-code data.csv; then
-            echo "changes_exist=true" >> $GITHUB_ENV
-          else
+             echo changes_exist=false
             echo "changes_exist=false" >> $GITHUB_ENV
+          else
+            echo changes_exist=true
+            echo "changes_exist=true" >> $GITHUB_ENV
           fi
 
       - name: Push updates
