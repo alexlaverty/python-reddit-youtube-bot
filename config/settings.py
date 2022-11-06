@@ -37,7 +37,7 @@ tiktok_voice = "en_us_006"
 voice_engine = "edge-tts"
 
 # Comment Settings
-banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBl"
+banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBlLGZ1Y2sscmV0YXJkLG1vdGhlcmZ1Y2tlcg=="
 theme = "dark"
 minimum_num_comments = 200
 reddit_comment_opacity = 1
@@ -58,6 +58,7 @@ enable_nsfw_content = False
 enable_overlay = False
 enable_selftext = True
 enable_upload = False
+enable_screenshot_title_image = True
 lexica_download_enabled = True  # Download files from Lexica
 max_video_length = 600  # Seconds
 maximum_length_self_text = 3000
@@ -78,6 +79,7 @@ vertical_video_width = 1080
 vertical_video_height = 1920
 # Video Orientation choices ["landscape","portrait"]
 orientation = "landscape"
+
 
 clip_size = (video_width, video_height)
 
@@ -100,6 +102,7 @@ background_directory = str(Path(assets_directory, "backgrounds"))
 soundeffects_directory = str(Path(assets_directory, "soundeffects"))
 video_overlay_filepath = str(Path(assets_directory, "particles.mp4"))
 videos_directory = "videos"
+add_hashtag_shorts_to_description = False
 
 # Youtube
 # Choices ['private', 'unlisted', 'public']
