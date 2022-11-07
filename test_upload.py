@@ -6,11 +6,13 @@ import os
 directory = os.getcwd()
 print(directory)
 
+
 class Video():
-    video = f"{directory}\\videos\\yf93yg_What_city_will_you_NEVER_visit_based_on_its_reputa\\final.mp4"
+    video = f"{directory}\\videos\\ylg9ls_Does_anyone_know_how_a_loss_curve_like_this_can_ha\\final.mp4"
     title = "What city will you NEVER visit based on it's reputation? (r\\AskReddit)"
-    thumbnail = f"{directory}\\videos\\yf93yg_What_city_will_you_NEVER_visit_based_on_its_reputa\\thumbnail_2.png"
+    thumbnail = f"{directory}\\videos\\ylg9ls_Does_anyone_know_how_a_loss_curve_like_this_can_ha\\thumbnail_0.png"
     description = "TTSVibeLounge"
+
 
 v = Video()
 
@@ -32,7 +34,7 @@ video.set_default_language("en-US")
 # setting status
 video.set_embeddable(True)
 video.set_license("creativeCommon")
-video.set_privacy_status("public")
+video.set_privacy_status("private")
 video.set_public_stats_viewable(True)
 
 # setting thumbnail
