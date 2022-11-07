@@ -43,8 +43,8 @@ def process_submissions(submissions):
                           f"{submission.id}_{title_path}"))
         video_filepath = str(Path(folder_path,
                                   "final.mp4"))
-        if os.path.exists(video_filepath):
-            print(f"Final video already compiled : {video_filepath}")
+        if os.path.exists(video_filepath) or csvwriter.is_uploaded(submission.id):
+            print(f"Final video already processed : {submission.id}")
         else:
             process_submission(submission)
             post_count += 1
@@ -188,18 +188,31 @@ def get_args():
                         default='landscape',
                         help='Sort Reddit posts by')
 
+    parser.add_argument('--shorts',
+                        action='store_true',
+                        help='Generate Youtube Shorts Video')
+
     args = parser.parse_args()
 
     if args.orientation:
         settings.orientation = args.orientation
-        settings.video_height = settings.vertical_video_height
-        settings.video_width = settings.vertical_video_width
+        if args.orientation == "portrait":
+            settings.video_height = settings.vertical_video_height
+            settings.video_width = settings.vertical_video_width
         logging.info(f'Setting Orientation to : \
                      {str(settings.orientation)}')
         logging.info(f'Setting video_height to : \
                      {str(settings.video_height)}')
         logging.info(f'Setting video_width to : \
                     {str(settings.video_width)}')
+
+    if args.shorts:
+        logging.info("Generating Youtube Shorts Video")
+        settings.orientation = "portrait"
+        settings.video_height = settings.vertical_video_height
+        settings.video_width = settings.vertical_video_width
+        settings.max_video_length = 59
+        settings.add_hashtag_shorts_to_description = True
 
     if args.submission_score:
         settings.minimum_submission_score = args.submission_score

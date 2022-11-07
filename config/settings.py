@@ -37,7 +37,7 @@ tiktok_voice = "en_us_006"
 voice_engine = "edge-tts"
 
 # Comment Settings
-banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBlLGZ1Y2sscmV0YXJkLG1vdGhlcmZ1Y2tlcg=="
+banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBlLGZ1Y2sscmV0YXJkLG1vdGhlcmZ1Y2tlcixyYXBpc3Q="
 theme = "dark"
 minimum_num_comments = 200
 reddit_comment_opacity = 1

@@ -15,10 +15,18 @@ RUN apt update -y && \
         libmagick++-dev \
         python3-pip \
         python3 \
-        git \
+        #git \
         ttf-mscorefonts-installer \
         vim && \
         fc-cache -f
+
+# Install specific version of git to satisfy github workflow action requirements
+run apt install -y libz-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext cmake gcc && \
+    wget https://github.com/git/git/archive/refs/tags/v2.38.1.tar.gz && \
+    tar -xvf v2.38.1.tar.gz && \
+    cd git-2.38.1 && \
+    make prefix=/usr/local all && \
+    make prefix=/usr/local install
 
 COPY . /app
 

@@ -14,7 +14,8 @@ import random
 import config.settings as settings
 import speech.speech as speech
 import sys
-from comments.screenshot import download_screenshots_of_reddit_posts
+from comments.screenshot import (download_screenshots_of_reddit_posts,
+                                 download_screenshot_of_reddit_post_title)
 from thumbnail.thumbnail import get_font_size
 from utils.common import (give_emoji_free_text, contains_url, sanitize_text)
 import publish.youtube as youtube
@@ -113,6 +114,10 @@ def create(video_directory, post, thumbnails):
 
     v.description = f"{v.meta.title}\n\n{v.meta.selftext}\n\n\
                     #reddit #{subreddit_name} #tts"
+
+    if settings.add_hashtag_shorts_to_description:
+        v.description += " #shorts"
+
     v.title = f"{sanitize_text(v.meta.title)}"
     height = settings.video_height
     width = settings.video_width
@@ -163,16 +168,42 @@ def create(video_directory, post, thumbnails):
 
     title_fontsize, lineheight = get_font_size(len(v.meta.title))
 
-    title_clip = (
-    ImageClip(v.thumbnail)
-        .set_position(("center", "center"))
-        .set_duration(audioclip_title.duration + settings.pause)
-        .set_audio(audioclip_title)
-        .set_start(t)
-        .set_opacity(settings.reddit_comment_opacity)
-        .resize(width=settings.video_width * settings.reddit_comment_width)
-    )
     # Generate Title Clip
+
+    if settings.enable_screenshot_title_image:
+        screenshot_directory = Path(settings.screenshot_directory, v.meta.id)
+        download_screenshot_of_reddit_post_title(
+            f"http://reddit.com{v.meta.permalink}", screenshot_directory
+        )
+        title_path = str(
+            Path(screenshot_directory, "title.png")
+        )
+        title_clip = (
+            ImageClip(title_path)
+            .set_position(("center", "center"))
+            .set_duration(audioclip_title.duration + settings.pause)
+            .set_audio(audioclip_title)
+            .set_start(t)
+            .set_opacity(settings.reddit_comment_opacity)
+        )
+        if title_clip.w > title_clip.h:
+            print("Resizing Horizontally")
+            title_clip = title_clip.resize(width=settings.video_width *
+                                           settings.reddit_comment_width)
+        else:
+            print("Resizing Vertically")
+            title_clip = title_clip.resize(height=settings.video_height * 0.95)
+    else:
+        title_clip = (
+            ImageClip(v.thumbnail)
+            .set_position(("center", "center"))
+            .set_duration(audioclip_title.duration + settings.pause)
+            .set_audio(audioclip_title)
+            .set_start(t)
+            .set_opacity(settings.reddit_comment_opacity)
+            .resize(width=settings.video_width * settings.reddit_comment_width)
+        )
+
     v.clips.append(title_clip)
 
     t += audioclip_title.duration + settings.pause
@@ -355,7 +386,9 @@ def create(video_directory, post, thumbnails):
         screenshot_directory = Path(settings.screenshot_directory, v.meta.id)
         if settings.commentstyle == "reddit":
             download_screenshots_of_reddit_posts(
-                accepted_comments, v.meta.url, screenshot_directory
+                accepted_comments,
+                f"http://reddit.com{v.meta.permalink}",
+                screenshot_directory
             )
 
         for count, accepted_comment in enumerate(accepted_comments):
@@ -399,6 +432,15 @@ def create(video_directory, post, thumbnails):
                     logging.info(f"Comment larger than video height : {img_path}")
                     continue
 
+                if v.duration + audioclip.duration > settings.max_video_length:
+                    logging.info(
+                        "Reached Maximum Video Length : "
+                        + str(settings.max_video_length)
+                    )
+                    logging.info(f"Used {str(count)}/{str(len(accepted_comments))} comments")
+                    logging.info("=== Finished Processing Comments ===")
+                    break
+
                 t += audioclip.duration + settings.pause
                 v.duration += audioclip.duration + settings.pause
 
@@ -408,15 +450,6 @@ def create(video_directory, post, thumbnails):
                 logging.debug(str(len(v.clips)))
 
                 logging.info("Current Video Duration : " + str(v.duration))
-
-                if v.duration > settings.max_video_length:
-                    logging.info(
-                        "Reached Maximum Video Length : "
-                        + str(settings.max_video_length)
-                    )
-                    logging.info(f"Used {str(count)}/{str(len(accepted_comments))} comments")
-                    logging.info("=== Finished Processing Comments ===")
-                    break
 
             if settings.commentstyle == "text":
 
@@ -494,6 +527,15 @@ def create(video_directory, post, thumbnails):
                                 Skipping Comment"
                             )
                             continue
+
+                        if v.duration + audioclip.duration > settings.max_video_length:
+                            logging.info(
+                                "Reached Maximum Video Length : "
+                                + str(settings.max_video_length)
+                            )
+                            logging.info(f"Used {str(count)}/{str(len(accepted_comments))} comments")
+                            logging.info("=== Finished Processing Comments ===")
+                            break
 
                     t += audioclip.duration + settings.pause
                     v.duration += audioclip.duration + settings.pause
@@ -678,7 +720,7 @@ def create(video_directory, post, thumbnails):
     else:
         logging.info("Skipping Video Compilation --enable_compilation passed")
 
-    if settings.enable_compilation and settings.enable_upload :
+    if settings.enable_compilation and settings.enable_upload:
         if exists("client_secret.json") and exists("credentials.storage"):
             if csvwriter.is_uploaded(v.meta.id):
                 logging.info("Already uploaded according to data.csv")
