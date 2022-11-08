@@ -59,6 +59,7 @@ enable_overlay = False
 enable_selftext = True
 enable_upload = False
 enable_screenshot_title_image = False
+enable_reddit_mentions = False
 lexica_download_enabled = True  # Download files from Lexica
 max_video_length = 600  # Seconds
 maximum_length_self_text = 3000

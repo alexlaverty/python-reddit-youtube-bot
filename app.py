@@ -106,6 +106,10 @@ def print_version_info():
 def get_args():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--enable-mentions',
+                        action='store_true',
+                        help='Check reddit account for u mentions')
+
     parser.add_argument('--disable-selftext',
                         action='store_true',
                         help='Disable selftext video generation')
@@ -214,6 +218,10 @@ def get_args():
         settings.max_video_length = 59
         settings.add_hashtag_shorts_to_description = True
 
+    if args.enable_mentions:
+        settings.enable_reddit_mentions = True
+        logging.info('Enable Generate Videos from User Mentions')
+
     if args.submission_score:
         settings.minimum_submission_score = args.submission_score
         logging.info(f'Setting Reddit Post Minimum Submission Score : \
@@ -289,13 +297,23 @@ if __name__ == "__main__":
     csvwriter = CsvWriter()
     csvwriter.initialise_csv()
 
+    submissions = []
+
     if args.url:
         urls = args.url.split(",")
-        submissions = []
         for url in urls:
             submissions.append(reddit.get_reddit_submission(url))
-    else:
-        submissions = reddit.posts()
+
+    if settings.enable_reddit_mentions:
+        logging.info('Getting Reddit Mentions')
+        mention_posts = reddit.get_reddit_mentions()
+        for mention_post in mention_posts:
+            logging.info(f'Reddit Mention : {mention_post}')
+            submissions.append(reddit.get_reddit_submission(mention_post))
+
+    reddit_posts = reddit.posts()
+    for reddit_post in reddit_posts:
+        submissions.append(reddit_post)
 
     if submissions:
         process_submissions(submissions)
