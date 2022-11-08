@@ -34,6 +34,8 @@ jobs:
           PRAW_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
           PRAW_CLIENT_SECRET: ${{ secrets.PRAW_CLIENT_SECRET }}
           PRAW_USER_AGENT: ${{ secrets.PRAW_USER_AGENT }}
+          PRAW_USERNAME: ${{ secrets.PRAW_USERNAME }}
+          PRAW_PASSWORD: ${{ secrets.PRAW_PASSWORD }}
           RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
           RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
