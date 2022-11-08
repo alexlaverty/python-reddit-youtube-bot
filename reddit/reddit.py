@@ -2,6 +2,7 @@ import praw
 import config.settings as settings
 import config.auth as auth
 import base64
+import re
 
 
 def is_valid_submission(submission):
@@ -55,6 +56,23 @@ def get_reddit_submission(url):
     )
     submission = r.submission(url=url)
     return submission
+
+
+def get_reddit_mentions():
+    r = praw.Reddit(
+        client_id=auth.praw_client_id,
+        client_secret=auth.praw_client_secret,
+        user_agent=auth.praw_user_agent,
+        username=auth.praw_username,
+        password=auth.praw_password,
+    )
+    mention_urls = []
+    for mention in r.inbox.mentions(limit=None):
+        post_url = re.sub(f"/{mention.id}/\?context=\d", '', mention.context, flags=re.IGNORECASE)
+        mention_urls.append(
+            f"https://www.reddit.com{post_url}"
+        )
+    return mention_urls
 
 
 def get_reddit_submissions():
