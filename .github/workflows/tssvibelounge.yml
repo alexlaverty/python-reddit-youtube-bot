@@ -11,17 +11,17 @@ jobs:
     container: alexlaverty/ttsvibelounge:1.0.3
     steps:
 
-      # Git version in container must match git version on ubuntu server
-      - name: get git
-        run: |
-          apt update -y
-          apt install -y libz-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext cmake gcc
-          wget https://github.com/git/git/archive/refs/tags/v2.38.1.tar.gz
-          tar -xvf v2.38.1.tar.gz
-          cd git-2.38.1
-          make prefix=/usr/local all
-          make prefix=/usr/local install
-          git --version
+      # # Git version in container must match git version on ubuntu server
+      # - name: get git
+      #   run: |
+      #     apt update -y
+      #     apt install -y libz-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext cmake gcc
+      #     wget https://github.com/git/git/archive/refs/tags/v2.38.1.tar.gz
+      #     tar -xvf v2.38.1.tar.gz
+      #     cd git-2.38.1
+      #     make prefix=/usr/local all
+      #     make prefix=/usr/local install
+      #     git --version
 
       - name: checkout repo content
         uses: actions/checkout@v3
