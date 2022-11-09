@@ -8,8 +8,10 @@ import re
 def is_valid_submission(submission):
     if submission.stickied:
         return False
-    if not submission.is_self:
+
+    if not settings.enable_screenshot_title_image and not submission.is_self:
         return False
+
     if (
         len(submission.title) < settings.title_length_minimum
         or len(submission.title) > settings.title_length_maximum

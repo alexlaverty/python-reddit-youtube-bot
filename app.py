@@ -303,19 +303,19 @@ if __name__ == "__main__":
         urls = args.url.split(",")
         for url in urls:
             submissions.append(reddit.get_reddit_submission(url))
+    else:
+        if settings.enable_reddit_mentions:
+            logging.info('Getting Reddit Mentions')
+            mention_posts = reddit.get_reddit_mentions()
+            for mention_post in mention_posts:
+                logging.info(f'Reddit Mention : {mention_post}')
+                submissions.append(reddit.get_reddit_submission(mention_post))
 
-    if settings.enable_reddit_mentions:
-        logging.info('Getting Reddit Mentions')
-        mention_posts = reddit.get_reddit_mentions()
-        for mention_post in mention_posts:
-            logging.info(f'Reddit Mention : {mention_post}')
-            submissions.append(reddit.get_reddit_submission(mention_post))
+        reddit_posts = reddit.posts()
+        for reddit_post in reddit_posts:
+            submissions.append(reddit_post)
 
-    reddit_posts = reddit.posts()
-    for reddit_post in reddit_posts:
-        submissions.append(reddit_post)
+        submissions = reddit.get_valid_submissions(submissions)
 
-    valid_submissions = reddit.get_valid_submissions(submissions)
-
-    if valid_submissions:
-        process_submissions(valid_submissions)
+    if submissions:
+        process_submissions(submissions)

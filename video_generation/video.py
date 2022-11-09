@@ -437,7 +437,8 @@ def create(video_directory, post, thumbnails):
                         "Reached Maximum Video Length : "
                         + str(settings.max_video_length)
                     )
-                    logging.info(f"Used {str(count)}/{str(len(accepted_comments))} comments")
+                    used_comment_ratio = f"{str(count)}/{str(len(accepted_comments))}"
+                    logging.info(f"Used {used_comment_ratio} comments")
                     logging.info("=== Finished Processing Comments ===")
                     break
 
