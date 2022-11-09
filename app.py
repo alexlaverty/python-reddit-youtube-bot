@@ -315,5 +315,7 @@ if __name__ == "__main__":
     for reddit_post in reddit_posts:
         submissions.append(reddit_post)
 
-    if submissions:
-        process_submissions(submissions)
+    valid_submissions = reddit.get_valid_submissions(submissions)
+
+    if valid_submissions:
+        process_submissions(valid_submissions)

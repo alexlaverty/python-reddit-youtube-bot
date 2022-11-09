@@ -106,8 +106,6 @@ def get_reddit_submissions():
 
 
 def get_valid_submissions(submissions):
-    post_total = settings.total_posts_to_process
-    post_count = 0
     valid_submissions = []
     print("===== Retrieving valid Reddit submissions =====")
     print("ID, SCORE, NUM_COMMENTS, LEN_SELFTEXT, SUBREDDIT, TITLE")
@@ -123,5 +121,4 @@ def get_valid_submissions(submissions):
 
 def posts():
     submissions = get_reddit_submissions()
-    valid_submissions = get_valid_submissions(submissions)
-    return valid_submissions
+    return submissions
