@@ -35,6 +35,7 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
 
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
+        context.set_default_timeout(settings.comment_screenshot_timeout)
         if settings.theme == "dark":
             cookie_file = open(
                 f"{os.getcwd()}/comments/cookie-dark-mode.json", encoding="utf-8"
