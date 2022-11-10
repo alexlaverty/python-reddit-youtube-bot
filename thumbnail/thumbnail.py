@@ -80,10 +80,10 @@ def get_font_size(length):
         fontsize = 190
 
     if length >= 10 and length < 20:
-        fontsize = 140
+        fontsize = 150
 
     if length >= 20 and length < 30:
-        fontsize = 170
+        fontsize = 150
 
     if length >= 30 and length < 40:
         fontsize = 130
@@ -127,6 +127,7 @@ def generate(
 
     # Get rid of double spaces
     title = title.replace("  ", " ")
+    title = title.replace("’", "")
 
     logging.info(title)
 
@@ -211,6 +212,7 @@ def create_thumbnail(video_directory, subreddit, title, image, index=0):
         return txt_clip
 
     # fontsize = 40
+    title = title.replace("’", "")
     fontsize, lineheight = get_font_size(len(title))
     logging.info(f"Title Length : {str(len(title))}")
     logging.info("Optimising Font Size :")
