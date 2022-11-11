@@ -414,16 +414,20 @@ def create(video_directory, post, thumbnails):
                          "comment_" + accepted_comment.id + ".png")
                 )
                 if exists(img_path):
-                    img_clip = (
-                        ImageClip(img_path)
-                        .set_position(("center", "center"))
-                        .set_duration(audioclip.duration + settings.pause)
-                        .set_audio(audioclip)
-                        .set_start(t)
-                        .set_opacity(settings.reddit_comment_opacity)
-                        .resize(width=settings.video_width
-                                * settings.reddit_comment_width)
-                    )
+                    try:
+                        img_clip = (
+                            ImageClip(img_path)
+                            .set_position(("center", "center"))
+                            .set_duration(audioclip.duration + settings.pause)
+                            .set_audio(audioclip)
+                            .set_start(t)
+                            .set_opacity(settings.reddit_comment_opacity)
+                            .resize(width=settings.video_width
+                                    * settings.reddit_comment_width)
+                        )
+                    except Exception as e:
+                        print(e)
+                        continue
                 else:
                     logging.info(f"Comment image not found : {img_path}")
                     continue
