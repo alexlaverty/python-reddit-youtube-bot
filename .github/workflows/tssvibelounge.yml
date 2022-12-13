@@ -22,6 +22,7 @@ jobs:
       #     make prefix=/usr/local all
       #     make prefix=/usr/local install
       #     git --version
+      #     gh secret set CREDENTIALS_STORAGE_REFRESH < credentials.storage
 
       - name: checkout repo content
         uses: actions/checkout@v3
@@ -52,9 +53,9 @@ jobs:
                          --enable-background \
                          --background-directory /app/assets/backgrounds \
                          --enable-mentions
-          gh secret set CREDENTIALS_STORAGE_REFRESH < credentials.storage
           rm -f client_secret.json
           rm -f credentials.storage
+
 
       - name: check for changes
         run: |
