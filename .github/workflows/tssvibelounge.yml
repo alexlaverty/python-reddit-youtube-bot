@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: alexlaverty/ttsvibelounge:1.0.3
+    container: alexlaverty/ttsvibelounge:1.0.4
     steps:
 
       # # Git version in container must match git version on ubuntu server
