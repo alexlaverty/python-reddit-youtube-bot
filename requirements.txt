@@ -18,3 +18,4 @@ simple-youtube-api
 varname
 pandas
 numpy
+PyNaCl
