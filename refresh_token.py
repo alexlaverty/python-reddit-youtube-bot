@@ -5,7 +5,7 @@ from nacl import encoding, public
 
 github_user = "alexlaverty"
 github_repo = "ttsvibelounge"
-github_token = os.getenv('GITHUB_TOKEN')
+github_token = os.getenv('GH_TOKEN')
 secret_name = "CREDENTIALS_STORAGE"
 api_endpoint = f"https://api.github.com/repos/{github_user}/{github_repo}"
 
