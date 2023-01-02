@@ -40,6 +40,7 @@ jobs:
           RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
           RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           echo $PWD
           echo ${{ github.workspace }}
