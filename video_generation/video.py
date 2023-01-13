@@ -97,6 +97,13 @@ def convert_keywords_to_string(keywords):
     return keyword_string.strip()
 
 
+def get_random_lines(file_name, num_lines):
+    with open(file_name, 'r') as file:
+        lines = file.readlines()
+        random_lines = random.sample(lines, num_lines)
+        return '\n'.join(random_lines)
+
+
 def create(video_directory, post, thumbnails):
     logging.info("========== Processing Reddit Post ==========")
     print_post_details(post)
@@ -112,8 +119,7 @@ def create(video_directory, post, thumbnails):
 
     subreddit_name = v.meta.subreddit_name_prefixed.replace("r/", "")
 
-    v.description = f"{v.meta.title}\n\n{v.meta.selftext}\n\n\
-                    #reddit #{subreddit_name} #tts"
+    v.description = get_random_lines('referral.txt', 5)
 
     if settings.add_hashtag_shorts_to_description:
         v.description += " #shorts"
