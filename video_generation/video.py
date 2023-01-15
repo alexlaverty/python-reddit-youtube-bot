@@ -404,6 +404,7 @@ def create(video_directory, post, thumbnails):
                     {str(count)}/{str(len(accepted_comments))} ==="
             )
 
+
             if settings.commentstyle == "reddit":
 
                 audio_filepath = str(
@@ -588,6 +589,7 @@ def create(video_directory, post, thumbnails):
             VideoFileClip(background_filepath)
             .set_start(tb)
             .volumex(settings.background_volume)
+            .set_opacity(settings.background_opacity)
         )
 
         if settings.orientation == "portrait":
