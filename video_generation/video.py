@@ -119,7 +119,7 @@ def create(video_directory, post, thumbnails):
 
     subreddit_name = v.meta.subreddit_name_prefixed.replace("r/", "")
 
-    v.description = get_random_lines('referral.txt', 5)
+    v.description = get_random_lines('referral.txt', 1)
 
     if settings.add_hashtag_shorts_to_description:
         v.description += " #shorts"
