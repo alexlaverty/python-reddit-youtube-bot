@@ -39,6 +39,10 @@ Checkout my Youtube Channel for example videos made by this repo :
 
 # Windows
 
+
+[Watch the Python Reddit Youtube Bot Tutorial Video :](https://youtu.be/LaFFU9EskfA)
+[![Watch the video](assets/images/python-reddit-youtube-bot-tutorial.png)](https://youtu.be/LaFFU9EskfA)
+
 ## <a name='install-prerequisite-components'></a>Install Prerequisite Components
 
 Install these prerequisite components first :
