@@ -29,10 +29,10 @@ Scrape posts from Reddit and automatically generate Youtube Videos and Thumbnail
 
 Checkout my Youtube Channel for example videos made by this repo :
 
-What crime are you okay with people committing?
+[What crime are you okay with people committing?](https://youtu.be/gOX1Uhxba-g)
 [![Watch the video](assets/images/xm5gsv_thumbnail.png)](https://youtu.be/gOX1Uhxba-g)
 
-What show has no likable characters?
+[What show has no likable characters?](https://youtu.be/xAaPbntOVb8)
 [![Watch the video](assets/images/Whatshowhasnolikablecharacters.png)](https://youtu.be/xAaPbntOVb8)
 
 # Quickstart Guide
