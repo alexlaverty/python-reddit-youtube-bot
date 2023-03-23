@@ -358,6 +358,11 @@ def create(video_directory, post, thumbnails):
                 rejected_comments.append(c)
                 continue
 
+            if "covid" in comment.lower() or "vaccine" in comment.lower():
+                logging.info("Status : REJECTED, Covid related, Youtube will Channel Strike..: " + comment)
+                rejected_comments.append(c)
+                continue
+
             comment = give_emoji_free_text(comment)
             comment = os.linesep.join([s for s in comment.splitlines() if s])
 

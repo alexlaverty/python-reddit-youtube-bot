@@ -45,7 +45,12 @@ def is_valid_submission(submission):
             f"{submission.title} <-- Number of comments too low!"
         )
         return False
-    if "update" in submission.title.lower() :
+    if "update" in submission.title.lower():
+        return False
+    if "covid" in submission.title.lower() or "vaccine" in submission.title.lower():
+        print(
+            f"{submission.title} <-- Youtube Channel Strikes if Covid content...!"
+        )
         return False
     return True
 
