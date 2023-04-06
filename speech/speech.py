@@ -82,7 +82,7 @@ def create_audio(path, text):
             file.close()
 
         if settings.voice_engine == "gtts":
-            ttmp3 = gTTS(text)
+            ttmp3 = gTTS(text, lang=settings.gtts_language, slow=False)
             ttmp3.save(path)
 
         if settings.voice_engine == "streamlabspolly":

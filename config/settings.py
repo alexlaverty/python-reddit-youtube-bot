@@ -33,6 +33,19 @@ pause = 1 # Pause after speech
 streamlabs_polly_voice = "Brian"
 tiktok_voice = "en_us_006"
 
+# Set the gtts language, examples :
+# English (en)
+# Spanish (es)
+# French (fr)
+# German (de)
+# Italian (it)
+# Portuguese (pt)
+# Dutch (nl)
+# Russian (ru)
+# Mandarin Chinese (zh-cn)
+# Japanese (ja)
+gtts_language = 'en'
+
 # Choices ["polly","balcon","gtts","tiktok","edge-tts","streamlabspolly"]
 voice_engine = "edge-tts"
 
