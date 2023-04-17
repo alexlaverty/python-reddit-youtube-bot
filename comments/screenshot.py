@@ -67,9 +67,13 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
                 path=f"assets/temp/{id}/png/story_content.png"
             )
         else:
-            page.locator('[data-test-id="post-content"]').screenshot(
-                path=f"{video_directory}/title.png"
-            )
+            try:
+                page.locator('[data-test-id="post-content"]').screenshot(
+                    path=f"{video_directory}/title.png"
+                )
+            except:
+                print("post-content title.png screenshot failed...")
+                pass
             for idx, comment in enumerate(
                 track(accepted_comments, "Downloading screenshots...")
             ):
