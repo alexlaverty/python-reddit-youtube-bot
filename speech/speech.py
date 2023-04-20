@@ -43,7 +43,7 @@ def process_speech_text(text):
     text = text.replace("WIBTA", " would I be the asshole ")
     text = text.replace(" stfu ", " shut the fuck up ")
     text = text.replace(" OP ", " o p ")
-    text = text.replace(" CB ", "choosing beggar")
+    text = text.replace(" CB ", " choosing beggar ")
     text = text.replace("pettyrevenge", "petty revenge")
     text = text.replace("askreddit", "ask reddit")
     text = text.replace("twoxchromosomes", "two x chromosomes")
