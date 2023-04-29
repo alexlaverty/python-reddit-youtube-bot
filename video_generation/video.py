@@ -148,7 +148,7 @@ def create(video_directory, post, thumbnails):
     audio_title = str(Path(speech_directory, "title.mp3"))
 
     title_speech_text = f"{sanitize_text(v.meta.title)}"
-
+   
     speech.create_audio(audio_title, title_speech_text)
 
     audioclip_title = AudioFileClip(audio_title).volumex(2)
@@ -498,17 +498,17 @@ def create(video_directory, post, thumbnails):
 
                     txt_clip = (
                         TextClip(
-                            current_clip_text,
+                            accepted_comment.body,
                             font=settings.text_font,
                             fontsize=settings.text_fontsize,
                             color=settings.text_color,
                             size=txt_clip_size,
                             kerning=-1,
                             method="caption",
-                            # bg_color=settings.text_bg_color,
+                            bg_color=settings.text_bg_color,
                             align="West",
                         )
-                        .set_position((clip_margin, clip_margin_top))
+                        .set_position(("center", "center"))
                         .set_duration(audioclip.duration + settings.pause)
                         .set_audio(audioclip)
                         .set_start(t)

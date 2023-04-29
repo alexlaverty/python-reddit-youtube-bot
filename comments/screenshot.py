@@ -7,6 +7,7 @@ import config.settings as settings
 import json
 import os
 import re
+import config.auth as auth
 
 storymode = False
 
@@ -44,12 +45,22 @@ def download_screenshots_of_reddit_posts(accepted_comments, url, video_directory
             cookie_file = open(
                 f"{os.getcwd()}/comments/cookie-light-mode.json", encoding="utf-8"
             )
-        cookies = json.load(cookie_file)
-        context.add_cookies(cookies)  # load preference cookies
+
         # Get the thread screenshot
         page = context.new_page()
+
+        page.goto('https://www.reddit.com/login')
+        page.type('#loginUsername', auth.praw_username)
+        page.type('#loginPassword', auth.praw_password)
+        page.click('button[type="submit"]')
+        page.wait_for_url('https://www.reddit.com/')
+
+        cookies = json.load(cookie_file)
+        context.add_cookies(cookies)  # load preference cookies
+        
         page.goto(url, timeout=0)
         page.set_viewport_size(ViewportSize(width=1920, height=1080))
+   
         if page.locator('[data-testid="content-gate"]').is_visible():
             # This means the post is NSFW and requires to click the proceed button.
 

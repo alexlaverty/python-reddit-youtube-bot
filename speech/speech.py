@@ -65,7 +65,7 @@ def process_speech_text(text):
 def create_audio(path, text):
     # logging.info(f"Generating Audio File : {text}")
     text = process_speech_text(text)
-    if not os.path.exists(path):
+    if not os.path.exists(path) or not os.path.getsize(path) > 0:
 
         if settings.voice_engine == "polly":
             polly_client = boto3.Session(

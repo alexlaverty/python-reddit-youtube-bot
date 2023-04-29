@@ -63,6 +63,7 @@ comment_screenshot_timeout = 30000
 background_colour = [26, 26, 27]
 background_opacity = 0.5
 background_volume = 0.5
+# commentstyle = ["reddit", "text"]
 commentstyle = "reddit"
 enable_background = False
 enable_comments = True
