@@ -53,7 +53,8 @@ jobs:
                          --enable-upload \
                          --enable-background \
                          --background-directory /app/assets/backgrounds \
-                         --enable-mentions
+                         --enable-mentions \
+                         --enable-saved-posts \
           python3 refresh_token.py
           rm -f client_secret.json
           rm -f credentials.storage
