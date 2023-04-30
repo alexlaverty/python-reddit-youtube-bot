@@ -110,6 +110,10 @@ def get_args():
                         action='store_true',
                         help='Check reddit account for u mentions')
 
+    parser.add_argument('--enable-saved-posts',
+                        action='store_true',
+                        help='Check reddit account for saved posts')
+
     parser.add_argument('--disable-selftext',
                         action='store_true',
                         help='Disable selftext video generation')
@@ -222,6 +226,10 @@ def get_args():
         settings.enable_reddit_mentions = True
         logging.info('Enable Generate Videos from User Mentions')
 
+    if args.enable_saved_posts:
+        settings.enable_saved_posts = True
+        logging.info('Enable Retrieving URLs from Saved Posts')
+
     if args.submission_score:
         settings.minimum_submission_score = args.submission_score
         logging.info(f'Setting Reddit Post Minimum Submission Score : \
@@ -310,6 +318,13 @@ if __name__ == "__main__":
             for mention_post in mention_posts:
                 logging.info(f'Reddit Mention : {mention_post}')
                 submissions.append(reddit.get_reddit_submission(mention_post))
+
+        if settings.enable_saved_posts:
+            # Retrieve the authenticated user's saved posts
+            saved_posts = reddit.get_reddit_saved()
+            for saved_post in saved_posts:
+                logging.info(f'Reddit Saved Post : {saved_post.title}')
+                submissions.append(saved_post)
 
         reddit_posts = reddit.posts()
         for reddit_post in reddit_posts:
