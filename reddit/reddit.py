@@ -16,6 +16,7 @@ def is_valid_submission(submission):
         len(submission.title) < settings.title_length_minimum
         or len(submission.title) > settings.title_length_maximum
     ):
+        f"{submission.title} <-- Does not meet title length requirements!"
         return False
     if not settings.enable_nsfw_content:
         if submission.over_18:
@@ -80,6 +81,17 @@ def get_reddit_mentions():
             f"https://www.reddit.com{post_url}"
         )
     return mention_urls
+
+def get_reddit_saved():
+    r = praw.Reddit(
+        client_id=auth.praw_client_id,
+        client_secret=auth.praw_client_secret,
+        user_agent=auth.praw_user_agent,
+        username=auth.praw_username,
+        password=auth.praw_password,
+    )
+    return list(r.user.me().saved(limit=None))
+
 
 
 def get_reddit_submissions():
