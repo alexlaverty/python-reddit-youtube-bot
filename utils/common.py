@@ -79,6 +79,10 @@ def sanitize_text(text: str) -> str:
 
     result = re.sub(regex_urls, " ", text)
 
+    # remove markdown url
+    pattern = r'\[([^]]*)\]\(([^)]*)\)'
+    result = re.sub(pattern, " ", result)
+
     # note: not removing apostrophes
     regex_expr = r"\s['|’]|['|’]\s|[\^_~@!&;#:\-–—%“”‘\"%\*/{}\[\]\(\)\\|<>=+]"
     result = re.sub(regex_expr, " ", result)
