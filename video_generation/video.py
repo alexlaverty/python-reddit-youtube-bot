@@ -481,7 +481,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
 
         for count, accepted_comment in enumerate(accepted_comments):
             logging.info(
-                "=== Processing Reddit Comment %s/%s ===", count, accepted_comments
+                "=== Processing Reddit Comment %s/%s ===", count, len(accepted_comments)
             )
 
             if settings.commentstyle == "reddit":
@@ -759,13 +759,13 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
     v.json = str(Path(video_directory, "meta.json"))
 
     data: Dict[str, Any] = {
-        "title": v.title,
-        "description": v.description,
-        "thumbnail": v.thumbnail,
-        "file": v.filepath,
-        "duration": v.duration,
-        "height": settings.video_height,
-        "width": settings.video_width,
+        "title": str(v.title),
+        "description": str(v.description),
+        "thumbnail": str(v.thumbnail),
+        "file": str(v.filepath),
+        "duration": str(v.duration),
+        "height": str(settings.video_height),
+        "width": str(settings.video_width),
     }
 
     with open(v.json, "w") as outfile:  # noqa: SCS109
