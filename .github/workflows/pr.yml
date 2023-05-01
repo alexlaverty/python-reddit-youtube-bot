@@ -1,0 +1,45 @@
+name: PR Build
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: alexlaverty/ttsvibelounge:1.0.6
+    steps:
+
+      - name: checkout repo content
+        uses: actions/checkout@v3
+
+      - name: Run ttsvibelounge Script
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          CREDENTIALS_STORAGE: ${{ secrets.CREDENTIALS_STORAGE }}
+          PRAW_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
+          PRAW_CLIENT_SECRET: ${{ secrets.PRAW_CLIENT_SECRET }}
+          PRAW_USER_AGENT: ${{ secrets.PRAW_USER_AGENT }}
+          PRAW_USERNAME: ${{ secrets.PRAW_USERNAME }}
+          PRAW_PASSWORD: ${{ secrets.PRAW_PASSWORD }}
+          RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
+          RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo $PWD
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+          echo $YOUTUBE_CLIENT_SECRET > client_secret.json
+          echo $CREDENTIALS_STORAGE > credentials.storage
+          cp config/auth-env.py config/auth.py
+          playwright install
+          python3 app.py --total-posts 1 \
+                         --enable-background \
+                         --background-directory /app/assets/backgrounds \
+                         --enable-mentions
+          python3 refresh_token.py
+          rm -f client_secret.json
+          rm -f credentials.storage
+
+
+
