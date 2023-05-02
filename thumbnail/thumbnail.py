@@ -273,7 +273,7 @@ def create_thumbnail(
     fontsize, lineheight = get_font_size(len(title))
     logging.info("Title Length : %s", len(title))
     logging.info("Optimising Font Size : ")
-    sys.stdout.write(fontsize)
+    sys.stdout.write(str(fontsize))
 
     while True:
         previous_fontsize: int = fontsize

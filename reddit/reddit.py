@@ -187,12 +187,12 @@ def get_valid_submissions(submissions: List[Submission]) -> List[Submission]:
     for submission in submissions:
         if is_valid_submission(submission):
             msg: str = ", ".join(
-                str(submission.id),
+               [str(submission.id),
                 str(submission.score),
                 str(submission.num_comments),
                 str(len(submission.selftext)),
                 submission.subreddit_name_prefixed,
-                submission.title,
+                submission.title]
             )
             print(msg)
             valid_submissions.append(submission)
