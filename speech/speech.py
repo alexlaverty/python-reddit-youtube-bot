@@ -1,18 +1,22 @@
-from gtts import gTTS
-from moviepy.editor import AudioFileClip, concatenate_audioclips
-from speech.streamlabs_polly import StreamlabsPolly
-from speech.tiktok import TikTok
-import argparse
-import boto3
-import config
-import config.settings as settings
+"""Transform text to speech."""
 import logging
 import os
 import re
-import subprocess
+import subprocess  # noqa: S404
 import textwrap
-from utils.common import sanitize_text
+from argparse import ArgumentParser, Namespace
+from pathlib import Path
+from typing import Any, List
 
+import boto3
+from gtts import gTTS
+from moviepy.editor import AudioFileClip, concatenate_audioclips
+
+import config
+import config.settings as settings
+from speech.streamlabs_polly import StreamlabsPolly
+from speech.tiktok import TikTok
+from utils.common import sanitize_text
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -22,7 +26,20 @@ logging.basicConfig(
 )
 
 
-def process_speech_text(text):
+def process_speech_text(text: str) -> str:
+    """Sanitize raw text.
+
+    This will process raw text prior to converting it to speech, replacing
+    common abbreviations with their full english version to ensure that the
+    generated speech is intelligable.
+
+    Args:
+        text: Text to be sanitized.
+
+    Returns:
+        Updated text that has had common abbreviations converted to their
+        full english equivalent.
+    """
     text = text.replace(" AFAIK ", " as far as I know ")
     text = text.replace("AITA", " Am I The Asshole? ")
     text = text.replace(" AMA ", " Ask me anything ")
@@ -54,79 +71,84 @@ def process_speech_text(text):
     text = text.replace("’", "'")
     text = text.replace("...", ".")
     text = text.replace("*", "")
-    text = re.sub('(\[|\()[0-9]{1,2}\s*(m|f)?(\)|\])', '',
-                  text,
-                  flags=re.IGNORECASE)
+    text = re.sub(r"(\[|\()[0-9]{1,2}\s*(m|f)?(\)|\])", "", text, flags=re.IGNORECASE)
 
     text = sanitize_text(text)
     return text
 
 
-def create_audio(path, text):
-    # logging.info(f"Generating Audio File : {text}")
-    text = process_speech_text(text)
-    if not os.path.exists(path) or not os.path.getsize(path) > 0:
+def create_audio(path: Path, text: str) -> Path:
+    """Generate an audio file using text to speech.
 
+    Args:
+        path: Path to save the generated audio file to.
+        text: Text to be converted to speech.
+
+    Returns:
+        Path to the generated audio file.
+    """
+    # logging.info(f"Generating Audio File : {text}")
+    output_path = os.path.normpath(path)
+    text: str = process_speech_text(text)
+    if not os.path.exists(output_path) or not os.path.getsize(output_path) > 0:
         if settings.voice_engine == "polly":
-            polly_client = boto3.Session(
+            polly_client: Any = boto3.Session(
                 aws_access_key_id=config.aws_access_key_id,
                 aws_secret_access_key=config.aws_secret_access_key,
                 region_name="us-west-2",
             ).client("polly")
 
-            response = polly_client.synthesize_speech(
+            response: Any = polly_client.synthesize_speech(
                 Engine="neural", OutputFormat="mp3", Text=text, VoiceId="Matthew"
             )
 
-            file = open(path, "wb")
-            file.write(response["AudioStream"].read())
-            file.close()
+            with open(output_path, "wb") as file:  # noqa: SCS109
+                file.write(response["AudioStream"].read())
 
         if settings.voice_engine == "gtts":
-            ttmp3 = gTTS(text, lang=settings.gtts_language, slow=False)
-            ttmp3.save(path)
+            ttmp3: Any = gTTS(text, lang=settings.gtts_language, slow=False)
+            ttmp3.save(output_path)
 
         if settings.voice_engine == "streamlabspolly":
-            slp = StreamlabsPolly()
-            speech_text_character_limit = 550
+            slp: StreamlabsPolly = StreamlabsPolly()
+            speech_text_character_limit: int = 550
 
             if len(text) > speech_text_character_limit:
                 logging.info(
                     "Text exceeds StreamlabsPolly limit, breaking up into chunks"
                 )
-                speech_chunks = []
-                chunk_list = textwrap.wrap(
+                speech_chunks: List[Path] = []
+                chunk_list: List[str] = textwrap.wrap(
                     text,
                     width=speech_text_character_limit,
                     break_long_words=True,
                     break_on_hyphens=False,
                 )
-
                 print(chunk_list)
 
                 for count, chunk in enumerate(chunk_list):
                     print(count)
                     if chunk == "&#x200B;":
-                        logging.info("Skip zero space character comment : " + chunk)
+                        logging.info("Skip zero space character comment : %s", chunk)
                         continue
 
                     if chunk == "":
                         logging.info("Skipping blank comment")
                         continue
 
-                    tmp_path = f"{path}{count}"
+                    tmp_path: Path = f"{output_path}{count}"
                     slp.run(chunk, tmp_path)
                     speech_chunks.append(tmp_path)
 
-                clips = [AudioFileClip(c) for c in speech_chunks]
-                final_clip = concatenate_audioclips(clips)
-                final_clip.write_audiofile(path)
+                clips: List[AudioFileClip] = [AudioFileClip(c) for c in speech_chunks]
+                final_clip: AudioFileClip = concatenate_audioclips(clips)
+                final_clip.write_audiofile(output_path)
             else:
                 print(text)
-                slp.run(text, path)
+                slp.run(text, output_path)
 
         if settings.voice_engine == "edge-tts":
-            subprocess.run(
+            subprocess.run(  # noqa: S603, S607
                 [
                     "edge-tts",
                     "--voice",
@@ -134,70 +156,70 @@ def create_audio(path, text):
                     "--text",
                     f"'{text}'",
                     "--write-media",
-                    path,
+                    output_path,
                 ]
             )
 
         if settings.voice_engine == "balcon":
-            result = subprocess.call(["balcon.exe", "-w", path, "-t", f"{text}"])
+            balcon_cmd: List[Any] = ["balcon.exe", "-w", output_path, "-t", f"{text}"]
+            subprocess.call(balcon_cmd)  # noqa: S603
 
         if settings.voice_engine == "tiktok":
-            speech_text_character_limit = 200
-            tt = TikTok()
+            speech_text_character_limit: int = 200
+            tt: TikTok = TikTok()
 
             if len(text) > speech_text_character_limit:
                 logging.info(
                     "Text exceeds tiktok limit, \
                              breaking up into chunks"
                 )
-                speech_chunks = []
-                chunk_list = textwrap.wrap(
+                speech_chunks: List[Path] = []
+                chunk_list: List[str] = textwrap.wrap(
                     text,
                     width=speech_text_character_limit,
                     break_long_words=True,
                     break_on_hyphens=False,
                 )
-
                 print(chunk_list)
 
                 for count, chunk in enumerate(chunk_list):
                     print(count)
                     if chunk == "&#x200B;":
-                        logging.info("Skip zero space character comment : " + chunk)
+                        logging.info("Skip zero space character comment : %s", chunk)
                         continue
 
                     if chunk == "":
                         logging.info("Skipping blank comment")
                         continue
 
-                    tmp_path = f"{path}{count}"
+                    tmp_path: Path = f"{path}{count}"
                     tt.run(chunk, tmp_path)
                     speech_chunks.append(tmp_path)
 
-                clips = [AudioFileClip(c) for c in speech_chunks]
-                final_clip = concatenate_audioclips(clips)
-                final_clip.write_audiofile(path)
+                clips: List[AudioFileClip] = [AudioFileClip(c) for c in speech_chunks]
+                final_clip: AudioFileClip = concatenate_audioclips(clips)
+                final_clip.write_audiofile(output_path)
             else:
                 print(text)
-                tt.run(text, path)
-
+                tt.run(text, output_path)
     else:
-        logging.info(f"Audio file already exists : {path}")
+        logging.info("Audio file already exists : %s", output_path)
 
-    logging.info(f"Created Audio File : {path}")
+    logging.info("Created Audio File : %s", output_path)
 
-    return path
+    return output_path
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser: ArgumentParser = ArgumentParser()
     parser.add_argument(
         "--speech", default="Hello world this is a test.", help="Enter text for speech"
     )
     parser.add_argument(
         "--path", default="test_audio.mp3", help="Path to save audio file to"
     )
-    args = parser.parse_args()
+    args: Namespace = parser.parse_args()
+
     print(args.path)
     print(args.speech)
     create_audio(args.path, args.speech)
