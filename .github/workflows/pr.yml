@@ -1,28 +1,12 @@
-name: TTSVibeLounge
-on:
-  schedule:
-    - cron: '0 */6 * * *'
-#   push:
-#     branches:
-#       - main
+name: PR Build
+
+on: [pull_request]
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     container: alexlaverty/ttsvibelounge:1.0.6
     steps:
-
-      # # Git version in container must match git version on ubuntu server
-      # - name: get git
-      #   run: |
-      #     apt update -y
-      #     apt install -y libz-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext cmake gcc
-      #     wget https://github.com/git/git/archive/refs/tags/v2.38.1.tar.gz
-      #     tar -xvf v2.38.1.tar.gz
-      #     cd git-2.38.1
-      #     make prefix=/usr/local all
-      #     make prefix=/usr/local install
-      #     git --version
-      #     gh secret set CREDENTIALS_STORAGE_REFRESH < credentials.storage
 
       - name: checkout repo content
         uses: actions/checkout@v3
@@ -50,7 +34,6 @@ jobs:
           cp config/auth-env.py config/auth.py
           playwright install
           python3 app.py --total-posts 1 \
-                         --enable-upload \
                          --enable-background \
                          --background-directory /app/assets/backgrounds \
                          --enable-mentions
@@ -59,22 +42,4 @@ jobs:
           rm -f credentials.storage
 
 
-      - name: check for changes
-        run: |
-          git config --global --add safe.directory $(realpath .)
-          if git diff --exit-code data.csv; then
-             echo changes_exist=false
-            echo "changes_exist=false" >> $GITHUB_ENV
-          else
-            echo changes_exist=true
-            echo "changes_exist=true" >> $GITHUB_ENV
-          fi
 
-      - name: Push updates
-        if: env.changes_exist == 'true'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add data.csv
-          git commit -m "TTSVibeLounge Scheduled Update" -a
-          git push -f
