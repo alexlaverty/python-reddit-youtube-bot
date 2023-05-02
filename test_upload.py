@@ -1,16 +1,24 @@
+"""Test upload to YouTube."""
+import os
+
 from simple_youtube_api.Channel import Channel
 from simple_youtube_api.LocalVideo import LocalVideo
-
-import os
 
 directory = os.getcwd()
 print(directory)
 
 
-class Video():
-    video = f"{directory}\\videos\\ylg9ls_Does_anyone_know_how_a_loss_curve_like_this_can_ha\\final.mp4"
-    title = "What city will you NEVER visit based on it's reputation? (r\\AskReddit)"
-    thumbnail = f"{directory}\\videos\\ylg9ls_Does_anyone_know_how_a_loss_curve_like_this_can_ha\\thumbnail_0.png"
+class Video:
+    """Video metdata."""
+
+    video = f"{directory}\\videos\\\
+              ylg9ls_Does_anyone_know_how_a_loss_curve_like_this_can_ha\\\
+              final.mp4"
+    title = "What city will you NEVER visit based on it's reputation? \
+            (r\\AskReddit)"
+    thumbnail = f"{directory}\\videos\\\
+                  ylg9ls_Does_anyone_know_how_a_loss_curve_like_this_can_ha\
+                  \\thumbnail_0.png"
     description = "TTSVibeLounge"
 
 
