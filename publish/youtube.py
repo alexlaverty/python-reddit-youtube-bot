@@ -6,7 +6,7 @@ from pathlib import Path
 
 from simple_youtube_api.Channel import Channel
 from simple_youtube_api.LocalVideo import LocalVideo
-from simple_youtube_api.youtube_video import YouTubeVideo
+#from simple_youtube_api.youtube_video import YouTubeVideo
 
 import config.settings as settings
 
@@ -64,7 +64,7 @@ def publish(video: Video) -> None:
 
     try:
         # uploading video and printing the results
-        uploaded_video: YouTubeVideo = channel.upload_video(youtube_upload)
+        uploaded_video = channel.upload_video(youtube_upload)
         print(uploaded_video.id)
         print(uploaded_video)
     except Exception as e:
