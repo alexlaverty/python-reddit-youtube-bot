@@ -1,9 +1,10 @@
+"""Configuration settings for the bot."""
 from sys import platform
 from pathlib import Path
 
 subreddits = [
     "askreddit",
-    #"AmItheAsshole",
+    # "AmItheAsshole",
     "antiwork",
     "AskMen",
     "ChoosingBeggars",
@@ -15,8 +16,8 @@ subreddits = [
     "TwoXChromosomes",
     "unpopularopinion",
     "confessions",
-    "confession"
-    ]
+    "confession",
+]
 
 subreddits_excluded = [
     "r/CFB",
@@ -29,7 +30,7 @@ reddit_post_time_filter = "day"
 
 # Speech Settings
 edge_tts_voice = "en-GB-RyanNeural"
-pause = 1 # Pause after speech
+pause = 1  # Pause after speech
 streamlabs_polly_voice = "Brian"
 tiktok_voice = "en_us_006"
 
@@ -44,13 +45,14 @@ tiktok_voice = "en_us_006"
 # Russian (ru)
 # Mandarin Chinese (zh-cn)
 # Japanese (ja)
-gtts_language = 'en'
+gtts_language = "en"
 
 # Choices ["polly","balcon","gtts","tiktok","edge-tts","streamlabspolly"]
 voice_engine = "edge-tts"
 
 # Comment Settings
-banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXBlLGZ1Y2sscmV0YXJkLG1vdGhlcmZ1Y2tlcixyYXBpc3Q="
+banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXB\
+                          lLGZ1Y2sscmV0YXJkLG1vdGhlcmZ1Y2tlcixyYXBpc3Q="
 theme = "dark"
 minimum_num_comments = 200
 reddit_comment_opacity = 1
@@ -121,7 +123,7 @@ add_hashtag_shorts_to_description = False
 
 # Youtube
 # Choices ['private', 'unlisted', 'public']
-youtube_privacy_status = 'public'
+youtube_privacy_status = "public"
 
 # Newcaster Settings
 enable_newscaster = False
@@ -136,6 +138,6 @@ newcaster_size = (video_width * 0.5, video_height * 0.5)
 threads = 4
 
 if platform == "linux" or platform == "linux2":
-    firefox_binary = '/opt/firefox/firefox'
+    firefox_binary = "/opt/firefox/firefox"
 elif platform == "win32":
-    firefox_binary = 'C:\\Program Files\\Mozilla Firefox\\firefox.exe'
+    firefox_binary = "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
