@@ -1,16 +1,20 @@
-import random
+"""Polly text to speech convertor."""
+import sys
+import time as pytime
+from datetime import datetime
+from pathlib import Path
+from random import SystemRandom
+from time import sleep
+from typing import Dict, List, Union
+
 import requests
-from requests.exceptions import JSONDecodeError
 
 # from utils import settings
 # from utils.voice import check_ratelimit
 from requests import Response
+from requests.exceptions import JSONDecodeError
+
 import config.settings as settings
-import time as pytime
-from datetime import datetime
-import sys
-from time import sleep
-import re
 from utils.common import sanitize_text
 
 if sys.version_info[0] >= 3:
@@ -33,28 +37,29 @@ voices = [
     "Salli",
     "Raveena",
 ]
-
-
 # valid voices https://lazypy.ro/tts/
 
 
-def sleep_until(time):
+def sleep_until(time: Union[int, datetime]) -> None:
+    """Pause until a specific end time.
+
+    Args:
+        time: Either a valid datetime object or unix timestamp in seconds
+            (i.e. seconds since Unix epoch).
     """
-    Pause your program until a specific end time.
-    'time' is either a valid datetime object or unix timestamp in seconds (i.e. seconds since Unix epoch)
-    """
-    end = time
+    end: int = time
 
     # Convert datetime to unix timestamp and adjust for locality
     if isinstance(time, datetime):
-        # If we're on Python 3 and the user specified a timezone, convert to UTC and get the timestamp.
+        # If we're on Python 3 and the user specified a timezone, convert to
+        # UTC and get the timestamp.
         if sys.version_info[0] >= 3 and time.tzinfo:
-            end = time.astimezone(timezone.utc).timestamp()
+            end: datetime = time.astimezone(timezone.utc).timestamp()
         else:
-            zoneDiff = (
+            zone_diff: float = (
                 pytime.time() - (datetime.now() - datetime(1970, 1, 1)).total_seconds()
             )
-            end = (time - datetime(1970, 1, 1)).total_seconds() + zoneDiff
+            end: float = (time - datetime(1970, 1, 1)).total_seconds() + zone_diff
 
     # Type check
     if not isinstance(end, (int, float)):
@@ -62,12 +67,10 @@ def sleep_until(time):
 
     # Now we wait
     while True:
-        now = pytime.time()
-        diff = end - now
+        now: float = pytime.time()
+        diff: float = end - now
 
-        #
         # Time is up!
-        #
         if diff <= 0:
             break
         else:
@@ -75,15 +78,21 @@ def sleep_until(time):
             sleep(diff / 2)
 
 
-def check_ratelimit(response: Response):
-    """
-    Checks if the response is a ratelimit response.
-    If it is, it sleeps for the time specified in the response.
+def check_ratelimit(response: Response) -> bool:
+    """Check if the rate limit has been hit.
+
+    If it has, sleep for the time specified in the response.
+
+    Args:
+        response: The HTTP response to be examined.
+
+    Returns:
+        `True` if the rate limit has been reached, otherwise `False`.
     """
     if response.status_code == 429:
         try:
-            time = int(response.headers["X-RateLimit-Reset"])
-            print(f"Ratelimit hit, sleeping...")
+            time: int = int(response.headers["X-RateLimit-Reset"])
+            print("Ratelimit hit, sleeping...")
             sleep_until(time)
             return False
         except KeyError:  # if the header is not present, we don't know how long to wait
@@ -93,30 +102,43 @@ def check_ratelimit(response: Response):
 
 
 class StreamlabsPolly:
-    def __init__(self):
-        self.url = "https://streamlabs.com/polly/speak"
-        self.max_chars = 550
-        self.voices = voices
+    """Polly text to speech convertor."""
 
-    def run(self, text, filepath, random_voice: bool = False):
+    def __init__(self):
+        """Initialise a new Polly text to speech convertor."""
+        self.url: str = "https://streamlabs.com/polly/speak"
+        self.max_chars: int = 550
+        self.voices: List[str] = voices
+
+    def run(self, text: str, filepath: Path, random_voice: bool = False) -> None:
+        """Convert text to an audio clip using a random Polly voice.
+
+        Args:
+            text: The text to be converted to speech.
+            filepath: Path to save the generated audio clip to.
+            random_voice: If `true`, selects a random voice, otherwise selects
+                the default polly voice.
+        """
         if random_voice:
-            voice = self.randomvoice()
+            voice: str = self.randomvoice()
         else:
             if not settings.streamlabs_polly_voice:
                 raise ValueError(
-                    f"Please set the config variable streamlabs_polly_voice to a valid voice. options are: {voices}"
+                    f"Please set the config variable streamlabs_polly_voice \
+                        to a valid voice. options are: {voices}"
                 )
-            voice = str(settings.streamlabs_polly_voice).capitalize()
-        text = sanitize_text(text)
-        body = {"voice": voice, "text": text, "service": "polly"}
-        response = requests.post(self.url, data=body)
+            voice: str = str(settings.streamlabs_polly_voice).capitalize()
+        text: str = sanitize_text(text)
+        body: Dict[str, List[str]] = {"voice": voice, "text": text, "service": "polly"}
+        response: Response = requests.post(self.url, data=body, timeout=120)
         if not check_ratelimit(response):
             self.run(text, filepath, random_voice)
-
         else:
             try:
-                voice_data = requests.get(response.json()["speak_url"])
-                with open(filepath, "wb") as f:
+                voice_data: Response = requests.get(
+                    response.json()["speak_url"], timeout=120
+                )
+                with open(filepath, "wb") as f:  # noqa: SCS109
                     f.write(voice_data.content)
             except (KeyError, JSONDecodeError):
                 try:
@@ -125,5 +147,11 @@ class StreamlabsPolly:
                 except (KeyError, JSONDecodeError):
                     print("Error occurred calling Streamlabs Polly")
 
-    def randomvoice(self):
-        return random.choice(self.voices)
+    def randomvoice(self) -> str:
+        """Select a random Polly voice.
+
+        Returns:
+            The name of a randomly selected Polly voice.
+        """
+        rnd: SystemRandom() = SystemRandom()
+        return rnd.choice(self.voices)

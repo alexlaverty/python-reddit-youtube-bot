@@ -6,8 +6,8 @@ import time
 import urllib
 from pathlib import Path
 from typing import List
-from urllib.request import Request, Response, urlopen
-
+from urllib.request import Request, urlopen
+from requests import Response
 import requests
 
 import config.settings as settings
