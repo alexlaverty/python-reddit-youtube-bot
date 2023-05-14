@@ -1,5 +1,7 @@
 boto3==1.26.123
 bs4==0.0.1
+colorama==0.4.6
+configparser==5.3.0
 edge-tts==6.1.3
 emoji==2.2.0
 gtts==2.3.2
@@ -11,6 +13,7 @@ praw==7.7.0
 pytime==0.2.3
 pyyaml==6.0.0
 rich==13.3.5
+ruamel.yaml==0.17.26
 selenium==4.9.0
 simple-youtube-api==0.2.8
 varname==0.11.1

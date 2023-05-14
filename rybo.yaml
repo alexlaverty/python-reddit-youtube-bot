@@ -1,0 +1,82 @@
+---
+
+# Folder path to videos that will be used for the video background.
+background_directory: assets/backgrounds
+
+# Use text based, or image based Reddit comments. Choices are **text** or **image**.
+comment_style: reddit
+
+# Enable or disable the video overlay.
+disable_overlay: False
+
+# Enable or disable self-text video generation.
+disable_selftext: False
+
+# Enable or disable adding a background to the video.
+enable_background: False
+
+# Check the reddit account for user mentions.
+enable_mentions: False
+
+# Include, or ignore posts tagged as Not Safe for Work.
+enable_nsfw: False
+
+# Enable or disable uploading videos to YouTube.
+enable_upload: False
+
+# Set the video orientation. Choices are "portrait" or "Landscape".
+orientation: landscape
+
+# Polly credentials for the AWS API.
+polly:
+  access_key_id:
+  secret_access_key:
+
+# Reddit credentials for the API and Web UI.
+reddit:
+  client_id:
+  client_secret:
+  username:
+  password:
+
+# Rumble credentials for the Web UI.
+rumble:
+  username:
+  password:
+
+# Enable or disable generating a YouTube shorts video.
+shorts: False
+
+# Set the sorting order when scanning Reddit posts. Choices are "top" or "hot".
+sort: hot
+
+# Enable or disable video generation for the post title and selftext only,
+# disables user comments.
+story_mode: False
+
+# Minimum submission score threshold.
+submission_score: 5000
+
+# List of subreddits to scan, where each subreddit is separated with a "+".
+subreddits: antiwork+AskMen+askreddit+ChoosingBeggars+confession+confessions+hatemyjob+NoStupidQuestions+pettyrevenge+Showerthoughts+TooAfraidToAsk+TwoXChromosomes+unpopularopinion
+
+# Enable or disable generation of just the video thumbnails.
+thumbnail_only: False
+
+# Filter Reddit submissions by time. Choices are "all", "day", "hour",
+# "month", "week" or "year".
+time: day
+
+# Total number of reddit submissions to process.
+total_posts: 10
+
+# Generate a video for a single Reddit submission.
+url:
+
+# Sets how long the generated video will be, in seconds.
+video_length: 600
+
+# Specify which text-to-speech engine should be used to narrate the video.
+# Choices are "polly", "balcon", "gtts", "tiktok", "edge-tts" or
+# "streamlabspolly".
+voice_engine: edge-tts
