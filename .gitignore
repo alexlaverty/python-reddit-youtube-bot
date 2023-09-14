@@ -13,8 +13,9 @@ client_secret.json
 cookies*.json
 credentials.storage
 videos/
-config/auth.py
 .env
+venv
 
+*.egg-info
 **/__pycache__/
 assets/work_dir/

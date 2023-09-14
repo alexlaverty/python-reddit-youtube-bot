@@ -15,7 +15,6 @@
 				"python.pythonPath": "/usr/local/bin/python",
 				"python.languageServer": "Pylance",
 				"python.globalModuleInstallation": false,
-				"python.logging.level": "debug",
 				"python.venvPath": "~/.pyenv",
 				"python.terminal.activateEnvInCurrentTerminal": true,
 				"python.analysis.autoSearchPaths": true,
@@ -41,27 +40,40 @@
 				"terminal.integrated.gpuAcceleration": "auto",
 				"terminal.integrated.useWslProfiles": true,
 				"terminal.integrated.defaultProfile.linux":"bash"
-			}
+			},
+			"extensions": [
+				"ms-python.python"
+			]
 		},
 
 			// Add the IDs of extensions you want installed when the container is created.
 	    "extensions": [
 		    "ms-python.python",
-            "ms-python.vscode-pylance"
+            "ms-python.vscode-pylance",			
 	    ]
 	},
 
 
 	"features": {
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1.2.1": {},
-		"ghcr.io/devcontainers/features/git:1.1.5": {}
+		"ghcr.io/devcontainers/features/git:1.1.5": {},
+		"ghcr.io/devcontainers-contrib/features/twine:2": {},
+		"ghcr.io/devcontainers-contrib/features/mypy:2": {},
+		"ghcr.io/devcontainers-contrib/features/isort:2": {},
+		"ghcr.io/devcontainers-contrib/features/flake8:2": {},
+		"ghcr.io/devcontainers-contrib/features/black:2": {},
+		"ghcr.io/devcontainers-contrib/features/bandit:2": {}
 	},
+
+	"mounts": [
+		"source=projectname-bashhistory,target=/commandhistory,type=volume"
+	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "/scripts/postCreateCommand.sh",
+	"postCreateCommand": "/bin/bash dependencies/scripts/postCreateCommand.sh",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"

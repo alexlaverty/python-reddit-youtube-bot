@@ -1,0 +1,1 @@
+"""Rybo command line utility."""

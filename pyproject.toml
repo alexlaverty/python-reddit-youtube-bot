@@ -1,6 +1,47 @@
+[build-system]
+requires = ["setuptools>=41", "wheel", "setuptools-git-versioning<2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rybo"
+dynamic = ["version"]
+authors = [
+    { name="Alex Laverty" }
+]
+maintainers = [
+    { name="Alex Laverty" },
+    { name="Nathon Fowlie" }
+]
+description="Reddit to YouTube bot."
+readme="README.md"
+requires-python=">=3.11"
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+keywords = [
+    "reddit",
+    "youtube",
+    "text-to-speech",
+    "bot"
+]
+license={file="LICENSE"}
+
+[project.urls]
+"Homepage" = "https://github.com/alexlaverty/python-reddit-youtube-bot"
+"Documentation" = "http://alexlaverty.github.io/python-reddit-youtube-bot"
+"Repository" = "https://github.com/alexlaverty/python-reddit-youtube-bot.git"
+"Bug Tracker" = "https://github.com/alexlaverty/python-reddit-youtube-bot/issues"
+
+[project.scripts]
+rybo = "rybo.cli.rybo:cli"
+
 [tool.flake8]
-max-line-length = 88
+docstring-convention = 'google'
+exclude = 'venv'
 extend-ignore = ['E203']
+max-line-length = 88
 
 [tool.isort]
 profile = "black"
@@ -11,3 +52,6 @@ max-line-length = 88
 [tool.pycodestyle]
 max-line-length = 88
 ignore = ['E203']
+
+[tool.setuptools-git-versioning]
+enabled = true

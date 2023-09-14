@@ -13,16 +13,16 @@ jobs:
 
       - name: Run ttsvibelounge Script
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          RYBO_POLLY_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          RYBO_POLLY_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           CREDENTIALS_STORAGE: ${{ secrets.CREDENTIALS_STORAGE }}
-          PRAW_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
-          PRAW_CLIENT_SECRET: ${{ secrets.PRAW_CLIENT_SECRET }}
-          PRAW_USER_AGENT: ${{ secrets.PRAW_USER_AGENT }}
-          PRAW_USERNAME: ${{ secrets.PRAW_USERNAME }}
-          PRAW_PASSWORD: ${{ secrets.PRAW_PASSWORD }}
-          RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
-          RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
+          RYBO_REDDIT_CLIENT_ID: ${{ secrets.PRAW_CLIENT_ID }}
+          RYBO_REDDIT_CLIENT_SECRET: ${{ secrets.PRAW_CLIENT_SECRET }}
+          RYBO_REDDIT_USER_AGENT: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0
+          RYBO_REDDIT_USERNAME: ${{ secrets.PRAW_USERNAME }}
+          RYBO_REDDIT_PASSWORD: ${{ secrets.PRAW_PASSWORD }}
+          RYBO_RUMBLE_PASSWORD: ${{ secrets.RUMBLE_PASSWORD }}
+          RYBO_RUMBLE_USERNAME: ${{ secrets.RUMBLE_USERNAME }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
@@ -31,12 +31,13 @@ jobs:
           echo $GITHUB_WORKSPACE
           echo $YOUTUBE_CLIENT_SECRET > client_secret.json
           echo $CREDENTIALS_STORAGE > credentials.storage
-          cp config/auth-env.py config/auth.py
+          pip install -r requirements.txt
           playwright install
-          python3 app.py --total-posts 1 \
-                         --enable-background \
-                         --background-directory /app/assets/backgrounds \
-                         --enable-mentions
+          pip install --editable .
+          rybo --total-posts 1 \
+               --enable-background \
+               --background-directory /app/assets/backgrounds \
+               --enable-mentions
           python3 refresh_token.py
           rm -f client_secret.json
           rm -f credentials.storage

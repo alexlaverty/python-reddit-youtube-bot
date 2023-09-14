@@ -29,6 +29,13 @@ RUN mkdir -p /home/vscode/.local/bin && \
     chmod +x /home/vscode/.local/bin/yt-dlp && \
     chown -R vscode /home/vscode/.local
 
+# Enables preservation of bash history
+RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" && \
+    mkdir /commandhistory && \
+    touch /commandhistory/.bash_history && \
+    chown -R $USERNAME /commandhistory && \
+    echo "$SNIPPET" >> "/home/$USERNAME/.bashrc"
+
 USER $USERNAME
 
 ENTRYPOINT ["/bin/bash"]

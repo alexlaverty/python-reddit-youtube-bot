@@ -11,8 +11,14 @@ pip install --user -r requirements.txt
 
 # Additional dependencies needed to develop the utility & maintain code
 # quality.
-pip install --user -r requirements-dev.txt
+pip install --user -r  requirements-dev.txt
 
 # Initialise playwright
+playwright install
 playwright install-deps
-playwright install firefox
+
+# Install an editable version of the rybo utility. Code changes will be applied
+# in real-time.
+pip install --editable .
+
+/bin/bash
