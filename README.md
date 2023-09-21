@@ -3,6 +3,7 @@
 <!-- vscode-markdown-toc -->
 * [Description](#description)
 * [Example Videos](#example-videos)
+* [Reddit Youtube Channels](#reddit-youtube-channels)
 * [Install Prerequisite Components](#install-prerequisite-components)
 * [Git clone repository](#git-clone-repository)
 * [Generate Reddit Tokens](#generate-reddit-tokens)
@@ -35,6 +36,15 @@ Checkout my Youtube Channel for example videos made by this repo :
 [What show has no likable characters?](https://youtu.be/xAaPbntOVb8)
 [![Watch the video](assets/images/Whatshowhasnolikablecharacters.png)](https://youtu.be/xAaPbntOVb8)
 
+## <a name='reddit-youtube-channels'></a>Reddit Youtube Channels
+
+Youtube Channels generated using this repo :
+* [TTSVibeLounge](https://www.youtube.com/@ttsvibelounge/videos)
+* [Aussie Banter Reddit](https://www.youtube.com/@AussieBanterReddit)
+
+If your Youtube Channel is generated using this repository and you would like it listed above please comment on this issue https://github.com/alexlaverty/python-reddit-youtube-bot/issues/91 with your youtube channel url and channel name and mention you'd like it listed in the main README file.
+
+  
 # Quickstart Guide
 
 # Windows
