@@ -72,7 +72,6 @@ def process_speech_text(text: str) -> str:
     text = text.replace("...", ".")
     text = text.replace("*", "")
     text = re.sub(r"(\[|\()[0-9]{1,2}\s*(m|f)?(\)|\])", "", text, flags=re.IGNORECASE)
-
     text = sanitize_text(text)
     return text
 
@@ -148,13 +147,21 @@ def create_audio(path: Path, text: str) -> Path:
                 slp.run(text, output_path)
 
         if settings.voice_engine == "edge-tts":
+            print("+++ edge-tts +++")
+            pattern = r'[^a-zA-Z0-9\s.,!?\'"-]'  # You can customize this pattern as needed.
+            # Use the re.sub() function to replace any characters that don't match the pattern with an empty string.
+            text = re.sub(pattern, '', text)
+            text = re.sub(r'\n+', ' ', text)
+            text = re.sub(r'\s+', ' ', text)
+
+            print(text)
             subprocess.run(  # noqa: S603, S607
                 [
                     "edge-tts",
                     "--voice",
                     settings.edge_tts_voice,
                     "--text",
-                    f"'{text}'",
+                    f"'{text.strip()}'",
                     "--write-media",
                     output_path,
                 ]
