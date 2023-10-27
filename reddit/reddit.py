@@ -131,6 +131,30 @@ def get_reddit_mentions() -> List[str]:
 
     return mention_urls
 
+def get_reddit_saved_posts() -> List[str]:
+    """Get a list of comments where ttvibe has been mentioned.
+
+    Returns:
+        A list containing zero or more URLs where ttvibe has been mentioned.
+    """
+    r: praw.Reddit = praw.Reddit(
+        client_id=auth.praw_client_id,
+        client_secret=auth.praw_client_secret,
+        user_agent=auth.praw_user_agent,
+        username=auth.praw_username,
+        password=auth.praw_password,
+    )
+
+    saved_posts_urls: List[str] = []
+    # Get the user's saved posts
+    saved_posts = r.user.me().saved(limit=None)  # 'limit=None' fetches all saved posts
+
+    # Print the URLs of saved posts
+    for post in saved_posts:
+        print(post.url)
+        saved_posts_urls.append(post.url)
+
+    return saved_posts_urls
 
 def get_reddit_submissions() -> List[Submission]:
     """Get the latest Reddit posts.

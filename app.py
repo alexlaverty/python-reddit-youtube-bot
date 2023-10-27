@@ -145,6 +145,12 @@ def get_args() -> Namespace:
     )
 
     parser.add_argument(
+        "--enable-saved",
+        action="store_true",
+        help="Check reddit account for saved posts",
+    )
+
+    parser.add_argument(
         "--disable-selftext",
         action="store_true",
         help="Disable selftext video generation",
@@ -252,21 +258,30 @@ def get_args() -> Namespace:
         if args.orientation == "portrait":
             settings.video_height = settings.vertical_video_height
             settings.video_width = settings.vertical_video_width
-        logging.info("Setting Orientation to : %s", settings.orientation)
-        logging.info("Setting video_height to : %s", settings.video_height)
-        logging.info("Setting video_width to : %s", settings.video_width)
 
     if args.shorts:
         logging.info("Generating Youtube Shorts Video")
+        settings.shorts_mode_enabled = True
         settings.orientation = "portrait"
         settings.video_height = settings.vertical_video_height
         settings.video_width = settings.vertical_video_width
-        settings.max_video_length = 59
         settings.add_hashtag_shorts_to_description = True
+        settings.text_fontsize = 60
+        settings.clip_margin = 100
+        settings.clip_margin_top = settings.vertical_video_height / 3
+        settings.reddit_comment_width = 0.90
+        settings.commentstyle = "text"
+        settings.enable_background = True
+        settings.max_video_length = 59
 
     if args.enable_mentions:
         settings.enable_reddit_mentions = True
         logging.info("Enable Generate Videos from User Mentions")
+
+    if args.enable_saved:
+        settings.enable_reddit_saved = True
+        logging.info("Enable Generate Videos from Saved Posts")
+
 
     if args.submission_score:
         settings.minimum_submission_score = args.submission_score
@@ -335,6 +350,12 @@ def get_args() -> Namespace:
         logging.info("Enabling Video Background!")
         settings.enable_background = True
 
+    logging.info("Setting Orientation to : %s", settings.orientation)
+    logging.info("Setting video_height to : %s", settings.video_height)
+    logging.info("Setting video_width to : %s", settings.video_width)
+    logging.info("Setting clip_margin to : %s", settings.clip_margin)
+    logging.info("Setting reddit_comment_width to : %s", settings.reddit_comment_width)
+
     return args
 
 
@@ -358,6 +379,13 @@ if __name__ == "__main__":
             for mention_post in mention_posts:
                 logging.info("Reddit Mention : %s", mention_post)
                 submissions.append(reddit.get_reddit_submission(mention_post))
+
+        if settings.enable_reddit_saved:
+            logging.info("Getting Reddit Saved Posts")
+            saved_posts = reddit.get_reddit_saved_posts()
+            for saved_post in saved_posts:
+                logging.info("Reddit Saved Post : %s", saved_post)
+                submissions.append(reddit.get_reddit_submission(saved_post))
 
         reddit_posts: List[Submission] = reddit.posts()
         for reddit_post in reddit_posts:

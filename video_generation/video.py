@@ -11,6 +11,7 @@ from os import path
 from pathlib import Path
 from random import SystemRandom
 from typing import Any, Dict, List, Optional
+import random
 
 from comments.screenshot import (
     download_screenshot_of_reddit_post_title,
@@ -217,8 +218,8 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
 
     v.title = f"{sanitize_text(v.meta.title)}"
     width: int = settings.video_width
-    clip_margin: int = 50
-    clip_margin_top: int = 30
+    clip_margin: int = settings.clip_margin
+    clip_margin_top: int = settings.clip_margin_top
     txt_clip_size = (width - (clip_margin * 2), None)
 
     current_clip_text: str = ""
@@ -263,8 +264,13 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
     # v.clips.append(subreddit_clip)
 
     title_fontsize, lineheight = get_font_size(len(v.meta.title))
+    margin_top = 250
+    title_clip_position_vertical = "center"
+    title_clip_duration = audioclip_title.duration + settings.pause
 
-    # Generate Title Clip
+    if settings.shorts_mode_enabled:
+        title_clip_position_vertical = margin_top
+        title_clip_duration = settings.max_video_length
 
     if settings.enable_screenshot_title_image:
         screenshot_directory: Path = Path(settings.screenshot_directory, v.meta.id)
@@ -273,27 +279,31 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         )
 
         title_path: str = str(Path(screenshot_directory, "title.png"))
+
         title_clip: ImageClip = (
             ImageClip(title_path)
-            .set_position(("center", "center"))
-            .set_duration(audioclip_title.duration + settings.pause)
+            .set_position(("center", title_clip_position_vertical))
+            .set_duration(title_clip_duration)
             .set_audio(audioclip_title)
             .set_start(t)
             .set_opacity(settings.reddit_comment_opacity)
         )
-        if title_clip.w > title_clip.h:
-            print("Resizing Horizontally")
-            title_clip = title_clip.resize(
-                width=settings.video_width * settings.reddit_comment_width
-            )
-        else:
-            print("Resizing Vertically")
-            title_clip = title_clip.resize(height=settings.video_height * 0.95)
+        title_clip = title_clip.resize(
+            width=settings.video_width * settings.reddit_comment_width
+        )
+        # if title_clip.w > title_clip.h:
+        #     print("Resizing Horizontally")
+        #     title_clip = title_clip.resize(
+        #         width=settings.video_width * settings.reddit_comment_width
+        #     )
+        # else:
+        #     print("Resizing Vertically")
+        #     title_clip = title_clip.resize(height=settings.video_height * 0.95)
     else:
         title_clip = (
             ImageClip(v.thumbnail)
-            .set_position(("center", "center"))
-            .set_duration(audioclip_title.duration + settings.pause)
+            .set_position(("center", title_clip_position_vertical))
+            .set_duration(title_clip_duration)
             .set_audio(audioclip_title)
             .set_start(t)
             .set_opacity(settings.reddit_comment_opacity)
@@ -306,6 +316,11 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
     v.duration += audioclip_title.duration + settings.pause
 
     newcaster_start: int = t
+
+    if settings.shorts_mode_enabled:
+        text_clip_margin = title_clip.h + 10 + margin_top
+    else:
+        text_clip_margin = clip_margin_top
 
     if v.meta.selftext and settings.enable_selftext:
         logging.info(log_group_header(title="Processing SelfText"))
@@ -352,7 +367,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                     # bg_color=settings.text_bg_color,
                     align="West",
                 )
-                .set_position((clip_margin, clip_margin_top))
+                .set_position((clip_margin, text_clip_margin))
                 .set_duration(selftext_audioclip.duration + settings.pause)
                 .set_audio(selftext_audioclip)
                 .set_start(t)
@@ -360,7 +375,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                 .volumex(1.5)
             )
 
-            if selftext_clip.h > settings.video_height:
+            if selftext_clip.h > settings.video_height - text_clip_margin:
                 logging.debug("Text exceeded Video Height, reset text")
                 current_clip_text = f"{selftext_line}\n"
                 selftext_clip = (
@@ -375,14 +390,14 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                         # bg_color=settings.text_bg_color,
                         align="West",
                     )
-                    .set_position((clip_margin, clip_margin_top))
+                    .set_position((clip_margin, text_clip_margin))
                     .set_opacity(settings.text_bg_opacity)
                     .set_duration(selftext_audioclip.duration + settings.pause)
                     .set_audio(selftext_audioclip)
                     .set_start(t)
                 )
 
-                if selftext_clip.h > settings.video_height:
+                if selftext_clip.h > settings.video_height - text_clip_margin:
                     logging.debug("Comment Text Too Long, Skipping Comment")
                     continue
 
@@ -471,6 +486,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                 logging.info("Rejected Comments : %s", len(rejected_comments))
                 logging.info("Accepted Comments : %s", len(accepted_comments))
                 break
+
         screenshot_directory = Path(settings.screenshot_directory, v.meta.id)
         if settings.commentstyle == "reddit":
             download_screenshots_of_reddit_posts(
@@ -498,7 +514,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                     try:
                         img_clip: ImageClip = (
                             ImageClip(img_path)
-                            .set_position(("center", "center"))
+                            .set_position(("center", text_clip_margin))
                             .set_duration(audioclip.duration + settings.pause)
                             .set_audio(audioclip)
                             .set_start(t)
@@ -552,7 +568,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                     audio_filepath = str(
                         Path(
                             speech_directory,
-                            f"{c.id}_{str(ccount)}.mp3",
+                            f"{accepted_comment.id}_{str(ccount)}.mp3",
                         )
                     )
                     speech.create_audio(audio_filepath, comment_line)
@@ -571,10 +587,10 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                             size=txt_clip_size,
                             kerning=-1,
                             method="caption",
-                            bg_color=settings.text_bg_color,
+                            #bg_color=settings.text_bg_color,
                             align="West",
                         )
-                        .set_position(("center", "center"))
+                        .set_position(("center", text_clip_margin))
                         .set_duration(audioclip.duration + settings.pause)
                         .set_audio(audioclip)
                         .set_start(t)
@@ -582,7 +598,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                         .volumex(1.5)
                     )
 
-                    if txt_clip.h > settings.video_height:
+                    if txt_clip.h > settings.video_height - text_clip_margin:
                         logging.debug("Text exceeded Video Height, reset text")
                         current_clip_text = f"{comment_line}\n\n"
                         txt_clip = (
@@ -597,14 +613,14 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                                 # bg_color=settings.text_bg_color,
                                 align="West",
                             )
-                            .set_position((clip_margin, clip_margin_top))
+                            .set_position((clip_margin, text_clip_margin))
                             .set_duration(audioclip.duration + settings.pause)
                             .set_audio(audioclip)
                             .set_opacity(settings.text_bg_opacity)
                             .set_start(t)
                         )
 
-                        if txt_clip.h > settings.video_height:
+                        if txt_clip.h > settings.video_height - text_clip_margin:
                             logging.debug("Comment Text Too Long, Skipping Comment")
                             continue
 
@@ -661,15 +677,58 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         background_clip: VideoFileClip = (
             VideoFileClip(background_filepath)
             .set_start(tb)
-            .volumex(settings.background_volume)
             .set_opacity(settings.background_opacity)
+            .volumex(0)
         )
+
+
+        random_seconds = random.uniform(15, 120)
+        background_clip = background_clip.subclip(random_seconds, background_clip.duration)
 
         if settings.orientation == "portrait":
             print("Portrait mode, cropping and resizing!")
-            background_clip = background_clip.crop(
-                x1=1166.6, y1=0, x2=2246.6, y2=1920
-            ).resize((settings.vertical_video_width, settings.vertical_video_height))
+            # background_clip = background_clip.crop(
+            #     x1=1166.6, 
+            #     x2=2246.6, 
+            #     y1=0, 
+            #     y2=1920
+            # ).resize((settings.vertical_video_width, settings.vertical_video_height))
+            
+            original_width, original_height = background_clip.size
+
+            # Check if resizing is necessary
+            if original_width < settings.vertical_video_width or original_height < settings.vertical_video_height:
+                print("Scaling background video to minimum size required for vertical video")
+
+                # Calculate the scaling factors for width and height
+                width_scale = settings.vertical_video_width / original_width
+                height_scale = settings.vertical_video_height / original_height
+
+                # Choose the minimum scaling factor to ensure the video fits the desired dimensions
+                scaling_factor = max(width_scale, height_scale)
+
+                # Calculate the new dimensions
+                new_width = int(original_width * scaling_factor)
+                new_height = int(original_height * scaling_factor)
+
+                background_clip = background_clip.resize((new_width, new_height))
+                original_width, original_height = background_clip.size
+            # Calculate the crop dimensions
+
+            print(f"original_width: {original_width}")
+            print(f"original_height: {original_height}")
+            print(f"settings.vertical_video_width: {settings.vertical_video_width}")
+            print(f"settings.vertical_video_height: {settings.vertical_video_height}")
+            x1 = (original_width - settings.vertical_video_width) // 2
+            x2 = x1 + settings.vertical_video_width
+            y1 = (original_height - settings.vertical_video_height) // 2
+            y2 = y1 + settings.vertical_video_height
+            print(f"x1: {x1}")
+            print(f"x2: {x2}")
+            print(f"y1: {y1}")
+            print(f"y2: {y2}")
+            # Crop the video clip
+            background_clip = background_clip.crop(x1=x1, y1=y1, x2=x2, y2=y2)
 
         if background_clip.duration < v.duration:
             logging.debug("Looping Background")
@@ -766,6 +825,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         "duration": str(v.duration),
         "height": str(settings.video_height),
         "width": str(settings.video_width),
+        "url": f"http://reddit.com{v.meta.permalink}",
     }
 
     with open(v.json, "w") as outfile:  # noqa: SCS109
@@ -781,6 +841,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         "duration": v.duration,
         "compiled": "false",
         "uploaded": "false",
+        "url": f"http://reddit.com{v.meta.permalink}",
     }
 
     csvwriter.write_entry(row=row)

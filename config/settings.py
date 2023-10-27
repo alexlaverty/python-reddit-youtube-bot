@@ -76,10 +76,11 @@ enable_selftext = True
 enable_upload = False
 enable_screenshot_title_image = False
 enable_reddit_mentions = False
+enable_reddit_saved_posts = False
 lexica_download_enabled = True  # Download files from Lexica
 max_video_length = 600  # Seconds
 maximum_length_self_text = 3000
-minimum_submission_score = 5000
+minimum_submission_score = 2000
 number_of_thumbnails = 1
 submission_limit = 500
 text_bg_color = "#1A1A1B"
@@ -87,6 +88,8 @@ text_bg_opacity = 1
 text_color = "white"
 text_font = "Verdana-Bold"
 text_fontsize = 32
+clip_margin = 50
+clip_margin_top = 30
 title_length_maximum = 100
 title_length_minimum = 20
 total_posts_to_process = 10
@@ -120,6 +123,7 @@ soundeffects_directory = str(Path(assets_directory, "soundeffects"))
 video_overlay_filepath = str(Path(assets_directory, "particles.mp4"))
 videos_directory = "videos"
 add_hashtag_shorts_to_description = False
+shorts_mode_enabled = False
 
 # Youtube
 # Choices ['private', 'unlisted', 'public']
