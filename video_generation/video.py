@@ -12,6 +12,7 @@ from pathlib import Path
 from random import SystemRandom
 from typing import Any, Dict, List, Optional
 import random
+import re 
 
 from comments.screenshot import (
     download_screenshot_of_reddit_post_title,
@@ -264,7 +265,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
     # v.clips.append(subreddit_clip)
 
     title_fontsize, lineheight = get_font_size(len(v.meta.title))
-    margin_top = 250
+    margin_top = 245
     title_clip_position_vertical = "center"
     title_clip_duration = audioclip_title.duration + settings.pause
 
@@ -455,6 +456,12 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                 rejected_comments.append(c)
                 continue
 
+            markdown_image_regex = r'!\[.*\]\(.*\)'
+            if re.search(markdown_image_regex, comment):
+                logging.info("Status : REJECTED, Markdown Image : %s", comment)
+                rejected_comments.append(c)
+                continue
+    
             if "covid" in comment.lower() or "vaccine" in comment.lower():
                 logging.info(
                     "Status : REJECTED, Covid related, \
@@ -560,7 +567,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                         logging.info("Skip zero space character comment : %s", comment)
                         continue
 
-                    if comment_line == "":
+                    if comment_line == "" or comment_line == ' ':
                         logging.info("Skipping blank comment")
                         continue
 
@@ -571,7 +578,9 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                             f"{accepted_comment.id}_{str(ccount)}.mp3",
                         )
                     )
+
                     speech.create_audio(audio_filepath, comment_line)
+                    print(f"Reading audio file: {audio_filepath}")
                     audioclip = AudioFileClip(audio_filepath)
 
                     current_clip_text += f"{comment_line}\n\n"
