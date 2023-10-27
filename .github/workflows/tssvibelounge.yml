@@ -52,8 +52,7 @@ jobs:
           python3 app.py --total-posts 1 \
                          --enable-upload \
                          --enable-background \
-                         --background-directory /app/assets/backgrounds \
-                         --enable-mentions
+                         --background-directory /app/assets/backgrounds
           python3 refresh_token.py
           rm -f client_secret.json
           rm -f credentials.storage
