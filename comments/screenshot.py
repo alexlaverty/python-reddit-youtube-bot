@@ -5,6 +5,7 @@ import re
 from io import TextIOWrapper
 from pathlib import Path
 from typing import List
+import time
 
 from playwright.sync_api import ViewportSize, sync_playwright
 from praw.models import Comment
@@ -67,6 +68,8 @@ def download_screenshots_of_reddit_posts(
         page = context.new_page()
 
         page.goto("https://www.reddit.com/login")
+
+        time.sleep(5)
 
         # Check if the first set of selectors exist and fill in the username and password.
         if page.query_selector("#loginUsername"):
