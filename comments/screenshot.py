@@ -67,10 +67,26 @@ def download_screenshots_of_reddit_posts(
         page = context.new_page()
 
         page.goto("https://www.reddit.com/login")
-        page.type("#loginUsername", auth.praw_username)
-        page.type("#loginPassword", auth.praw_password)
+
+        # Check if the first set of selectors exist and fill in the username and password.
+        if page.query_selector("#loginUsername"):
+            page.type("#loginUsername", auth.praw_username)
+            page.type("#loginPassword", auth.praw_password)
+        # If the first set of selectors don't exist, try the second set.
+        elif page.query_selector("#login-username"):
+            page.type("#login-username", auth.praw_username)
+            page.type("#login-password", auth.praw_password)
+        else:
+            print("Username and password fields not found.")
+
         page.click('button[type="submit"]')
         page.wait_for_url("https://www.reddit.com/")
+
+        current_url = page.url
+        if current_url == "https://www.reddit.com/":
+            print("Login successful!")
+        else:
+            print("Login failed.")
 
         cookies = json.load(cookie_file)
         context.add_cookies(cookies)  # load preference cookies
