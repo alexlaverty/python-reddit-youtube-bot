@@ -692,9 +692,6 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         )
 
 
-        random_seconds = random.uniform(15, 120)
-        background_clip = background_clip.subclip(random_seconds, background_clip.duration)
-
         if settings.orientation == "portrait":
             print("Portrait mode, cropping and resizing!")
             # background_clip = background_clip.crop(
