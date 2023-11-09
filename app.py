@@ -85,6 +85,9 @@ def process_submission(submission: Submission) -> None:
     video: Video = Video(submission)
     title_path: str = safe_filename(submission.title)
 
+    if settings.background_music_path:
+        video.music = settings.background_music_path
+
     # Create Video Directories
     video.folder_path: str = str(
         Path(settings.videos_directory, f"{submission.id}_{title_path}")
@@ -221,6 +224,24 @@ def get_args() -> Namespace:
         help="Enable video backgrounds",
     )
 
+    parser.add_argument(
+        "-m",
+        "--enable-background-music",
+        action="store_true",
+        help="Enable background music",
+    )
+
+    parser.add_argument(
+        "--background-music-path",
+        help="Path to background music file"
+    )
+
+    parser.add_argument(
+        "--thumbnail-image-path",
+        help="Path to thumbnail image file"
+    )
+
+
     parser.add_argument("--total-posts", type=int, help="Enable video backgrounds")
 
     parser.add_argument(
@@ -304,6 +325,28 @@ def get_args() -> Namespace:
             "Setting video background directory : %s", args.background_directory
         )
         settings.background_directory = args.background_directory
+
+    if args.enable_background_music:
+        # Enable background music, selects random music file from assets/music
+        logging.info(
+            "Enable Background Music : True",
+        )
+        settings.enable_background_music = True
+
+    if args.background_music_path:
+        # If you want specific music use this to specify the path to the mp3 file.
+        logging.info(
+            "Specify background music file : %s", args.background_music_path
+        )
+        settings.enable_background_music = True
+        settings.background_music_path = args.background_music_path
+
+    if args.thumbnail_image_path:
+        # If you want a specific thumbnail image specify the path using this arg.
+        logging.info(
+            "Settings thumbnail image path : %s", args.thumbnail_image_path
+        )
+        settings.thumbnail_image_path = args.thumbnail_image_path
 
     if args.total_posts:
         logging.info("Total Posts to process : %s", args.total_posts)
