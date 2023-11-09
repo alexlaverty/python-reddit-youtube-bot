@@ -173,6 +173,9 @@ def generate(
             video_directory, title, number_of_images=number_of_thumbnails
         )
 
+    if settings.thumbnail_image_path:
+        images = [settings.thumbnail_image_path]
+
     thumbnails = []
 
     if images:

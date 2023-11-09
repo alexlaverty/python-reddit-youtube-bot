@@ -75,15 +75,18 @@ def download_screenshots_of_reddit_posts(
         if page.query_selector("#loginUsername"):
             page.type("#loginUsername", auth.praw_username)
             page.type("#loginPassword", auth.praw_password)
+            page.click('button[type="submit"]')
+            page.wait_for_url("https://www.reddit.com/")
         # If the first set of selectors don't exist, try the second set.
         elif page.query_selector("#login-username"):
             page.type("#login-username", auth.praw_username)
             page.type("#login-password", auth.praw_password)
+            page.click('button[type="button"]')
+            page.wait_for_url("https://www.reddit.com/")
         else:
             print("Username and password fields not found.")
 
-        page.click('button[type="submit"]')
-        page.wait_for_url("https://www.reddit.com/")
+
 
         current_url = page.url
         if current_url == "https://www.reddit.com/":

@@ -27,10 +27,11 @@ import moviepy.video.fx.all as vfx
 from moviepy.editor import (
     AudioFileClip,
     ColorClip,
+    CompositeAudioClip,
     CompositeVideoClip,
     ImageClip,
     TextClip,
-    VideoFileClip,
+    VideoFileClip
 )
 
 from praw.models import Comment, Submission
@@ -521,7 +522,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                     try:
                         img_clip: ImageClip = (
                             ImageClip(img_path)
-                            .set_position(("center", text_clip_margin))
+                            .set_position(("center", "center"))
                             .set_duration(audioclip.duration + settings.pause)
                             .set_audio(audioclip)
                             .set_start(t)
@@ -759,6 +760,32 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
 
     v.clips.insert(0, background_clip)
 
+    if settings.enable_background_music:
+        print(f"Creating background music audio")
+        if settings.background_music_path:
+            background_music_filepath = settings.background_music_path
+            logging.info(f"Using specified background music : {background_music_filepath}")
+        else:
+            rnd: SystemRandom = SystemRandom()
+            background_music_path = rnd.choice(seq=os.listdir(settings.music_directory))
+            background_music_filepath: Path = Path(
+                settings.music_directory,
+                str(background_music_path)
+            )
+            logging.info("Randomly Selected Background Music : %s", background_music_filepath)
+
+        background_music_audio = AudioFileClip(background_music_filepath)
+
+        # Adjust audio clip to match video duration
+        if background_music_audio.duration < v.duration:
+            # Loop the audio to match the video duration
+            background_music_audio = background_music_audio.volumex(0).loop(-1, duration=v.duration)
+        elif background_music_audio.duration > v.duration:
+            # Trim the audio to match the video duration
+            background_music_audio = background_music_audio.subclip(0, v.duration)
+
+        background_music_audio = background_music_audio.volumex(settings.background_music_volume)
+
     if settings.enable_overlay:
         logging.info(log_group_subheader(title="Adding Overlay Clip"))
         clip_video_overlay: VideoFileClip = (
@@ -822,6 +849,14 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         v.clips.append(clip_video_newscaster)
 
     post_video: CompositeVideoClip = CompositeVideoClip(v.clips)
+
+    if settings.enable_background_music:
+        print(f"Adding background music")
+        # Create a composite audio clip with both original audio and adjusted background music
+        composite_audio = CompositeAudioClip([post_video.audio, background_music_audio])
+
+        # Set the audio of the video clip to the composite audio
+        post_video = post_video.set_audio(composite_audio)
 
     v.filepath = Path(video_directory, "final.mp4")
     v.json = str(Path(video_directory, "meta.json"))
