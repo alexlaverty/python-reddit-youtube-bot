@@ -29,6 +29,9 @@ def safe_filename(text: str):
     text = text.replace(" ", "_")
     return "".join([c for c in text if re.match(r"\w", c)])[:50]
 
+def is_new_layout(page):
+    page.wait_for_selector('html')
+    return 'is-shredtop-pdp' in page.eval_on_selector('html', '(htmlElement) => htmlElement.className')
 
 def download_screenshots_of_reddit_posts(
     accepted_comments: List[Comment], url: str, video_directory: Path
@@ -75,12 +78,14 @@ def download_screenshots_of_reddit_posts(
         if page.query_selector("#loginUsername"):
             page.type("#loginUsername", auth.praw_username)
             page.type("#loginPassword", auth.praw_password)
+            page.wait_for_selector('button[type="submit"]')
             page.click('button[type="submit"]')
             page.wait_for_url("https://www.reddit.com/")
         # If the first set of selectors don't exist, try the second set.
         elif page.query_selector("#login-username"):
             page.type("#login-username", auth.praw_username)
             page.type("#login-password", auth.praw_password)
+            page.wait_for_selector('button[type="submit"]')
             page.click('button[type="button"]')
             page.wait_for_url("https://www.reddit.com/")
         else:
@@ -112,6 +117,9 @@ def download_screenshots_of_reddit_posts(
                     '[data-click-id="text"] button'
                 ).click()  # Remove "Click to see nsfw" Button in Screenshot
 
+        # Determine the Reddit UI Layout
+        new_reddit_ui_layout=is_new_layout(page)
+
         if storymode:
             page.locator('[data-click-id="text"]').screenshot(
                 path=f"assets/temp/{id}/png/story_content.png"
@@ -130,10 +138,46 @@ def download_screenshots_of_reddit_posts(
 
                     page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
 
-                    try:
+                    if new_reddit_ui_layout:
+                        #print(f"https://reddit.com{comment.permalink}")
+                        # Wait for the shreddit-comment to be present on the page
+                        page.wait_for_selector('shreddit-comment')
+
+                        selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                        entry_element = page.wait_for_selector(selector)
+
+                        # Check if the has-children attribute exists on the shreddit-comment element
+                        collapsed_attribute_exists = page.eval_on_selector(
+                            selector,
+                            '(comment) => comment.hasAttribute("collapsed")'
+                        )
+
+                        # Check if the has-children attribute exists on the shreddit-comment element
+                        children_attribute_exists = page.eval_on_selector(
+                            selector,
+                            '(comment) => comment.hasAttribute("has-children")'
+                        )
+
+                        if collapsed_attribute_exists:
+                            # Expanding Collapsed Comment
+                            button_selector = f'{selector} details summary div button'
+                            page.wait_for_selector(button_selector)
+                            page.click(button_selector)
+                            print(f"Expanded the collapsed shreddit-comment with thingid t1_{comment.id}.")
+
+                        if children_attribute_exists:
+                            #print("Collapsing comment thread")
+                            comment_fold_button_selector = f'#comment-fold-button'
+                            page.wait_for_selector(comment_fold_button_selector)
+                            page.click(comment_fold_button_selector)
+
+
+                        # Check if the element exists before taking a screenshot
+                        if entry_element.is_visible():
+                            entry_element.screenshot(path=comment_path)
+                    else:
                         page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
-                    except Exception:  # noqa: S110
-                        pass
+
 
             print("Screenshots downloaded Successfully.")
 
