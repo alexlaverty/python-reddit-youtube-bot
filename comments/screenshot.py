@@ -72,7 +72,9 @@ def download_screenshots_of_reddit_posts(
 
         page.goto("https://www.reddit.com/login")
 
-        time.sleep(5)
+        #time.sleep(5)
+        # Wait for the page to finish loading
+        page.wait_for_load_state("load")
 
         # Check if the first set of selectors exist and fill in the username and password.
         if page.query_selector("#loginUsername"):
@@ -85,11 +87,17 @@ def download_screenshots_of_reddit_posts(
         elif page.query_selector("#login-username"):
             page.type("#login-username", auth.praw_username)
             page.type("#login-password", auth.praw_password)
-            page.wait_for_selector('button[type="submit"]')
-            page.click('button[type="button"]')
+            # Wait for the button to be visible
+            button_selector = 'button.login'
+            page.wait_for_selector(button_selector, state="visible")
+
+            # Click the button
+            page.click(button_selector)
             page.wait_for_url("https://www.reddit.com/")
         else:
-            print("Username and password fields not found.")
+            # Print the HTML content if the selectors are not found.
+            print("Username and password fields not found. Printing HTML:")
+            print(page.content())
 
 
 
