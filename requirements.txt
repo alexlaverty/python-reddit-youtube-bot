@@ -17,3 +17,4 @@ varname==0.11.1
 pandas==2.0.1
 numpy==1.24.3
 PyNaCl==1.5.0
+Pillow==9.5.0
