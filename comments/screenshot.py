@@ -56,7 +56,8 @@ def download_screenshots_of_reddit_posts(
         print("Launching Headless Browser...")
 
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
+        ua = "Mozilla/5.0 (Linux; Android 8.0.0; MI 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.101 Mobile Safari/537.36"
+        context = browser.new_context(user_agent=ua)
         context.set_default_timeout(settings.comment_screenshot_timeout)
         if settings.theme == "dark":
             cookie_file: TextIOWrapper = open(
