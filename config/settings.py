@@ -3,20 +3,21 @@ from sys import platform
 from pathlib import Path
 
 subreddits = [
-    "askreddit",
+    # "askreddit",
+    "movies",
     # "AmItheAsshole",
-    "antiwork",
-    "AskMen",
-    "ChoosingBeggars",
-    "hatemyjob",
-    "NoStupidQuestions",
-    "pettyrevenge",
-    "Showerthoughts",
-    "TooAfraidToAsk",
-    "TwoXChromosomes",
-    "unpopularopinion",
-    "confessions",
-    "confession",
+    # "antiwork",
+    # "AskMen",
+    # "ChoosingBeggars",
+    # "hatemyjob",
+    # "NoStupidQuestions",
+    # "pettyrevenge",
+    # "Showerthoughts",
+    # "TooAfraidToAsk",
+    # "TwoXChromosomes",
+    # "unpopularopinion",
+    # "confessions",
+    # "confession",
 ]
 
 subreddits_excluded = [
@@ -53,13 +54,14 @@ voice_engine = "edge-tts"
 # Comment Settings
 banned_keywords_base64 = "cG9ybixzZXgsamVya2luZyBvZmYsc2x1dCxyYXB\
                           lLGZ1Y2sscmV0YXJkLG1vdGhlcmZ1Y2tlcixyYXBpc3Q="
-theme = "dark"
+theme = "dark" # "dark"/"light"
 minimum_num_comments = 200
 reddit_comment_opacity = 1
 reddit_comment_width = 0.95
 comment_length_max = 600
-comment_limit = 100
+comment_limit = 15
 comment_screenshot_timeout = 30000
+screenshot_debug = False  # if True enables breakpoints in critical parts of screenshot.py
 
 # Video settings
 background_colour = [26, 26, 27]
@@ -69,10 +71,10 @@ background_volume = 0.5
 commentstyle = "reddit"
 enable_background = False
 enable_comments = True
-enable_compilation = True
+enable_compilation = False # True -> compile video
 enable_nsfw_content = False
 enable_overlay = False
-enable_selftext = True
+enable_selftext = False # True -> ? compile comments mp3 
 enable_upload = False
 enable_screenshot_title_image = False
 enable_reddit_mentions = False
@@ -96,7 +98,7 @@ clip_margin = 50
 clip_margin_top = 30
 title_length_maximum = 100
 title_length_minimum = 20
-total_posts_to_process = 10
+total_posts_to_process = 1
 video_height = 720
 video_width = 1280
 vertical_video_width = 1080
@@ -145,6 +147,9 @@ newcaster_size = (video_width * 0.5, video_height * 0.5)
 
 # Tweak for performance, set number of cores
 threads = 4
+
+# Whether to launch the Browser in Headless mode
+headless_browser = True  # defaults to True, but can set it to False to see what happens
 
 if platform == "linux" or platform == "linux2":
     firefox_binary = "/opt/firefox/firefox"
