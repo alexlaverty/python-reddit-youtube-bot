@@ -45,8 +45,6 @@ def is_new_layout(page):
 
     return new_reddit_layout
 
-
-
 def download_screenshots_of_reddit_posts(
     accepted_comments: List[Comment], url: str, video_directory: Path
 ) -> None:
@@ -111,13 +109,19 @@ def download_screenshots_of_reddit_posts(
             page.wait_for_url("https://www.reddit.com/")
         else:
             frame_loc = page.frame_locator('[src^="https://www.reddit.com/account/login"]')
-            username_loc = frame_loc.locator("#loginUsername")
-            password_loc = frame_loc.locator("#loginPassword")
-            button_loc = frame_loc.locator("[data-step='username-and-password'] button")
+            username_loc = frame_loc.locator("#loginUsername").first
+            password_loc = frame_loc.locator("#loginPassword").first
+            button_loc = frame_loc.locator("[data-step='username-and-password'] button").first
+            frame_loc_found = True
+            if not (username_loc.is_visible() and password_loc.is_visible() and button_loc.is_visible()):
+                frame_loc_found = False
+                username_loc = page.locator("#login-username").first
+                password_loc = page.locator("#login-password").first
+                button_loc = page.locator("button.login").first
             if (username_loc.is_visible() and password_loc.is_visible() and button_loc.is_visible()):
-                print("Login via frame_locator...")
-                username_loc.first.fill(auth.praw_username)
-                password_loc.first.fill(auth.praw_password)
+                print("Username and password fields found " + ("(via frame_locator)" if frame_loc_found else "") + ". Logging in...") 
+                username_loc.type(auth.praw_username)
+                password_loc.type(auth.praw_password)
                 button_loc.first.click()
                 
                 # Bypass "See Reddit in..."
@@ -127,7 +131,7 @@ def download_screenshots_of_reddit_posts(
                     see_reddit_in_button.dispatch_event('click')
 
                 # Wait for navigation to page different from the login one
-                not_login_url_regex = re.compile('^(https://www.reddit.com/)(?!login$)(.*)')
+                not_login_url_regex = re.compile('^(https://www.reddit.com/)(?!login)(.*)')
                 page.wait_for_url(not_login_url_regex)
             else:
                 # Print the HTML content if the selectors are not found.
@@ -158,7 +162,7 @@ def download_screenshots_of_reddit_posts(
         page.goto(url, timeout=0)
 
         #print(page.evaluate('() => document.querySelector("html").classList.toString()'))
-
+        
         # Alternate method to try to set preferred theme
         dark_mode_setter_loc = page.locator('shreddit-darkmode-setter').first
         dark_mode_tracker_loc = page.locator('faceplate-tracker[noun="dark_mode"]').first
@@ -193,6 +197,8 @@ def download_screenshots_of_reddit_posts(
             
             # breakpoint()
             
+            use_permalinks = False
+            
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
             ):
@@ -210,6 +216,24 @@ def download_screenshots_of_reddit_posts(
                         #print(f"https://reddit.com{comment.permalink}")
                         # Wait for the shreddit-comment to be present on the page
                         
+                        comment_excerpt = (comment.body.split("\n")[0])[:80] + "…"
+                        print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
+                        
+                        time.sleep(3)
+
+                        # Locate comment
+                        selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                        comment_loc = page.locator(selector).first
+                        
+                        # If comment not found on page, load single thread from permalink
+                        if use_permalinks or (not use_permalinks and not comment_loc.is_visible()):
+                            if not use_permalinks:
+                                print(f"Comment not found on page, using permalink to '{comment.permalink}'...")
+                                print("Use permalinks from now on...")
+                                use_permalinks = True
+                            # breakpoint()
+                            page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+
                         # Bypass "See this post in..."
                         see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
                         if see_this_post_in_button.is_visible():
@@ -222,12 +246,12 @@ def download_screenshots_of_reddit_posts(
                             print("View more comments... [CLICK]")
                             view_more_comments_button.dispatch_event('click')
                         
-                        time.sleep(3)
-                        # Locate comment
-                        selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
-                        #print(selector)
-                        comment_loc = page.locator(selector).first
-
+                        # If the comment text itself is collapsed, expand it
+                        comment_text_loc = comment_loc.locator("p").first
+                        if not comment_text_loc.is_visible():
+                            self_expand_button_loc = comment_loc.locator('summary button').first
+                            self_expand_button_loc.dispatch_event('click')
+                        
                         # If replies are expanded toggle them
                         expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
                         if expanded_loc.is_visible():
@@ -235,7 +259,9 @@ def download_screenshots_of_reddit_posts(
                             expanded_loc.dispatch_event("click")
                         
                         entry_element = comment_loc
+                        
                         #print(is_new_layout(page))
+                        
                         # Check if the element exists before taking a screenshot
                         print(f"Downloading screenshot '{comment_path}'...")
                         if entry_element.is_visible():
@@ -271,6 +297,10 @@ def download_screenshots_of_reddit_posts(
                             if settings.screenshot_debug: 
                                 print("[screenshot_debug]")
                                 breakpoint()
+                    else:
+                        page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+                        page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
+
 
             print("Screenshots downloaded Successfully.")
 
