@@ -16,5 +16,9 @@ videos/
 config/auth.py
 .env
 
+obtain_refresh_token.py
+setPython.cmd
+data.csv
+
 **/__pycache__/
 assets/work_dir/
