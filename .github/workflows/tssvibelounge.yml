@@ -1,7 +1,7 @@
 name: TTSVibeLounge
 on:
-  # schedule:
-  #   - cron: '0 */6 * * *'
+  schedule:
+    - cron: '0 */6 * * *'
   push:
     branches:
       - main
