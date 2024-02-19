@@ -32,8 +32,20 @@ def safe_filename(text: str):
     return "".join([c for c in text if re.match(r"\w", c)])[:50]
 
 def is_new_layout(page):
+    new_reddit_layout = False
     page.wait_for_selector('html')
-    return 'is-shredtop-pdp' in page.eval_on_selector('html', '(htmlElement) => htmlElement.className')
+    # Check if the element with tag name 'shreddit-app' exists on the page
+    shreddit_app_element = page.locator('shreddit-app').first
+
+    if shreddit_app_element:
+        print("Element 'shreddit-app' exists on the page.")
+        new_reddit_layout = True
+    else:
+        print("Element 'shreddit-app' exists on the page.")
+
+    return new_reddit_layout
+
+
 
 def download_screenshots_of_reddit_posts(
     accepted_comments: List[Comment], url: str, video_directory: Path
@@ -144,7 +156,9 @@ def download_screenshots_of_reddit_posts(
         context.add_cookies(cookies)  # load preference cookies
 
         page.goto(url, timeout=0)
-        
+
+        #print(page.evaluate('() => document.querySelector("html").classList.toString()'))
+
         # Alternate method to try to set preferred theme
         dark_mode_setter_loc = page.locator('shreddit-darkmode-setter').first
         dark_mode_tracker_loc = page.locator('faceplate-tracker[noun="dark_mode"]').first
@@ -211,15 +225,17 @@ def download_screenshots_of_reddit_posts(
                         time.sleep(3)
                         # Locate comment
                         selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                        #print(selector)
                         comment_loc = page.locator(selector).first
-                        
+
                         # If replies are expanded toggle them
                         expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
                         if expanded_loc.is_visible():
+                            #print("If replies are expanded toggle them")
                             expanded_loc.dispatch_event("click")
                         
                         entry_element = comment_loc
-                        
+                        #print(is_new_layout(page))
                         # Check if the element exists before taking a screenshot
                         print(f"Downloading screenshot '{comment_path}'...")
                         if entry_element.is_visible():
@@ -227,13 +243,34 @@ def download_screenshots_of_reddit_posts(
                             entry_element.screenshot(path=comment_path)
                         else:
                             print("Mmmmhhh... could not create screenshot!")
+                            print("2nd attempt, redirecting to comment permalink :")
+                            print(f"https://reddit.com{comment.permalink}")
+                            page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+                            time.sleep(3)
+                            if is_new_layout(page):
+                                # Bypass "See this post in..."
+                                see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
+                                if see_this_post_in_button.is_visible():
+                                    print("See this post in... [CONTINUE]")
+                                    see_this_post_in_button.dispatch_event('click')
+
+                                comment_loc = page.locator(selector).first
+                                if comment_loc:
+                                    # If replies are expanded toggle them
+                                    expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
+                                    if expanded_loc.is_visible():
+                                        #print("Collapse the comment replies")
+                                        expanded_loc.dispatch_event("click")
+                                    time.sleep(2)
+                                    comment_loc.screenshot(path=comment_path)
+                                    page.goto(url, timeout=0)
+                            else:
+                                if page.locator(f"#t1_{comment.id}").first:
+                                    page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
+
                             if settings.screenshot_debug: 
                                 print("[screenshot_debug]")
                                 breakpoint()
-                    else:
-                        page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
-                        page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
-
 
             print("Screenshots downloaded Successfully.")
 
