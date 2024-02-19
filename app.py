@@ -102,12 +102,16 @@ def process_submission(submission: Submission) -> None:
     else:
         # Generate Thumbnail
 
-        thumbnails: List[Path] = thumbnail.generate(
-            video_directory=video.folder_path,
-            subreddit=submission.subreddit_name_prefixed,
-            title=submission.title,
-            number_of_thumbnails=settings.number_of_thumbnails,
-        )
+        thumbnails = None
+        if not settings.enable_thumbnails:
+            print("Skipping thumbnails generation...")
+        else:
+            thumbnails: List[Path] = thumbnail.generate(
+                video_directory=video.folder_path,
+                subreddit=submission.subreddit_name_prefixed,
+                title=submission.title,
+                number_of_thumbnails=settings.number_of_thumbnails,
+            )
 
         if thumbnails:
             video.thumbnail_path = thumbnails[0]

@@ -303,7 +303,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         #     title_clip = title_clip.resize(height=settings.video_height * 0.95)
     else:
         title_clip = (
-            ImageClip(v.thumbnail)
+            (ImageClip(v.thumbnail) if v.thumbnail is not None else ColorClip((settings.video_width, settings.video_height)))
             .set_position(("center", title_clip_position_vertical))
             .set_duration(title_clip_duration)
             .set_audio(audioclip_title)
@@ -503,176 +503,179 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
                 screenshot_directory,
             )
 
-        for count, accepted_comment in enumerate(accepted_comments):
-            logging.info(
-                "=== Processing Reddit Comment %s/%s ===", count, len(accepted_comments)
-            )
-
-            if settings.commentstyle == "reddit":
-                audio_filepath: str = str(
-                    Path(speech_directory, f"{accepted_comment.id}.mp3")
+        if not settings.enable_comments_audio:
+            print("Skipping comments' audio generation...")
+        else:
+            for count, accepted_comment in enumerate(accepted_comments):
+                logging.info(
+                    "=== Processing Reddit Comment %s/%s ===", count, len(accepted_comments)
                 )
-                speech.create_audio(audio_filepath, accepted_comment.body)
-                audioclip: AudioFileClip = AudioFileClip(audio_filepath)
 
-                img_path: str = str(
-                    Path(screenshot_directory, f"comment_{accepted_comment.id}.png")
-                )
-                if path.exists(img_path):
-                    try:
-                        img_clip: ImageClip = (
-                            ImageClip(img_path)
-                            .set_position(("center", "center"))
-                            .set_duration(audioclip.duration + settings.pause)
-                            .set_audio(audioclip)
-                            .set_start(t)
-                            .set_opacity(settings.reddit_comment_opacity)
-                            .resize(
-                                width=settings.video_width
-                                * settings.reddit_comment_width
+                if settings.commentstyle == "reddit":
+                    audio_filepath: str = str(
+                        Path(speech_directory, f"{accepted_comment.id}.mp3")
+                    )
+                    speech.create_audio(audio_filepath, accepted_comment.body)
+                    audioclip: AudioFileClip = AudioFileClip(audio_filepath)
+
+                    img_path: str = str(
+                        Path(screenshot_directory, f"comment_{accepted_comment.id}.png")
+                    )
+                    if path.exists(img_path):
+                        try:
+                            img_clip: ImageClip = (
+                                ImageClip(img_path)
+                                .set_position(("center", "center"))
+                                .set_duration(audioclip.duration + settings.pause)
+                                .set_audio(audioclip)
+                                .set_start(t)
+                                .set_opacity(settings.reddit_comment_opacity)
+                                .resize(
+                                    width=settings.video_width
+                                    * settings.reddit_comment_width
+                                )
+                            )
+                        except Exception as e:
+                            print(e)
+                            continue
+                    else:
+                        logging.info("Comment image not found : %s", img_path)
+                        continue
+
+                    if img_clip.h > settings.video_height:
+                        logging.info("Comment larger than video height : %s", img_path)
+                        continue
+
+                    if v.duration + audioclip.duration > settings.max_video_length:
+                        logging.info(
+                            "Reached Maximum Video Length : %s", settings.max_video_length
+                        )
+                        logging.info("Used %s/%s comments", count, len(accepted_comments))
+                        logging.info("=== Finished Processing Comments ===")
+                        break
+
+                    t += audioclip.duration + settings.pause
+                    v.duration += audioclip.duration + settings.pause
+
+                    v.clips.append(img_clip)
+
+                    logging.debug("Video Clips : ")
+                    logging.debug(str(len(v.clips)))
+                    logging.info("Current Video Duration : %s", v.duration)
+
+                if settings.commentstyle == "text":
+                    comment_lines: List[str] = accepted_comment.body.splitlines()
+
+                    for ccount, comment_line in enumerate(comment_lines):
+                        if comment_line == "&#x200B;":
+                            logging.info("Skip zero space character comment : %s", comment)
+                            continue
+
+                        if comment_line == "" or comment_line == ' ':
+                            logging.info("Skipping blank comment")
+                            continue
+
+                        logging.debug("comment_line     : %s", comment_line)
+                        audio_filepath = str(
+                            Path(
+                                speech_directory,
+                                f"{accepted_comment.id}_{str(ccount)}.mp3",
                             )
                         )
-                    except Exception as e:
-                        print(e)
-                        continue
-                else:
-                    logging.info("Comment image not found : %s", img_path)
-                    continue
 
-                if img_clip.h > settings.video_height:
-                    logging.info("Comment larger than video height : %s", img_path)
-                    continue
+                        speech.create_audio(audio_filepath, comment_line)
+                        print(f"Reading audio file: {audio_filepath}")
+                        audioclip = AudioFileClip(audio_filepath)
 
-                if v.duration + audioclip.duration > settings.max_video_length:
-                    logging.info(
-                        "Reached Maximum Video Length : %s", settings.max_video_length
-                    )
-                    logging.info("Used %s/%s comments", count, len(accepted_comments))
-                    logging.info("=== Finished Processing Comments ===")
-                    break
+                        current_clip_text += f"{comment_line}\n\n"
+                        logging.debug("Current Clip Text :")
+                        logging.debug(current_clip_text)
 
-                t += audioclip.duration + settings.pause
-                v.duration += audioclip.duration + settings.pause
-
-                v.clips.append(img_clip)
-
-                logging.debug("Video Clips : ")
-                logging.debug(str(len(v.clips)))
-                logging.info("Current Video Duration : %s", v.duration)
-
-            if settings.commentstyle == "text":
-                comment_lines: List[str] = accepted_comment.body.splitlines()
-
-                for ccount, comment_line in enumerate(comment_lines):
-                    if comment_line == "&#x200B;":
-                        logging.info("Skip zero space character comment : %s", comment)
-                        continue
-
-                    if comment_line == "" or comment_line == ' ':
-                        logging.info("Skipping blank comment")
-                        continue
-
-                    logging.debug("comment_line     : %s", comment_line)
-                    audio_filepath = str(
-                        Path(
-                            speech_directory,
-                            f"{accepted_comment.id}_{str(ccount)}.mp3",
-                        )
-                    )
-
-                    speech.create_audio(audio_filepath, comment_line)
-                    print(f"Reading audio file: {audio_filepath}")
-                    audioclip = AudioFileClip(audio_filepath)
-
-                    current_clip_text += f"{comment_line}\n\n"
-                    logging.debug("Current Clip Text :")
-                    logging.debug(current_clip_text)
-
-                    txt_clip: TextClip = (
-                        TextClip(
-                            accepted_comment.body,
-                            font=settings.text_font,
-                            fontsize=settings.text_fontsize,
-                            color=settings.text_color,
-                            size=txt_clip_size,
-                            kerning=-1,
-                            method="caption",
-                            #bg_color=settings.text_bg_color,
-                            align="West",
-                        )
-                        .set_position(("center", text_clip_margin))
-                        .set_duration(audioclip.duration + settings.pause)
-                        .set_audio(audioclip)
-                        .set_start(t)
-                        .set_opacity(settings.text_bg_opacity)
-                        .volumex(1.5)
-                    )
-
-                    if txt_clip.h > settings.video_height - text_clip_margin:
-                        logging.debug("Text exceeded Video Height, reset text")
-                        current_clip_text = f"{comment_line}\n\n"
-                        txt_clip = (
+                        txt_clip: TextClip = (
                             TextClip(
-                                current_clip_text,
+                                accepted_comment.body,
                                 font=settings.text_font,
                                 fontsize=settings.text_fontsize,
                                 color=settings.text_color,
                                 size=txt_clip_size,
                                 kerning=-1,
                                 method="caption",
-                                # bg_color=settings.text_bg_color,
+                                #bg_color=settings.text_bg_color,
                                 align="West",
                             )
-                            .set_position((clip_margin, text_clip_margin))
+                            .set_position(("center", text_clip_margin))
                             .set_duration(audioclip.duration + settings.pause)
                             .set_audio(audioclip)
-                            .set_opacity(settings.text_bg_opacity)
                             .set_start(t)
+                            .set_opacity(settings.text_bg_opacity)
+                            .volumex(1.5)
                         )
 
                         if txt_clip.h > settings.video_height - text_clip_margin:
-                            logging.debug("Comment Text Too Long, Skipping Comment")
-                            continue
-
-                        total_duration: int = v.duration + audioclip.duration
-                        if total_duration > settings.max_video_length:
-                            logging.info(
-                                "Reached Maximum Video Length : %s",
-                                settings.max_video_length,
+                            logging.debug("Text exceeded Video Height, reset text")
+                            current_clip_text = f"{comment_line}\n\n"
+                            txt_clip = (
+                                TextClip(
+                                    current_clip_text,
+                                    font=settings.text_font,
+                                    fontsize=settings.text_fontsize,
+                                    color=settings.text_color,
+                                    size=txt_clip_size,
+                                    kerning=-1,
+                                    method="caption",
+                                    # bg_color=settings.text_bg_color,
+                                    align="West",
+                                )
+                                .set_position((clip_margin, text_clip_margin))
+                                .set_duration(audioclip.duration + settings.pause)
+                                .set_audio(audioclip)
+                                .set_opacity(settings.text_bg_opacity)
+                                .set_start(t)
                             )
-                            logging.info(
-                                "Used %s/%s comments",
-                                ccount,
-                                len(accepted_comments),
-                            )
-                            logging.info("=== Finished Processing Comments ===")
-                            break
 
-                    t += audioclip.duration + settings.pause
-                    v.duration += audioclip.duration + settings.pause
+                            if txt_clip.h > settings.video_height - text_clip_margin:
+                                logging.debug("Comment Text Too Long, Skipping Comment")
+                                continue
 
-                    v.clips.append(txt_clip)
-                    logging.debug("Video Clips : ")
-                    logging.debug(str(len(v.clips)))
+                            total_duration: int = v.duration + audioclip.duration
+                            if total_duration > settings.max_video_length:
+                                logging.info(
+                                    "Reached Maximum Video Length : %s",
+                                    settings.max_video_length,
+                                )
+                                logging.info(
+                                    "Used %s/%s comments",
+                                    ccount,
+                                    len(accepted_comments),
+                                )
+                                logging.info("=== Finished Processing Comments ===")
+                                break
 
-                logging.info("Current Video Duration : %s", v.duration)
+                        t += audioclip.duration + settings.pause
+                        v.duration += audioclip.duration + settings.pause
 
-                if v.duration > settings.max_video_length:
-                    logging.info(
-                        "Reached Maximum Video Length : %s", settings.max_video_length
-                    )
-                    logging.info("Used %s/%s comments", ccount, len(accepted_comments))
-                    logging.info("=== Finished Processing Comments ===")
-                    break
+                        v.clips.append(txt_clip)
+                        logging.debug("Video Clips : ")
+                        logging.debug(str(len(v.clips)))
 
-                if count == settings.comment_limit:
-                    logging.info(
-                        "Reached Maximum Number of Comments Limit : %s",
-                        settings.comment_limit,
-                    )
-                    logging.info("Used %s/%s comments", ccount, len(accepted_comments))
-                    logging.info("=== Finished Processing Comments ===")
-                    break
+                    logging.info("Current Video Duration : %s", v.duration)
+
+                    if v.duration > settings.max_video_length:
+                        logging.info(
+                            "Reached Maximum Video Length : %s", settings.max_video_length
+                        )
+                        logging.info("Used %s/%s comments", ccount, len(accepted_comments))
+                        logging.info("=== Finished Processing Comments ===")
+                        break
+
+                    if count == settings.comment_limit:
+                        logging.info(
+                            "Reached Maximum Number of Comments Limit : %s",
+                            settings.comment_limit,
+                        )
+                        logging.info("Used %s/%s comments", ccount, len(accepted_comments))
+                        logging.info("=== Finished Processing Comments ===")
+                        break
     else:
         logging.info("Skipping comments!")
 
