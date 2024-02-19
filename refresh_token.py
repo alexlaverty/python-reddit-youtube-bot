@@ -57,8 +57,7 @@ def write_secret(repo_key: Any, secret_encrypted_string: str) -> None:
         repo_key: Name of the repository that should contain the secret.
         secret_encrypted_string: Secret value.
     """
-    url: str = f"https://api.github.com/repos/{github_user}/{github_repo}/\
-                 actions/secrets/{secret_name}"
+    url: str = f"https://api.github.com/repos/{github_user}/{github_repo}/actions/secrets/{secret_name}"
     headers: Dict[str, str] = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
