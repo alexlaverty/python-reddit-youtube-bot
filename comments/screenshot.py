@@ -208,6 +208,7 @@ def download_screenshots_of_reddit_posts(
                             print("View more comments... [CLICK]")
                             view_more_comments_button.dispatch_event('click')
                         
+                        time.sleep(3)
                         # Locate comment
                         selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
                         comment_loc = page.locator(selector).first
