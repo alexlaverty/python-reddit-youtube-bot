@@ -133,7 +133,16 @@ def download_screenshots_of_reddit_posts(
 
                 # Wait for navigation to page different from the login one
                 not_login_url_regex = re.compile('^(https://www.reddit.com/)(?!login)(.*)')
-                page.wait_for_url(not_login_url_regex)
+                if settings.screenshot_debug:
+                    try:
+                        page.wait_for_url(not_login_url_regex)
+                    except Exception as e:
+                        print("[screenshot_debug]")
+                        print(e)
+                        breakpoint()
+                else:
+                    page.wait_for_url(not_login_url_regex)
+                    
             else:
                 # Print the HTML content if the selectors are not found.
                 print("Username and password fields not found. Printing HTML:")
@@ -200,6 +209,29 @@ def download_screenshots_of_reddit_posts(
             
             use_permalinks = False
             
+            def print_comments_availability_on_page(comments):
+                print()
+                print("COMMENTS AVAILABILITY ON PAGE")
+                on_page_comments = []
+                off_page_comments = []
+                for (_idx, comment) in enumerate(comments):
+                    comment_excerpt = (comment.body.split("\n")[0])[:80] + "…"
+                    print(f" [{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
+                    
+                    # Locate comment
+                    selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                    comment_loc = page.locator(selector).first
+                    
+                    if comment_loc.is_visible():
+                        print("  ON PAGE")
+                        on_page_comments.append(comment)
+                    else:
+                        print(" OFF PAGE")
+                        off_page_comments.append(comment)
+                print(f"ON PAGE: {len(on_page_comments)}  OFF PAGE: {len(off_page_comments)}")
+                print()
+                breakpoint()
+            
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
             ):
@@ -249,12 +281,18 @@ def download_screenshots_of_reddit_posts(
                             view_more_comments_button.dispatch_event('click')
                             view_more_comments_button.wait_for(state='hidden')
                         
+                        if _idx == 0 and settings.screenshot_debug:
+                            print_comments_availability_on_page(accepted_comments)
+                        
                         # If the comment text itself is collapsed, expand it
                         comment_text_loc = comment_loc.locator("p").first
                         if not comment_text_loc.is_visible():
                             self_expand_button_loc = comment_loc.locator('summary button').first
                             if self_expand_button_loc.is_visible():
                                 self_expand_button_loc.dispatch_event('click')
+                            elif settings.screenshot_debug:
+                                print("[screenshot_debug]")
+                                breakpoint()
                         
                         # If replies are expanded toggle them
                         expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
