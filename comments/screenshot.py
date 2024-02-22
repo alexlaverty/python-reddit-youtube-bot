@@ -119,7 +119,7 @@ def download_screenshots_of_reddit_posts(
                 password_loc = page.locator("#login-password").first
                 button_loc = page.locator("button.login").first
             if (username_loc.is_visible() and password_loc.is_visible() and button_loc.is_visible()):
-                print("Username and password fields found " + ("(via frame_locator)" if frame_loc_found else "") + ". Logging in...") 
+                print("Username and password fields found" + (" (via frame_locator)" if frame_loc_found else "") + ". Logging in...") 
                 username_loc.type(auth.praw_username)
                 password_loc.type(auth.praw_password)
                 button_loc.first.click()
@@ -129,6 +129,7 @@ def download_screenshots_of_reddit_posts(
                 if see_reddit_in_button.is_visible():
                     print("See Reddit in... [CONTINUE]")
                     see_reddit_in_button.dispatch_event('click')
+                    see_reddit_in_button.wait_for(state='hidden')
 
                 # Wait for navigation to page different from the login one
                 not_login_url_regex = re.compile('^(https://www.reddit.com/)(?!login)(.*)')
@@ -239,12 +240,14 @@ def download_screenshots_of_reddit_posts(
                         if see_this_post_in_button.is_visible():
                             print("See this post in... [CONTINUE]")
                             see_this_post_in_button.dispatch_event('click')
+                            see_this_post_in_button.wait_for(state='hidden')
                         
                         # Click on "View more comments", if present
                         view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
                         if view_more_comments_button.is_visible():
                             print("View more comments... [CLICK]")
                             view_more_comments_button.dispatch_event('click')
+                            view_more_comments_button.wait_for(state='hidden')
                         
                         # If the comment text itself is collapsed, expand it
                         comment_text_loc = comment_loc.locator("p").first
