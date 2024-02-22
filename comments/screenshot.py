@@ -250,7 +250,8 @@ def download_screenshots_of_reddit_posts(
                         comment_text_loc = comment_loc.locator("p").first
                         if not comment_text_loc.is_visible():
                             self_expand_button_loc = comment_loc.locator('summary button').first
-                            self_expand_button_loc.dispatch_event('click')
+                            if self_expand_button_loc.is_visible():
+                                self_expand_button_loc.dispatch_event('click')
                         
                         # If replies are expanded toggle them
                         expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
