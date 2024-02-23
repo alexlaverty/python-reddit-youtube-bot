@@ -132,7 +132,8 @@ def download_screenshots_of_reddit_posts(
                     see_reddit_in_button.wait_for(state='hidden')
 
                 # Wait for navigation to page different from the login one
-                not_login_url_regex = re.compile('^(https://www.reddit.com/)(?!login)(.*)')
+                login_url = page.url
+                not_login_url_regex = re.compile('^(?!' + login_url + ')')
                 if settings.screenshot_debug:
                     try:
                         page.wait_for_url(not_login_url_regex)
