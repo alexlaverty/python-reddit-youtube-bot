@@ -215,7 +215,8 @@ def download_screenshots_of_reddit_posts(
                 on_page_comments = []
                 off_page_comments = []
                 for (_idx, comment) in enumerate(comments):
-                    comment_excerpt = (comment.body.split("\n")[0])[:80] + "…"
+                    comment_excerpt = (comment.body.split("\n")[0])
+                    if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
                     print(f" [{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
                     
                     # Locate comment
@@ -230,7 +231,7 @@ def download_screenshots_of_reddit_posts(
                         off_page_comments.append(comment)
                 print(f"ON PAGE: {len(on_page_comments)}  OFF PAGE: {len(off_page_comments)}")
                 print()
-                breakpoint()
+                # breakpoint()
             
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
@@ -249,7 +250,8 @@ def download_screenshots_of_reddit_posts(
                         #print(f"https://reddit.com{comment.permalink}")
                         # Wait for the shreddit-comment to be present on the page
                         
-                        comment_excerpt = (comment.body.split("\n")[0])[:80] + "…"
+                        comment_excerpt = (comment.body.split("\n")[0])
+                        if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
                         print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
                         
                         time.sleep(3)
@@ -281,7 +283,7 @@ def download_screenshots_of_reddit_posts(
                             view_more_comments_button.dispatch_event('click')
                             view_more_comments_button.wait_for(state='hidden')
                         
-                        if _idx == 0 and settings.screenshot_debug:
+                        if _idx == 0 and False:
                             print_comments_availability_on_page(accepted_comments)
                         
                         # If the comment text itself is collapsed, expand it
