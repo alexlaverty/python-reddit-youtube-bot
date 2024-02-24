@@ -282,7 +282,8 @@ def download_screenshots_of_reddit_posts(
                                 # Ensure to hide backdrop
                                 backdrop_loc = page.locator('#bottom-sheet #backdrop').first
                                 if backdrop_loc.count() > 0:
-                                    print("Hiding backdrop...")
+                                    if settings.screenshot_debug:
+                                        print("Hiding backdrop...")
                                     backdrop_loc.evaluate('node => node.style.display="none"')
                             
                             # Click on "View more comments", if present
