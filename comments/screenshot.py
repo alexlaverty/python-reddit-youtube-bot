@@ -234,118 +234,132 @@ def download_screenshots_of_reddit_posts(
                 print()
                 # breakpoint()
             
-            for _idx, comment in enumerate(
-                accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
-            ):
-                comment_path: Path = Path(f"{video_directory}/comment_{comment.id}.png")
+            try:
+            
+                for _idx, comment in enumerate(
+                    accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
+                ):
+                    comment_path: Path = Path(f"{video_directory}/comment_{comment.id}.png")
 
-                if comment_path.exists():
-                    print(f"Comment Screenshot already downloaded : {comment_path}")
-                else:
-                    if page.locator('[data-testid="content-gate"]').is_visible():
-                        page.locator('[data-testid="content-gate"] button').click()
-
-                    # page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
-
-                    if new_reddit_ui_layout:
-                        #print(f"https://reddit.com{comment.permalink}")
-                        # Wait for the shreddit-comment to be present on the page
-                        
-                        comment_excerpt = (comment.body.split("\n")[0])
-                        if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
-                        print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
-                        
-                        time.sleep(3)
-
-                        # Locate comment
-                        selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
-                        comment_loc = page.locator(selector).first
-                        
-                        # If comment not found on page, load single thread from permalink
-                        if use_permalinks or (not use_permalinks and not comment_loc.is_visible()):
-                            if not use_permalinks:
-                                print(f"Comment not found on page, using permalink to '{comment.permalink}'...")
-                                print("Use permalinks from now on...")
-                                use_permalinks = True
-                            # breakpoint()
-                            page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
-
-                        # Bypass "See this post in..."
-                        see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
-                        if see_this_post_in_button.is_visible():
-                            print("See this post in... [CONTINUE]")
-                            see_this_post_in_button.dispatch_event('click')
-                            see_this_post_in_button.wait_for(state='hidden')
-                        
-                        # Click on "View more comments", if present
-                        view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
-                        if view_more_comments_button.is_visible():
-                            print("View more comments... [CLICK]")
-                            view_more_comments_button.dispatch_event('click')
-                            view_more_comments_button.wait_for(state='hidden')
-                        
-                        if _idx == 0 and False:
-                            print_comments_availability_on_page(accepted_comments)
-                        
-                        # If the comment text itself is collapsed, expand it
-                        comment_text_loc = comment_loc.locator("p").first
-                        if not comment_text_loc.is_visible():
-                            self_expand_button_loc = comment_loc.locator('summary button').first
-                            if self_expand_button_loc.is_visible():
-                                self_expand_button_loc.dispatch_event('click')
-                            elif settings.screenshot_debug:
-                                print("[screenshot_debug]")
-                                breakpoint()
-                        
-                        # If replies are expanded toggle them
-                        expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
-                        if expanded_loc.is_visible():
-                            #print("If replies are expanded toggle them")
-                            expanded_loc.dispatch_event("click")
-                        
-                        entry_element = comment_loc
-                        
-                        #print(is_new_layout(page))
-                        
-                        # Check if the element exists before taking a screenshot
-                        print(f"Downloading screenshot '{comment_path}'...")
-                        if entry_element.is_visible():
-                            entry_element.scroll_into_view_if_needed()
-                            entry_element.screenshot(path=comment_path)
-                        else:
-                            print("Mmmmhhh... could not create screenshot!")
-                            print("2nd attempt, redirecting to comment permalink :")
-                            print(f"https://reddit.com{comment.permalink}")
-                            page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
-                            time.sleep(3)
-                            if is_new_layout(page):
-                                # Bypass "See this post in..."
-                                see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
-                                if see_this_post_in_button.is_visible():
-                                    print("See this post in... [CONTINUE]")
-                                    see_this_post_in_button.dispatch_event('click')
-
-                                comment_loc = page.locator(selector).first
-                                if comment_loc:
-                                    # If replies are expanded toggle them
-                                    expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
-                                    if expanded_loc.is_visible():
-                                        #print("Collapse the comment replies")
-                                        expanded_loc.dispatch_event("click")
-                                    time.sleep(2)
-                                    comment_loc.screenshot(path=comment_path)
-                                    page.goto(url, timeout=0)
-                            else:
-                                if page.locator(f"#t1_{comment.id}").first:
-                                    page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
-
-                            if settings.screenshot_debug: 
-                                print("[screenshot_debug]")
-                                breakpoint()
+                    if comment_path.exists():
+                        print(f"Comment Screenshot already downloaded : {comment_path}")
                     else:
-                        page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
-                        page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
+                        if page.locator('[data-testid="content-gate"]').is_visible():
+                            page.locator('[data-testid="content-gate"] button').click()
 
+                        # page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+
+                        if new_reddit_ui_layout:
+                            #print(f"https://reddit.com{comment.permalink}")
+                            # Wait for the shreddit-comment to be present on the page
+                            
+                            comment_excerpt = (comment.body.split("\n")[0])
+                            if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
+                            print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
+                            
+                            time.sleep(3)
+
+                            # Locate comment
+                            selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                            comment_loc = page.locator(selector).first
+                            
+                            # If comment not found on page, load single thread from permalink
+                            if use_permalinks or (not use_permalinks and not comment_loc.is_visible()):
+                                if not use_permalinks:
+                                    print(f"Comment not found on page, using permalink to '{comment.permalink}'...")
+                                    print("Use permalinks from now on...")
+                                    use_permalinks = True
+                                # breakpoint()
+                                page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+
+                            # Bypass "See this post in..."
+                            see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
+                            if see_this_post_in_button.is_visible():
+                                print("See this post in... [CONTINUE]")
+                                see_this_post_in_button.dispatch_event('click')
+                                see_this_post_in_button.wait_for(state='hidden')
+                            else:
+                                # Ensure to hide backdrop
+                                backdrop_loc = page.locator('#bottom-sheet #backdrop').first
+                                if backdrop_loc.count() > 0:
+                                    print("Hiding backdrop...")
+                                    backdrop_loc.evaluate('node => node.style.display="none"')
+                            
+                            # Click on "View more comments", if present
+                            view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
+                            if view_more_comments_button.is_visible():
+                                print("View more comments... [CLICK]")
+                                view_more_comments_button.dispatch_event('click')
+                                view_more_comments_button.wait_for(state='hidden')
+                            
+                            if _idx == 0 and False:
+                                print_comments_availability_on_page(accepted_comments)
+                            
+                            # If the comment text itself is collapsed, expand it
+                            comment_text_loc = comment_loc.locator("p").first
+                            if not comment_text_loc.is_visible():
+                                self_expand_button_loc = comment_loc.locator('summary button').first
+                                if self_expand_button_loc.is_visible():
+                                    self_expand_button_loc.dispatch_event('click')
+                                elif settings.screenshot_debug:
+                                    print("[screenshot_debug]")
+                                    breakpoint()
+                            
+                            # If replies are expanded toggle them
+                            expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
+                            if expanded_loc.is_visible():
+                                #print("If replies are expanded toggle them")
+                                expanded_loc.dispatch_event("click")
+                            
+                            entry_element = comment_loc
+                            
+                            #print(is_new_layout(page))
+                            
+                            # Check if the element exists before taking a screenshot
+                            print(f"Downloading screenshot '{comment_path}'...")
+                            if entry_element.is_visible():
+                                entry_element.scroll_into_view_if_needed()
+                                entry_element.screenshot(path=comment_path)
+                            else:
+                                print("Mmmmhhh... could not create screenshot!")
+                                print("2nd attempt, redirecting to comment permalink :")
+                                print(f"https://reddit.com{comment.permalink}")
+                                page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+                                time.sleep(3)
+                                if is_new_layout(page):
+                                    # Bypass "See this post in..."
+                                    see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
+                                    if see_this_post_in_button.is_visible():
+                                        print("See this post in... [CONTINUE]")
+                                        see_this_post_in_button.dispatch_event('click')
+
+                                    comment_loc = page.locator(selector).first
+                                    if comment_loc:
+                                        # If replies are expanded toggle them
+                                        expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
+                                        if expanded_loc.is_visible():
+                                            #print("Collapse the comment replies")
+                                            expanded_loc.dispatch_event("click")
+                                        time.sleep(2)
+                                        comment_loc.screenshot(path=comment_path)
+                                        page.goto(url, timeout=0)
+                                else:
+                                    if page.locator(f"#t1_{comment.id}").first:
+                                        page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
+
+                                if settings.screenshot_debug: 
+                                    print("[screenshot_debug]")
+                                    breakpoint()
+                        else:
+                            page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+                            page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
+                            
+            except Exception as e:
+                print(f"Error: {e}")
+                print("Taking screenshot and re-throw...")
+                page.screenshot(path='error.png')
+                print("See 'error.png'")
+                raise
 
             print("Screenshots downloaded Successfully.")
 
