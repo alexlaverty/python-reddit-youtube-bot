@@ -357,9 +357,10 @@ def download_screenshots_of_reddit_posts(
                             
             except Exception as e:
                 print(f"Error: {e}")
-                print("Taking screenshot and re-throw...")
-                page.screenshot(path='error.png')
-                print("See 'error.png'")
+                print("Taking screenshot and re-throwing Exception...")
+                error_path = Path(f"{video_directory}/error.png")
+                page.screenshot(path=error_path)
+                print(f"See '{error_path}'")
                 raise
 
             print("Screenshots downloaded Successfully.")
