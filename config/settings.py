@@ -4,20 +4,19 @@ from pathlib import Path
 
 subreddits = [
     "askreddit",
-    # "movies",
-    # "AmItheAsshole",
-    # "antiwork",
-    # "AskMen",
-    # "ChoosingBeggars",
-    # "hatemyjob",
-    # "NoStupidQuestions",
-    # "pettyrevenge",
-    # "Showerthoughts",
-    # "TooAfraidToAsk",
-    # "TwoXChromosomes",
-    # "unpopularopinion",
-    # "confessions",
-    # "confession",
+    "AmItheAsshole",
+    "antiwork",
+    "AskMen",
+    "ChoosingBeggars",
+    "hatemyjob",
+    "NoStupidQuestions",
+    "pettyrevenge",
+    "Showerthoughts",
+    "TooAfraidToAsk",
+    "TwoXChromosomes",
+    "unpopularopinion",
+    "confessions",
+    "confession",
 ]
 
 subreddits_excluded = [
@@ -61,7 +60,7 @@ reddit_comment_width = 0.95
 comment_length_max = 600
 comment_limit = 100
 comment_screenshot_timeout = 30000
-screenshot_debug = True  # if True enables breakpoints in critical parts of screenshot.py
+screenshot_debug = False  # if True enables breakpoints in critical parts of screenshot.py
 
 # Video settings
 background_colour = [26, 26, 27]
@@ -71,12 +70,12 @@ background_volume = 0.5
 commentstyle = "reddit"
 enable_background = False
 enable_comments = True
-enable_compilation = True # True -> compile video
+enable_compilation = True  # True -> compile video
 enable_nsfw_content = False
 enable_overlay = False
-enable_selftext = False
-enable_comments_audio = False # True -> generate mp3 from comment text
-enable_thumbnails = False # True -> generate post thumbnails
+enable_selftext = True
+enable_comments_audio = True  # True -> generate mp3 from comment text
+enable_thumbnails = True  # True -> generate post thumbnails
 enable_upload = False
 enable_screenshot_title_image = False
 enable_reddit_mentions = False
