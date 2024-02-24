@@ -120,8 +120,8 @@ def download_screenshots_of_reddit_posts(
                 button_loc = page.locator("button.login").first
             if (username_loc.is_visible() and password_loc.is_visible() and button_loc.is_visible()):
                 print("Username and password fields found" + (" (via frame_locator)" if frame_loc_found else "") + ". Logging in...") 
-                username_loc.type(auth.praw_username)
-                password_loc.type(auth.praw_password)
+                username_loc.fill(auth.praw_username)
+                password_loc.fill(auth.praw_password)
                 button_loc.first.click()
                 
                 # Bypass "See Reddit in..."
