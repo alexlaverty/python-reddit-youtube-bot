@@ -4,19 +4,19 @@ from pathlib import Path
 
 subreddits = [
     "askreddit",
-    # "AmItheAsshole",
-    # "antiwork",
-    # "AskMen",
-    # "ChoosingBeggars",
-    # "hatemyjob",
-    # "NoStupidQuestions",
-    # "pettyrevenge",
-    # "Showerthoughts",
-    # "TooAfraidToAsk",
-    # "TwoXChromosomes",
-    # "unpopularopinion",
-    # "confessions",
-    # "confession",
+    "AmItheAsshole",
+    "antiwork",
+    "AskMen",
+    "ChoosingBeggars",
+    "hatemyjob",
+    "NoStupidQuestions",
+    "pettyrevenge",
+    "Showerthoughts",
+    "TooAfraidToAsk",
+    "TwoXChromosomes",
+    "unpopularopinion",
+    "confessions",
+    "confession",
 ]
 
 subreddits_excluded = [
@@ -60,9 +60,10 @@ reddit_comment_width = 0.95
 comment_length_max = 600
 comment_limit = 100
 comment_screenshot_timeout = 30000
-screenshot_debug = True  # if True enables breakpoints in critical parts of screenshot.py
-use_old_reddit = True  # if True use old.reddit.com instead of reddit.com
-use_comments_permalinks = True  # if True don't try to scrape subreddit page, use comment permalinks directly
+screenshot_debug = False  # if True enables breakpoints in critical parts of screenshot.py
+use_old_reddit = False  # if True use old.reddit.com instead of reddit.com
+use_old_reddit_login = True  # if True use old.reddit.com to login instead of reddit.com
+use_comments_permalinks = False  # if True don't try to scrape subreddit page, use comment permalinks directly
 
 # Video settings
 background_colour = [26, 26, 27]
@@ -75,9 +76,9 @@ enable_comments = True
 enable_compilation = True  # if True compile video
 enable_nsfw_content = False
 enable_overlay = False
-enable_selftext = False
-enable_comments_audio = False  # if True generate mp3 from comment text
-enable_thumbnails = False  # if True generate post thumbnails
+enable_selftext = True
+enable_comments_audio = True  # if True generate mp3 from comment text
+enable_thumbnails = True  # if True generate post thumbnails
 enable_upload = False
 enable_screenshot_title_image = False
 enable_reddit_mentions = False
@@ -152,7 +153,7 @@ newcaster_size = (video_width * 0.5, video_height * 0.5)
 threads = 4
 
 # Whether to launch the Browser in Headless mode
-headless_browser = False  # defaults to True, but can set it to False to see what happens
+headless_browser = True  # defaults to True, but can set it to False to see what happens
 
 if platform == "linux" or platform == "linux2":
     firefox_binary = "/opt/firefox/firefox"
