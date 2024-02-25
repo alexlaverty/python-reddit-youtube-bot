@@ -497,9 +497,10 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
 
         screenshot_directory = Path(settings.screenshot_directory, v.meta.id)
         if settings.commentstyle == "reddit":
+            reddit_base_url = "http://old.reddit.com" if settings.use_old_reddit else "https://reddit.com"
             download_screenshots_of_reddit_posts(
                 accepted_comments,
-                f"http://reddit.com{v.meta.permalink}",
+                f"{reddit_base_url}{v.meta.permalink}",
                 screenshot_directory,
             )
 
