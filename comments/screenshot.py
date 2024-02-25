@@ -224,26 +224,26 @@ def download_screenshots_of_reddit_posts(
                 
                 return selector
 
-            def print_comments_availability_on_page(comments):
+            def print_comments_availability_on_page(comments, detailed=False):
                 print()
                 print("COMMENTS AVAILABILITY ON PAGE")
                 on_page_comments = []
                 off_page_comments = []
                 for (_idx, comment) in enumerate(comments):
                     comment_excerpt = get_comment_excerpt(comment)
-                    print(f" [{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
+                    if detailed: print(f" [{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
                     
                     # Locate comment
                     selector = get_comment_selector(comment)
                     comment_loc = page.locator(selector).first
                     
                     if comment_loc.is_visible():
-                        print("  ON PAGE")
+                        if detailed: print("  ON PAGE")
                         on_page_comments.append(comment)
                     else:
-                        print(" OFF PAGE")
+                        if detailed: print(" OFF PAGE")
                         off_page_comments.append(comment)
-                print(f"ON PAGE: {len(on_page_comments)}  OFF PAGE: {len(off_page_comments)}")
+                print(f"ON PAGE: {len(on_page_comments)} | OFF PAGE: {len(off_page_comments)} | TOTAL: {len(comments)}")
                 print()
             
             try:
