@@ -106,7 +106,7 @@ def download_screenshots_of_reddit_posts(
             if (username_loc.is_visible() and password_loc.is_visible() and button_loc.is_visible()):
                 login_fields_found = True
                 login_fields_found_using = "old.reddit.com"
-        # Check if the first set of selectors exist and fill in the username and password.
+        # Check if the first set of selectors exist.
         elif not login_fields_found and page.query_selector("#loginUsername"):
             username_loc = page.locator("#loginUsername").first
             password_loc = page.locator("#loginPassword").first
