@@ -145,11 +145,11 @@ def download_screenshots_of_reddit_posts(
 
         # Login fields found: fill fields and click login button
         if login_fields_found:
-            print("Username and password fields found" + (f" (using {login_fields_found_using})" if login_fields_found_using else "") + ". Logging in...") 
+            print("Username and password fields found" + (f" (using {login_fields_found_using})" if login_fields_found_using else "") + ". Logging in...")
             username_loc.fill(auth.praw_username)
             password_loc.fill(auth.praw_password)
             button_loc.first.click()
-            
+
             # Bypass "See Reddit in..."
             see_reddit_in_button = page.locator('#bottom-sheet button.continue').first
             if see_reddit_in_button.is_visible():
@@ -169,11 +169,11 @@ def download_screenshots_of_reddit_posts(
                     breakpoint()
             else:
                 page.wait_for_url(not_login_url_regex, wait_until="commit") # wait_until='commit' -> wait until another url started loading
-        
+
         else:
             # Print the HTML content if the selectors are not found.
             print("Username and password fields not found. Printing HTML:")
-            if settings.screenshot_debug: 
+            if settings.screenshot_debug:
                 print("[screenshot_debug]")
                 breakpoint()
             print(page.content())
@@ -183,12 +183,12 @@ def download_screenshots_of_reddit_posts(
         current_url = page.url
         # print(f"Current PageURL: {page.url}")
         user_drawer_button = page.locator("#expand-user-drawer-button").first
-        
+
         if current_url == "https://www.reddit.com/" or (settings.use_old_reddit_login and current_url == "https://old.reddit.com/") or user_drawer_button.count() == 1:
             print("Login successful!")
         else:
             print("Login failed.")
-            if settings.screenshot_debug: 
+            if settings.screenshot_debug:
                 print("[screenshot_debug]")
                 breakpoint()
 
@@ -199,7 +199,7 @@ def download_screenshots_of_reddit_posts(
         reddit_base_url = "http://old.reddit.com" if settings.use_old_reddit else "https://reddit.com"
 
         #print(page.evaluate('() => document.querySelector("html").classList.toString()'))
-        
+
         # Alternate method to try to set preferred theme
         dark_mode_setter_loc = page.locator('shreddit-darkmode-setter').first
         dark_mode_tracker_loc = page.locator('faceplate-tracker[noun="dark_mode"]').first
@@ -208,9 +208,9 @@ def download_screenshots_of_reddit_posts(
             is_dark_mode_enabled = dark_mode_setter_loc.get_attribute('enabled') is not None
             if (settings.theme == "dark" and not is_dark_mode_enabled) or (settings.theme != "dark" and is_dark_mode_enabled):
                 dark_mode_tracker_loc.dispatch_event('click')
-        
+
         print("Downloading screenshots of reddit posts...")
-        
+
         page.set_viewport_size(ViewportSize(width=1920, height=1080))
 
         if page.locator('[data-testid="content-gate"]').is_visible():
@@ -233,7 +233,7 @@ def download_screenshots_of_reddit_posts(
                 path=f"assets/temp/{id}/png/story_content.png"
             )
         else:
-            
+
             use_permalinks = settings.use_comments_permalinks
             if settings.use_comments_permalinks:
                 print("Using comment permalinks...")
@@ -241,13 +241,13 @@ def download_screenshots_of_reddit_posts(
             def get_comment_excerpt(comment):
                 comment_excerpt = (comment.body.split("\n")[0])
                 if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
-                
+
                 return comment_excerpt
-            
+
             def get_comment_selector(comment):
                 selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
                 if settings.use_old_reddit: selector = f'#thing_t1_{comment.id} .entry'
-                
+
                 return selector
 
             def print_comments_availability_on_page(comments, detailed=False):
@@ -258,11 +258,11 @@ def download_screenshots_of_reddit_posts(
                 for (_idx, comment) in enumerate(comments):
                     comment_excerpt = get_comment_excerpt(comment)
                     if detailed: print(f" [{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
-                    
+
                     # Locate comment
                     selector = get_comment_selector(comment)
                     comment_loc = page.locator(selector).first
-                    
+
                     if comment_loc.is_visible():
                         if detailed: print("  ON PAGE")
                         on_page_comments.append(comment)
@@ -271,12 +271,12 @@ def download_screenshots_of_reddit_posts(
                         off_page_comments.append(comment)
                 print(f"ON PAGE: {len(on_page_comments)} | OFF PAGE: {len(off_page_comments)} | TOTAL: {len(comments)}")
                 print()
-            
+
             try:
-            
+
                 if False:
                     print_comments_availability_on_page(accepted_comments)
-                            
+
                 for _idx, comment in enumerate(
                     accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
                 ):
@@ -293,16 +293,16 @@ def download_screenshots_of_reddit_posts(
                         if new_reddit_ui_layout or settings.use_old_reddit:
                             #print(f"https://reddit.com{comment.permalink}")
                             # Wait for the shreddit-comment to be present on the page
-                            
+
                             comment_excerpt = get_comment_excerpt(comment)
                             print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
-                            
+
                             time.sleep(3)
 
                             # Locate comment
                             selector = get_comment_selector(comment)
                             comment_loc = page.locator(selector).first
-                            
+
                             # If comment not found on page, load single thread from permalink
                             if use_permalinks or (not use_permalinks and not comment_loc.is_visible()):
                                 if not use_permalinks:
@@ -325,7 +325,7 @@ def download_screenshots_of_reddit_posts(
                                     if settings.screenshot_debug:
                                         print("Hiding backdrop...")
                                     backdrop_loc.evaluate('node => node.style.display="none"')
-                            
+
                             # Click on "View more comments", if present
                             view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
                             if settings.use_old_reddit: view_more_comments_button = page.locator(".commentarea > .sitetable > .thing:not(.comment) .button").first
@@ -333,7 +333,7 @@ def download_screenshots_of_reddit_posts(
                                 print("View more comments... [CLICK]")
                                 view_more_comments_button.dispatch_event('click')
                                 if not settings.use_old_reddit: view_more_comments_button.wait_for(state='hidden')
-                            
+
                             # If the comment text itself is collapsed, expand it
                             comment_text_loc = comment_loc.locator("p").first
                             if not comment_text_loc.is_visible():
@@ -343,17 +343,17 @@ def download_screenshots_of_reddit_posts(
                                 elif settings.screenshot_debug:
                                     print("[screenshot_debug]")
                                     breakpoint()
-                            
+
                             # If replies are expanded toggle them
                             expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
                             if expanded_loc.is_visible():
                                 #print("If replies are expanded toggle them")
                                 expanded_loc.dispatch_event("click")
-                            
+
                             entry_element = comment_loc
-                            
+
                             #print(is_new_layout(page))
-                            
+
                             # Check if the element exists before taking a screenshot
                             print(f"Downloading screenshot '{comment_path}'...")
                             if entry_element.is_visible():
@@ -396,13 +396,13 @@ def download_screenshots_of_reddit_posts(
                                     if page.locator(f"#t1_{comment.id}").first:
                                         page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
 
-                                if settings.screenshot_debug: 
+                                if settings.screenshot_debug:
                                     print("[screenshot_debug]")
                                     breakpoint()
                         else:
                             page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
                             page.locator(f"#t1_{comment.id}").screenshot(path=comment_path)
-                            
+
             except Exception as e:
                 print(f"Error: {e}")
                 print("Taking screenshot and re-throwing Exception...")
