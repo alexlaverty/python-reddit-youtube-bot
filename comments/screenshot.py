@@ -57,7 +57,7 @@ def download_screenshots_of_reddit_posts(
         url: URL of the Reddit content to be screenshotted.
         video_directory: Path where the screenshots will be saved.
     """
-    print("Downloading screenshots of reddit posts...")
+    # print("Downloading screenshots of reddit posts...")
     # id = re.sub(r"[^\w\s-]", "", reddit_object.meta.id)
     # # ! Make sure the reddit screenshots folder exists
     # title_path = safe_filename(reddit_object.title)
@@ -83,6 +83,7 @@ def download_screenshots_of_reddit_posts(
         # Get the thread screenshot
         page = context.new_page()
 
+        print("Trying to login...")
         page.goto("https://www.reddit.com/login")
 
         #time.sleep(5)
@@ -182,6 +183,8 @@ def download_screenshots_of_reddit_posts(
             is_dark_mode_enabled = dark_mode_setter_loc.get_attribute('enabled') is not None
             if (settings.theme == "dark" and not is_dark_mode_enabled) or (settings.theme != "dark" and is_dark_mode_enabled):
                 dark_mode_tracker_loc.dispatch_event('click')
+        
+        print("Downloading screenshots of reddit posts...")
         
         # page.set_viewport_size(ViewportSize(width=1920, height=1080))
         page.set_viewport_size(ViewportSize(width=1200, height=700))
@@ -376,7 +379,6 @@ def download_screenshots_of_reddit_posts(
                             
             except Exception as e:
                 print(f"Error: {e}")
-                print(f"Error is None: {e is None}  Error str: '{e}'")
                 print("Taking screenshot and re-throwing Exception...")
                 error_path = Path(f"{video_directory}/error.png")
                 page.screenshot(path=error_path)
