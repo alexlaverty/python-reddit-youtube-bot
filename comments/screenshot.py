@@ -207,8 +207,6 @@ def download_screenshots_of_reddit_posts(
             )
         else:
             
-            # breakpoint()
-            
             use_permalinks = settings.use_comments_permalinks
             
             def get_comment_excerpt(comment):
@@ -244,7 +242,6 @@ def download_screenshots_of_reddit_posts(
                         off_page_comments.append(comment)
                 print(f"ON PAGE: {len(on_page_comments)}  OFF PAGE: {len(off_page_comments)}")
                 print()
-                # breakpoint()
             
             try:
             
@@ -283,7 +280,7 @@ def download_screenshots_of_reddit_posts(
                                     print(f"Comment not found on page, using permalink to '{comment.permalink}'...")
                                     print("Use permalinks from now on...")
                                     use_permalinks = True
-                                # breakpoint()
+
                                 page.goto(f"{reddit_base_url}{comment.permalink}", timeout=0)
 
                             # Bypass "See this post in..."
