@@ -62,7 +62,7 @@ comment_limit = 100
 comment_screenshot_timeout = 30000
 screenshot_debug = True  # if True enables breakpoints in critical parts of screenshot.py
 use_old_reddit = True  # if True use old.reddit.com instead of reddit.com
-use_comments_permalinks = False  # if True don't try to scrape subreddit page, use comment permalinks directly
+use_comments_permalinks = True  # if True don't try to scrape subreddit page, use comment permalinks directly
 
 # Video settings
 background_colour = [26, 26, 27]
