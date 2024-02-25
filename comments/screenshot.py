@@ -136,13 +136,13 @@ def download_screenshots_of_reddit_posts(
                 not_login_url_regex = re.compile('^(?!' + login_url + ')')
                 if settings.screenshot_debug:
                     try:
-                        page.wait_for_url(not_login_url_regex)
+                        page.wait_for_url(not_login_url_regex, wait_until="commit") # wait_until='commit' -> wait until another url started loading
                     except Exception as e:
                         print("[screenshot_debug]")
                         print(e)
                         breakpoint()
                 else:
-                    page.wait_for_url(not_login_url_regex)
+                    page.wait_for_url(not_login_url_regex, wait_until="commit") # wait_until='commit' -> wait until another url started loading
                     
             else:
                 # Print the HTML content if the selectors are not found.
@@ -157,8 +157,7 @@ def download_screenshots_of_reddit_posts(
         current_url = page.url
         # print(f"Current PageURL: {page.url}")
         user_drawer_button = page.locator("#expand-user-drawer-button").first
-        # print(f"user_drawer_button.count(): {user_drawer_button.count()}")
-        # breakpoint()
+        
         if current_url == "https://www.reddit.com/" or user_drawer_button.count() == 1:
             print("Login successful!")
         else:
@@ -171,6 +170,7 @@ def download_screenshots_of_reddit_posts(
         context.add_cookies(cookies)  # load preference cookies
 
         page.goto(url, timeout=0)
+        reddit_base_url = "http://old.reddit.com" if settings.use_old_reddit else "https://reddit.com"
 
         #print(page.evaluate('() => document.querySelector("html").classList.toString()'))
         
@@ -183,7 +183,8 @@ def download_screenshots_of_reddit_posts(
             if (settings.theme == "dark" and not is_dark_mode_enabled) or (settings.theme != "dark" and is_dark_mode_enabled):
                 dark_mode_tracker_loc.dispatch_event('click')
         
-        page.set_viewport_size(ViewportSize(width=1920, height=1080))
+        # page.set_viewport_size(ViewportSize(width=1920, height=1080))
+        page.set_viewport_size(ViewportSize(width=1200, height=700))
 
         if page.locator('[data-testid="content-gate"]').is_visible():
             # This means the post is NSFW and requires to click the proceed button.
@@ -249,7 +250,7 @@ def download_screenshots_of_reddit_posts(
 
                         # page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
 
-                        if new_reddit_ui_layout:
+                        if new_reddit_ui_layout or settings.use_old_reddit:
                             #print(f"https://reddit.com{comment.permalink}")
                             # Wait for the shreddit-comment to be present on the page
                             
@@ -261,6 +262,7 @@ def download_screenshots_of_reddit_posts(
 
                             # Locate comment
                             selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                            if settings.use_old_reddit: selector = f'#thing_t1_{comment.id} .entry'
                             comment_loc = page.locator(selector).first
                             
                             # If comment not found on page, load single thread from permalink
@@ -270,7 +272,7 @@ def download_screenshots_of_reddit_posts(
                                     print("Use permalinks from now on...")
                                     use_permalinks = True
                                 # breakpoint()
-                                page.goto(f"https://reddit.com{comment.permalink}", timeout=0)
+                                page.goto(f"{reddit_base_url}{comment.permalink}", timeout=0)
 
                             # Bypass "See this post in..."
                             see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
@@ -288,10 +290,11 @@ def download_screenshots_of_reddit_posts(
                             
                             # Click on "View more comments", if present
                             view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
+                            if settings.use_old_reddit: view_more_comments_button = page.locator(".commentarea > .sitetable > .thing:not(.comment) .button").first
                             if view_more_comments_button.is_visible():
                                 print("View more comments... [CLICK]")
                                 view_more_comments_button.dispatch_event('click')
-                                view_more_comments_button.wait_for(state='hidden')
+                                if not settings.use_old_reddit: view_more_comments_button.wait_for(state='hidden')
                             
                             if _idx == 0 and False:
                                 print_comments_availability_on_page(accepted_comments)
@@ -319,6 +322,16 @@ def download_screenshots_of_reddit_posts(
                             # Check if the element exists before taking a screenshot
                             print(f"Downloading screenshot '{comment_path}'...")
                             if entry_element.is_visible():
+
+                                if settings.use_old_reddit: # inject css
+                                    # Set max-width (as it would be too big normally, with lots of empty space)
+                                    # Change background-color (as it would be ~yellow for single-thread posts (permalinks))
+                                    entry_element.evaluate("""el => {
+                                        el.style.maxWidth = '750px';
+                                        let commentBody = el.querySelector('.usertext-body');
+                                        if (commentBody) commentBody.style.backgroundColor = 'inherit';
+                                    }""")
+
                                 entry_element.scroll_into_view_if_needed()
                                 entry_element.screenshot(path=comment_path)
                             else:
@@ -361,6 +374,7 @@ def download_screenshots_of_reddit_posts(
                 error_path = Path(f"{video_directory}/error.png")
                 page.screenshot(path=error_path)
                 print(f"See '{error_path}'")
+                print()
                 raise
 
             print("Screenshots downloaded Successfully.")
