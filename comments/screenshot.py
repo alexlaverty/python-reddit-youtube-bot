@@ -209,20 +209,31 @@ def download_screenshots_of_reddit_posts(
             
             # breakpoint()
             
-            use_permalinks = False
+            use_permalinks = settings.use_comments_permalinks
             
+            def get_comment_excerpt(comment):
+                comment_excerpt = (comment.body.split("\n")[0])
+                if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
+                
+                return comment_excerpt
+            
+            def get_comment_selector(comment):
+                selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                if settings.use_old_reddit: selector = f'#thing_t1_{comment.id} .entry'
+                
+                return selector
+
             def print_comments_availability_on_page(comments):
                 print()
                 print("COMMENTS AVAILABILITY ON PAGE")
                 on_page_comments = []
                 off_page_comments = []
                 for (_idx, comment) in enumerate(comments):
-                    comment_excerpt = (comment.body.split("\n")[0])
-                    if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
+                    comment_excerpt = get_comment_excerpt(comment)
                     print(f" [{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
                     
                     # Locate comment
-                    selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
+                    selector = get_comment_selector(comment)
                     comment_loc = page.locator(selector).first
                     
                     if comment_loc.is_visible():
@@ -237,6 +248,9 @@ def download_screenshots_of_reddit_posts(
             
             try:
             
+                if True:
+                    print_comments_availability_on_page(accepted_comments)
+                            
                 for _idx, comment in enumerate(
                     accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
                 ):
@@ -254,15 +268,13 @@ def download_screenshots_of_reddit_posts(
                             #print(f"https://reddit.com{comment.permalink}")
                             # Wait for the shreddit-comment to be present on the page
                             
-                            comment_excerpt = (comment.body.split("\n")[0])
-                            if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
+                            comment_excerpt = get_comment_excerpt(comment)
                             print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
                             
                             time.sleep(3)
 
                             # Locate comment
-                            selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
-                            if settings.use_old_reddit: selector = f'#thing_t1_{comment.id} .entry'
+                            selector = get_comment_selector(comment)
                             comment_loc = page.locator(selector).first
                             
                             # If comment not found on page, load single thread from permalink
@@ -291,13 +303,10 @@ def download_screenshots_of_reddit_posts(
                             # Click on "View more comments", if present
                             view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
                             if settings.use_old_reddit: view_more_comments_button = page.locator(".commentarea > .sitetable > .thing:not(.comment) .button").first
-                            if view_more_comments_button.is_visible():
+                            if view_more_comments_button.is_visible() and not use_permalinks:
                                 print("View more comments... [CLICK]")
                                 view_more_comments_button.dispatch_event('click')
                                 if not settings.use_old_reddit: view_more_comments_button.wait_for(state='hidden')
-                            
-                            if _idx == 0 and False:
-                                print_comments_availability_on_page(accepted_comments)
                             
                             # If the comment text itself is collapsed, expand it
                             comment_text_loc = comment_loc.locator("p").first
@@ -370,6 +379,7 @@ def download_screenshots_of_reddit_posts(
                             
             except Exception as e:
                 print(f"Error: {e}")
+                print(f"Error is None: {e is None}  Error str: '{e}'")
                 print("Taking screenshot and re-throwing Exception...")
                 error_path = Path(f"{video_directory}/error.png")
                 page.screenshot(path=error_path)
