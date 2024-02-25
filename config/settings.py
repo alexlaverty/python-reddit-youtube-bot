@@ -61,8 +61,9 @@ comment_length_max = 600
 comment_limit = 100
 comment_screenshot_timeout = 30000
 screenshot_debug = True  # if True enables breakpoints in critical parts of screenshot.py
-use_old_reddit = True  # if True use old.reddit.com instead of reddit.com
-use_comments_permalinks = True  # if True don't try to scrape subreddit page, use comment permalinks directly
+use_old_reddit = False  # if True use old.reddit.com instead of reddit.com
+use_old_reddit_login = True  # if True use old.reddit.com to login instead of reddit.com
+use_comments_permalinks = False  # if True don't try to scrape subreddit page, use comment permalinks directly
 
 # Video settings
 background_colour = [26, 26, 27]
@@ -72,7 +73,7 @@ background_volume = 0.5
 commentstyle = "reddit"
 enable_background = False
 enable_comments = True
-enable_compilation = True  # if True compile video
+enable_compilation = False  # if True compile video
 enable_nsfw_content = False
 enable_overlay = False
 enable_selftext = False
