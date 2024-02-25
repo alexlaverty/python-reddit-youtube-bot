@@ -341,7 +341,7 @@ def download_screenshots_of_reddit_posts(
                                         if (commentBody) commentBody.style.backgroundColor = 'inherit';
                                     }""")
 
-                                entry_element.scroll_into_view_if_needed()
+                                if settings.screenshot_debug: entry_element.scroll_into_view_if_needed()
                                 entry_element.screenshot(path=comment_path)
                             else:
                                 print("Mmmmhhh... could not create screenshot!")
