@@ -16,30 +16,37 @@
       }
       
       .label > * {
-        display: inline-block;
+        display: inline;
         font-weight: 300;
+      }
+      
+      .hidden {
+        display: none;
       }
     </style>
   </head>
   <body>
     <div id="comment-container">
       <div class="label">Avatar:
-        <div id="avatar">#avatar</div>
+        <div id="avatar">{{avatar}}</div>
       </div>
       <div class="label">Author:
-        <div id="author">#author</div>
+        <div id="author">{{author}}</div>
       </div>
       <div class="label">Comment ID:
-        <div id="id">#id</div>
+        <div id="id">{{id}}</div>
       </div>
-      <div class="label">Comment:
-        <div id="body_html">#body_html</div>
+      <div class="label">Comment (html):
+        <div id="body_html">{{body_html}}</div>
+      </div>
+      <div class="label hidden">Comment (text):
+        <div id="body">{{body_text}}</div>
       </div>
       <div class="label">Upvotes:
-        <div id="score">#score</div>
+        <div id="score">{{score}}</div>
       </div>
       <div class="label">Date:
-        <div id="date">#date</div>
+        <div id="date">{{date}}</div>
       </div>
     </div>
   </body>

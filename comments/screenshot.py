@@ -54,6 +54,13 @@ def set_inner_html(page, selector, inner_html=''):
     evaluate_context_data = escaped_inner_html
     el.first.evaluate(f"el => el.innerHTML = \'{escaped_inner_html}\';", evaluate_context_data)
 
+def fill_template(template, values):
+    filled_template = template # a copy of template
+    for k, v in values.items():
+        filled_template = filled_template.replace(k, v)
+    
+    return filled_template
+
 def get_comment_excerpt(comment):
     comment_excerpt = (comment.body.split("\n")[0])
     if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
@@ -108,6 +115,7 @@ def download_screenshots_of_reddit_posts(
 
             # Go to template page
             page.goto(settings.template_url)
+            blank_template = page.content()
             
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
@@ -122,13 +130,21 @@ def download_screenshots_of_reddit_posts(
 
                     # breakpoint()
                     
-                    # Fill template fields
-                    set_inner_html(page, '#author', comment.author.name if comment.author else '[unknown]')
-                    set_inner_html(page, '#id', comment.id)
-                    set_inner_html(page, '#score', str(comment.score))
-                    set_inner_html(page, '#avatar', comment.author.icon_img if comment.author else '[unknown]')
-                    set_inner_html(page, '#date', dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"))
-                    set_inner_html(page, '#body_html', comment.body_html)
+                    # Reset template
+                    page.set_content(blank_template)
+                    
+                    # Fill template fields and update page
+                    values = {
+                        '{{author}}': comment.author.name if comment.author else '[unknown]',
+                        '{{id}}': comment.id,
+                        '{{score}}': str(comment.score),
+                        '{{avatar}}': comment.author.icon_img if comment.author else '[unknown]',
+                        '{{date}}': dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"),
+                        '{{body_text}}': comment.body,
+                        '{{body_html}}': comment.body_html,
+                    }
+                    filled_template = fill_template(blank_template, values)
+                    page.set_content(filled_template)
                     
                     entry_element = page.locator('#comment-container').first
                     
