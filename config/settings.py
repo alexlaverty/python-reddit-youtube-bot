@@ -65,6 +65,9 @@ use_old_reddit = False  # if True use old.reddit.com instead of reddit.com
 use_old_reddit_login = True  # if True use old.reddit.com to login instead of reddit.com
 use_comments_permalinks = False  # if True don't try to scrape subreddit page, use comment permalinks directly
 
+template_url = "http://localhost:8000/comment_templates/example" # f.e. "http://localhost:8000/comment_templates/example"
+use_template = True  # if True loads template_url as a comment template and fills in data using the Reddit API
+
 # Video settings
 background_colour = [26, 26, 27]
 background_opacity = 0.5
