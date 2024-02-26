@@ -168,6 +168,7 @@ def get_reddit_submissions() -> List[Submission]:
         client_id=auth.praw_client_id,
         client_secret=auth.praw_client_secret,
         user_agent=auth.praw_user_agent,
+        check_for_async=not settings.use_template  # disable check (to hide warnings) if settings.use_template is True
     )
 
     if settings.subreddits:
