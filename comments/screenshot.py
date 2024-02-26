@@ -159,6 +159,8 @@ def download_screenshots_of_reddit_posts(
                             print("[screenshot_debug]")
                             breakpoint()
 
+                print("Screenshots downloaded Successfully.")
+
         else:  # Login and take screenshots by scraping Reddit posts
 
             print(f"Trying to login ({reddit_login_url})...")
