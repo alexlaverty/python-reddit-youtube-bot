@@ -106,6 +106,9 @@ def download_screenshots_of_reddit_posts(
             template_url = settings.template_url
             print(f"Using template '{template_url}'...")
 
+            # Go to template page
+            page.goto(settings.template_url)
+            
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
             ):
@@ -117,9 +120,6 @@ def download_screenshots_of_reddit_posts(
                     comment_excerpt = get_comment_excerpt(comment)
                     print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
 
-                    # Reset template page
-                    page.goto(settings.template_url)
-                    
                     # breakpoint()
                     
                     # Fill template fields
