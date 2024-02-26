@@ -15,7 +15,7 @@ import config.auth as auth
 import config.settings as settings
 
 import pdb
-import datatime as dt
+import datetime as dt
 
 storymode = False
 
@@ -45,6 +45,21 @@ def is_new_layout(page):
         print("Element 'shreddit-app' exists on the page.")
 
     return new_reddit_layout
+
+def set_inner_html(page, selector, inner_html=''):
+    el = page.locator(selector).first
+    # Escape inner_html
+    #TODO: probably more cases are to be handled
+    escaped_inner_html = inner_html.replace("\n", "\\n").replace('"', '\\"').replace("'", "\\'")
+    evaluate_context_data = escaped_inner_html
+    el.first.evaluate(f"el => el.innerHTML = \'{escaped_inner_html}\';", evaluate_context_data)
+
+def get_comment_excerpt(comment):
+    comment_excerpt = (comment.body.split("\n")[0])
+    if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
+
+    return comment_excerpt
+
 
 def download_screenshots_of_reddit_posts(
     accepted_comments: List[Comment], url: str, video_directory: Path
@@ -86,9 +101,49 @@ def download_screenshots_of_reddit_posts(
 
         reddit_login_url = "https://old.reddit.com/login" if settings.use_old_reddit_login else "https://www.reddit.com/login"
         
+        # Fill comment template using Reddit API and take screenshot
         if settings.use_template:
-        
-        else:
+            template_url = settings.template_url
+            print(f"Using template '{template_url}'...")
+
+            for _idx, comment in enumerate(
+                accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
+            ):
+                comment_path: Path = Path(f"{video_directory}/comment_{comment.id}.png")
+
+                if comment_path.exists():
+                    print(f"Comment Screenshot already downloaded : {comment_path}")
+                else:
+                    comment_excerpt = get_comment_excerpt(comment)
+                    print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
+
+                    # Reset template page
+                    page.goto(settings.template_url)
+                    
+                    # breakpoint()
+                    
+                    # Fill template fields
+                    set_inner_html(page, '#author', comment.author.name if comment.author else '[unknown]')
+                    set_inner_html(page, '#id', comment.id)
+                    set_inner_html(page, '#score', str(comment.score))
+                    set_inner_html(page, '#avatar', comment.author.icon_img if comment.author else '[unknown]')
+                    set_inner_html(page, '#date', dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"))
+                    set_inner_html(page, '#body_html', comment.body_html)
+                    
+                    entry_element = page.locator('#comment-container').first
+                    
+                    # Check if the element exists before taking a screenshot
+                    print(f"Downloading screenshot '{comment_path}'...")
+                    if entry_element.is_visible():
+                        entry_element.scroll_into_view_if_needed()
+                        entry_element.screenshot(path=comment_path)
+                    else:
+                        print("Mmmmhhh... could not create screenshot!")
+                        if settings.screenshot_debug: 
+                            print("[screenshot_debug]")
+                            breakpoint()
+
+        else:  # Login and take screenshots by scraping Reddit posts
 
             print(f"Trying to login ({reddit_login_url})...")
             page.goto(reddit_login_url)
@@ -243,12 +298,6 @@ def download_screenshots_of_reddit_posts(
                 use_permalinks = settings.use_comments_permalinks
                 if settings.use_comments_permalinks:
                     print("Using comment permalinks...")
-
-                def get_comment_excerpt(comment):
-                    comment_excerpt = (comment.body.split("\n")[0])
-                    if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
-
-                    return comment_excerpt
 
                 def get_comment_selector(comment):
                     selector = f'shreddit-comment[thingid="t1_{comment.id}"]'
