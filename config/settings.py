@@ -65,8 +65,8 @@ use_old_reddit = False  # if True use old.reddit.com instead of reddit.com
 use_old_reddit_login = True  # if True use old.reddit.com to login instead of reddit.com
 use_comments_permalinks = False  # if True don't try to scrape subreddit page, use comment permalinks directly
 
-template_url = "http://localhost:8000/comment_templates/example" # f.e. "http://localhost:8000/comment_templates/example"
-use_template = True  # if True loads template_url as a comment template and fills in data using the Reddit API
+template_url = "https://azrafe7.github.io/python-reddit-youtube-bot.git/comment_templates/old_reddit_mockup/index.html"  # url of template to use (f.e. "http://localhost:8000/comment_templates/example")
+use_template = True  # if True loads template_url as a comment template and fills in with data using the Reddit API (via praw)
 
 # Video settings
 background_colour = [26, 26, 27]
