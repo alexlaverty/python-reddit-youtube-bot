@@ -16,6 +16,7 @@ import config.settings as settings
 
 import pdb
 import datetime as dt
+import json
 
 storymode = False
 
@@ -58,8 +59,35 @@ def fill_template(template, values):
     filled_template = template # a copy of template
     for k, v in values.items():
         filled_template = filled_template.replace(k, v)
-    
+
     return filled_template
+
+# Formats `datetime` to something like '1 year ago', '25 minutes ago', etc.
+# TODO: check if it works properly (for now it only tries to handle past dates)
+def datetime_to_human_timedelta(datetime):
+    now = dt.datetime.now()
+    delta = now - datetime
+    total_seconds = delta.total_seconds()
+    years = total_seconds // (3600 * 24 * 30 * 12)
+    months = total_seconds // (3600 * 24 * 30)
+    days = total_seconds // (3600 * 24)
+    hours = total_seconds // 3600
+    minutes = total_seconds // 60
+    seconds = total_seconds
+
+    human_timedelta = "just now"
+    suffixes = ["year", "month", "day", "hour", "minute", "second"]
+    elapsed = [years, months, days, hours, minutes, seconds]
+    # print(list(zip(suffixes, elapsed)))
+    for idx, t in enumerate(elapsed):
+        if t > 0:
+            human_timedelta = f"{t:.0f} {suffixes[idx]}"
+            if t > 1:
+                human_timedelta += "s"
+            human_timedelta += " ago"
+            break
+
+    return human_timedelta
 
 def get_comment_excerpt(comment):
     comment_excerpt = (comment.body.split("\n")[0])
@@ -107,7 +135,7 @@ def download_screenshots_of_reddit_posts(
         page = context.new_page()
 
         reddit_login_url = "https://old.reddit.com/login" if settings.use_old_reddit_login else "https://www.reddit.com/login"
-        
+
         # Fill comment template using Reddit API and take screenshot
         if settings.use_template:
             template_url = settings.template_url
@@ -116,7 +144,7 @@ def download_screenshots_of_reddit_posts(
             # Go to template page
             page.goto(settings.template_url)
             blank_template = page.content()
-            
+
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
             ):
@@ -129,25 +157,27 @@ def download_screenshots_of_reddit_posts(
                     print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
 
                     # breakpoint()
-                    
+
                     # Reset template
                     page.set_content(blank_template)
-                    
+
                     # Fill template fields and update page
                     values = {
                         '{{author}}': comment.author.name if comment.author else '[unknown]',
                         '{{id}}': comment.id,
                         '{{score}}': str(comment.score),
                         '{{avatar}}': comment.author.icon_img if comment.author else '[unknown]',
-                        '{{date}}': dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"),
+                        '{{date}}': datetime_to_human_timedelta(dt.datetime.fromtimestamp(comment.created)),
                         '{{body_text}}': comment.body,
                         '{{body_html}}': comment.body_html,
                     }
+                    # print(dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"))
+                    print(f"{comment.permalink}")
                     filled_template = fill_template(blank_template, values)
                     page.set_content(filled_template)
-                    
+
                     entry_element = page.locator('#comment-container').first
-                    
+
                     # Check if the element exists before taking a screenshot
                     print(f"Downloading screenshot '{comment_path}'...")
                     if entry_element.is_visible():
@@ -155,7 +185,7 @@ def download_screenshots_of_reddit_posts(
                         entry_element.screenshot(path=comment_path)
                     else:
                         print("Mmmmhhh... could not create screenshot!")
-                        if settings.screenshot_debug: 
+                        if settings.screenshot_debug:
                             print("[screenshot_debug]")
                             breakpoint()
 
