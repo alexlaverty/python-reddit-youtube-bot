@@ -116,6 +116,10 @@ def download_screenshots_of_reddit_posts(
     # #Path(f"assets/temp/{id}/png").mkdir(parents=True, exist_ok=True)
 
     with sync_playwright() as p:
+        if settings.use_template:
+            template_url = settings.template_url
+            print(f"Using template '{template_url}'...")
+
         print("Launching " + ("Headless " if settings.headless_browser else "") + "Browser...")
 
         browser = p.chromium.launch(headless=settings.headless_browser)
@@ -138,8 +142,6 @@ def download_screenshots_of_reddit_posts(
 
         # Fill comment template using Reddit API and take screenshot
         if settings.use_template:
-            template_url = settings.template_url
-            print(f"Using template '{template_url}'...")
 
             # Go to template page
             page.goto(settings.template_url)
