@@ -172,7 +172,7 @@ def download_screenshots_of_reddit_posts(
                         '{{body_html}}': comment.body_html,
                     }
                     # print(dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"))
-                    print(f"{comment.permalink}")
+                    # print(f"Comment Permalink: {comment.permalink}")
                     filled_template = fill_template(blank_template, values)
                     page.set_content(filled_template)
 
