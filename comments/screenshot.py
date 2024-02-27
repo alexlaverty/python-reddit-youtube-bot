@@ -89,6 +89,23 @@ def datetime_to_human_timedelta(datetime):
 
     return human_timedelta
 
+# Formats `number` to something like '12.2k', '1.1M', etc.
+# (note that the threshold for using 'k' is 10000, i.e. 9500 will still be converted to '9500' and NOT to '9.5k')
+def number_to_abbreviated_string(number):
+    abbreviated_str = f"{number:.0f}"
+    millions = number / 1000000
+    thousands = number / 1000
+    suffixes = ["M", "k"]
+    counts = [millions, thousands]
+    thresholds = [1, 10]
+    # print(list(zip(suffixes, counts)))
+    for idx, n in enumerate(counts):
+        if n >= thresholds[idx]:
+            abbreviated_str = f"{n:.1f}{suffixes[idx]}"
+            break
+
+    return abbreviated_str
+
 def get_comment_excerpt(comment):
     comment_excerpt = (comment.body.split("\n")[0])
     if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
@@ -167,7 +184,7 @@ def download_screenshots_of_reddit_posts(
                     values = {
                         '{{author}}': comment.author.name if comment.author else '[unknown]',
                         '{{id}}': comment.id,
-                        '{{score}}': str(comment.score),
+                        '{{score}}': number_to_abbreviated_string(comment.score),
                         '{{avatar}}': comment.author.icon_img if comment.author else '[unknown]',
                         '{{date}}': datetime_to_human_timedelta(dt.datetime.fromtimestamp(comment.created)),
                         '{{body_text}}': comment.body,
