@@ -66,7 +66,8 @@ use_old_reddit_login = True  # if True use old.reddit.com to login instead of re
 use_comments_permalinks = False  # if True don't try to scrape subreddit page, use comment permalinks directly
 
 template_url = "dark_reddit_mockup"
-use_template = True  # if True loads template_url as a comment template and fills in with data using the Reddit API (via praw)
+template_abbreviated_style = "new_reddit"  # can be one of ["none", "old_reddit", "new_reddit"]
+use_template = True  # if True loads template_url as a comment template, and fills it with data using the Reddit API (using PRAW)
 
 # Video settings
 background_colour = [26, 26, 27]
