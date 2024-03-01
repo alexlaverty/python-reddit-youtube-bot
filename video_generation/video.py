@@ -689,7 +689,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         logging.info("Background : %s", background_filepath)
 
         background_clip: VideoFileClip = (
-            VideoFileClip(background_filepath)
+            VideoFileClip(str(background_filepath))
             .set_start(tb)
             .set_opacity(settings.background_opacity)
             .volumex(0)
