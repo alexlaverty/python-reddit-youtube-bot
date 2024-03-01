@@ -303,7 +303,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         #     title_clip = title_clip.resize(height=settings.video_height * 0.95)
     else:
         title_clip = (
-            (ImageClip(v.thumbnail) if v.thumbnail is not None else ColorClip((settings.video_width, settings.video_height)))
+            (ImageClip(str(v.thumbnail)) if v.thumbnail is not None else ColorClip((settings.video_width, settings.video_height)))
             .set_position(("center", title_clip_position_vertical))
             .set_duration(title_clip_duration)
             .set_audio(audioclip_title)
@@ -894,7 +894,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
     if settings.enable_compilation:
         logging.info(log_group_subheader(title="Compiling Video Clip"))
         logging.info("Compiling video, this takes a while, please be patient : ")
-        post_video.write_videofile(v.filepath, fps=24)
+        post_video.write_videofile(str(v.filepath), fps=24)
 
     else:
         logging.info("Skipping Video Compilation --enable_compilation passed")

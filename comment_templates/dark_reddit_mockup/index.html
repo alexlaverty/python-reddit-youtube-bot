@@ -1,0 +1,207 @@
+<html>
+  <head>
+    <title>Dark Reddit Comment Template</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=1024">
+    <style type="text/css">
+      #comment-container {
+        padding: 8px;
+        max-width: 750px;
+      }
+    
+      avatar {
+        grid-row-start: 1;
+        grid-column-start: 1;
+        grid-column-end: 2;
+        background-color: red;
+        display: grid;
+      }
+      avatar img {
+        justify-self: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 9999px;
+      }
+      
+      header {
+        grid-row-start: 1;
+        grid-column-start: 2;
+        grid-column-end: -1;
+        background-color: #fed330;
+        
+        display: flex;
+        margin-right: 0;
+        flex-direction: row;
+        align-items: center;
+        max-width: 100%;
+        font-size: .875rem;
+        padding-top: 2px;
+        padding-bottom: 10px;
+        margin-left: 0.5rem;
+        align-items: center;
+      }
+      header .user {
+        font-weight: 700;
+        color: rgb(242, 244, 245);
+      }
+      header .time {
+        color: rgb(130, 149, 155);
+      }
+      header .time-separator {
+        padding-left: 8px;
+        padding-right: 4px;
+        margin-top: 2px;
+      }
+      
+      comment {
+        grid-row-start: 2;
+        grid-column-start: 2;
+        grid-column-end: -1;
+        background-color: #20bf6b;
+        margin-left: 0.5rem;
+        margin-top: -14px;
+      }
+      thread-line {
+        grid-row-start: 2;
+        grid-row-end: 3;
+        grid-column-start: 1;
+        grid-column-end: 2;
+        background-color: #45aaf2;
+        display: grid;
+      }
+      more-replies {
+        grid-row-start: 3;
+        grid-row-end: 4;
+        grid-column-start: 1;
+        grid-column-end: 2;
+        background-color: green;
+        display: grid;
+      }
+      more-replies svg {
+        justify-self: center;
+        /* padding-top: 2px; */
+      }
+      
+      .line {
+        width: 1px;
+        background-color: rgb(48, 48, 48);
+        height: 100%;
+        justify-self: center;
+      }
+      footer {
+        grid-row-start: 3;
+        grid-row-end: 4;
+        grid-column-start: 2;
+        grid-column-end: -1;
+        background-color: #fd9644;
+        display: flex;
+        
+        font-size: 12px;
+        font-weight: 600;
+      }
+      footer .score .number {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+      footer .footer-unit {
+        padding-left: 6px;
+        padding-right: 6px;
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+      }
+      footer .footer-text {
+        padding-left: 6px;
+        padding-right: 6px;
+        margin-top: -2px;
+      }
+      
+      .wrapper {
+        display: grid;
+        grid-template-columns: 44px 3fr;
+        grid-template-rows: 40px;
+        font-size: 14px;
+      }
+      
+      .grid-label {
+        font-weight: bold;
+        padding: 2px;
+        display: inline-block;
+        display: none;
+      }
+      .inherit-background {
+        background-color: inherit;
+      }
+      
+      body {
+        background-color: rgb(11, 20, 22);
+        color: rgb(242, 242, 242);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+        font-size: 16px;
+      }
+    </style>
+  
+  </head>
+  <body>
+    <div id="comment-container" data-comment-id="{{id}}">
+      <div class="wrapper">
+        <avatar class="inherit-background">
+          <span class="grid-label">avatar</span>
+          <img src="{{avatar}}"></img>
+        </avatar>
+        <header class="inherit-background">
+          <span class="grid-label">header</span>
+          <span class="user">{{author}}</span>
+          <span class="time time-separator">•</span>
+          <span class="time">
+            <span class="time time-abbr">{{date}}</span>
+          </span>
+        </header>
+        <thread-line class="inherit-background"><span class="grid-label">line</span>
+          <div class="line"></div>
+        </thread-line>
+        <comment class="inherit-background">
+          <span class="grid-label">comment</span>
+          {{body_html}}
+          <!--p>Gambling<br>comment<br>spanning multiple<br>lines</p-->
+        </comment>
+        <more-replies class="inherit-background">
+          <span class="grid-label">replies</span>
+          <svg class="expand" rpl="" fill="currentColor" height="16" icon-name="join-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"> <!--?lit$99468199$--><!--?lit$99468199$-->
+            <path d="M10.625 9.375H14v1.25h-3.375V14h-1.25v-3.375H6v-1.25h3.375V6h1.25v3.375ZM20 10A10 10 0 1 1 10 0a10.011 10.011 0 0 1 10 10Zm-1.25 0A8.75 8.75 0 1 0 10 18.75 8.76 8.76 0 0 0 18.75 10Z"></path><!--?--> 
+          </svg>
+        </more-replies>
+        <footer class="inherit-background">
+          <span class="grid-label">footer</span>
+          <span class="score footer-unit">
+            <svg class="upvote" rpl="" fill="currentColor" height="16" icon-name="upvote-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"> <!--?lit$99468199$--><!--?lit$99468199$-->
+              <path d="M12.877 19H7.123A1.125 1.125 0 0 1 6 17.877V11H2.126a1.114 1.114 0 0 1-1.007-.7 1.249 1.249 0 0 1 .171-1.343L9.166.368a1.128 1.128 0 0 1 1.668.004l7.872 8.581a1.25 1.25 0 0 1 .176 1.348 1.113 1.113 0 0 1-1.005.7H14v6.877A1.125 1.125 0 0 1 12.877 19ZM7.25 17.75h5.5v-8h4.934L10 1.31 2.258 9.75H7.25v8ZM2.227 9.784l-.012.016c.01-.006.014-.01.012-.016Z"></path><!--?--> 
+            </svg>
+            <span class="footer-text number">{{score}}</span>
+            <svg class="downvote" rpl="" fill="currentColor" height="16" icon-name="downvote-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"> <!--?lit$99468199$--><!--?lit$99468199$-->
+              <path d="M10 20a1.122 1.122 0 0 1-.834-.372l-7.872-8.581A1.251 1.251 0 0 1 1.118 9.7 1.114 1.114 0 0 1 2.123 9H6V2.123A1.125 1.125 0 0 1 7.123 1h5.754A1.125 1.125 0 0 1 14 2.123V9h3.874a1.114 1.114 0 0 1 1.007.7 1.25 1.25 0 0 1-.171 1.345l-7.876 8.589A1.128 1.128 0 0 1 10 20Zm-7.684-9.75L10 18.69l7.741-8.44H12.75v-8h-5.5v8H2.316Zm15.469-.05c-.01 0-.014.007-.012.013l.012-.013Z"></path><!--?--> 
+            </svg>
+          </span>
+          <span class="reply footer-unit">
+            <svg class="reply" rpl="" aria-hidden="true" fill="currentColor" height="16" icon-name="comment-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.725 19.872a.718.718 0 0 1-.607-.328.725.725 0 0 1-.118-.397V16H3.625A2.63 2.63 0 0 1 1 13.375v-9.75A2.629 2.629 0 0 1 3.625 1h12.75A2.63 2.63 0 0 1 19 3.625v9.75A2.63 2.63 0 0 1 16.375 16h-4.161l-4 3.681a.725.725 0 0 1-.489.191ZM3.625 2.25A1.377 1.377 0 0 0 2.25 3.625v9.75a1.377 1.377 0 0 0 1.375 1.375h4a.625.625 0 0 1 .625.625v2.575l3.3-3.035a.628.628 0 0 1 .424-.165h4.4a1.377 1.377 0 0 0 1.375-1.375v-9.75a1.377 1.377 0 0 0-1.374-1.375H3.625Z"></path>
+            </svg>
+            <span class="footer-text">Reply</span>
+          </span>
+          <span class="share footer-unit">
+            <svg class="share" rpl="" aria-hidden="true" class="icon-share" fill="currentColor" height="16" icon-name="share-ios-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"> <!--?lit$99468199$--><!--?lit$99468199$-->
+              <path d="M19 11v5.378A2.625 2.625 0 0 1 16.378 19H3.622A2.625 2.625 0 0 1 1 16.378V11h1.25v5.378a1.373 1.373 0 0 0 1.372 1.372h12.756a1.373 1.373 0 0 0 1.372-1.372V11H19ZM9.375 3.009V14h1.25V3.009l2.933 2.933.884-.884-4-4a.624.624 0 0 0-.884 0l-4 4 .884.884 2.933-2.933Z"></path><!--?--> 
+            </svg>
+            <span class="footer-text">Share</span>
+          </span>
+          <span class="menu footer-unit">
+            <svg class="menu" rpl="" fill="currentColor" height="12" icon-name="overflow-horizontal-fill" viewBox="0 0 20 20" width="12" xmlns="http://www.w3.org/2000/svg"> <!--?lit$99468199$--><!--?lit$99468199$-->
+              <path d="M6 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path><!--?--> 
+            </svg>
+            <span class="footer-text"></span>
+          </span>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

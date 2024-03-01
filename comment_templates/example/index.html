@@ -1,0 +1,53 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Reddit Comment Template</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=1024">
+    <style type="text/css">
+      /* Custom css */
+      body {
+        font-family: monospace, verdana, arial, helvetica, sans-serif;
+        font-size: 14;
+      }
+      
+      .label {
+        font-weight: 600;
+      }
+      
+      .label > * {
+        display: inline;
+        font-weight: 300;
+      }
+      
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="comment-container">
+      <div class="label">Avatar:
+        <div id="avatar">{{avatar}}</div>
+      </div>
+      <div class="label">Author:
+        <div id="author">{{author}}</div>
+      </div>
+      <div class="label">Comment ID:
+        <div id="id">{{id}}</div>
+      </div>
+      <div class="label">Comment (html):
+        <div id="body_html">{{body_html}}</div>
+      </div>
+      <div class="label hidden">Comment (text):
+        <div id="body">{{body_text}}</div>
+      </div>
+      <div class="label">Upvotes:
+        <div id="score">{{score}}</div>
+      </div>
+      <div class="label">Date:
+        <div id="date">{{date}}</div>
+      </div>
+    </div>
+  </body>
+</html>
