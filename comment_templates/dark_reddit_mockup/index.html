@@ -39,12 +39,13 @@
         font-weight: 700;
         color: rgb(242, 244, 245);
       }
-      header .time-wrapper {
+      header .time {
         color: rgb(130, 149, 155);
       }
       header .time-separator {
         padding-left: 8px;
-        padding-top: 1px;
+        padding-right: 4px;
+        margin-top: 2px;
       }
       
       comment {
@@ -53,6 +54,7 @@
         grid-column-end: -1;
         background-color: #20bf6b;
         padding-left: 4px;
+        margin-top: -14px;
       }
       thread-line {
         grid-row-start: 2;
@@ -72,7 +74,7 @@
       }
       more-replies svg {
         justify-self: center;
-        padding-top: 2px;
+        /* padding-top: 2px; */
       }
       
       .line {
@@ -105,6 +107,7 @@
         display: grid;
         grid-template-columns: 44px 3fr;
         grid-template-rows: 40px;
+        font-size: 14px;
       }
       
       .grid-label {
@@ -135,9 +138,9 @@
         </avatar>
         <header class="inherit-background"><span class="grid-label">header</span>
           <span class="user">user</span>
-          <span class="time-wrapper">
-            <span class="time-separator">•</span>
-            <span class="time">4d ago</span>
+          <span class="time time-separator">•</span>
+          <span class="time">
+            <span class="time time-abbr">4d ago</span>
           </span>
         </header>
         <thread-line class="inherit-background"><span class="grid-label">line</span>
@@ -145,7 +148,7 @@
         </thread-line>
         <comment class="inherit-background">
           <span class="grid-label">comment</span>
-          <p>comment<br>spanning multiple<br>lines</p>
+          <p>Gambling<br>comment<br>spanning multiple<br>lines</p>
         </comment>
         <more-replies class="inherit-background">
           <span class="grid-label">replies</span>
