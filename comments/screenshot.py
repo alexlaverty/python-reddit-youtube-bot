@@ -17,6 +17,7 @@ import config.settings as settings
 import pdb
 import datetime as dt
 import json
+from jinja2 import Environment, FileSystemLoader
 
 storymode = False
 
@@ -132,10 +133,9 @@ def download_screenshots_of_reddit_posts(
     # folder_path = str(Path(settings.videos_directory,f"{id}_{title_path}"))
     # #Path(f"assets/temp/{id}/png").mkdir(parents=True, exist_ok=True)
 
+
+
     with sync_playwright() as p:
-        if settings.use_template:
-            template_url = settings.template_url
-            print(f"Using template '{template_url}'...")
 
         print("Launching " + ("Headless " if settings.headless_browser else "") + "Browser...")
 
@@ -155,15 +155,17 @@ def download_screenshots_of_reddit_posts(
         # Get the thread screenshot
         page = context.new_page()
 
-        reddit_login_url = "https://old.reddit.com/login" if settings.use_old_reddit_login else "https://www.reddit.com/login"
-
-        # Fill comment template using Reddit API and take screenshot
         if settings.use_template:
+            template_url = settings.template_url
+            print(f"Using template '{template_url}'...")
+            template_url = str(Path("comment_templates", settings.template_url))
+            # Read the Jinja template from a file
+            print(f"Using Comment Template : {template_url}")
 
-            # Go to template page
-            page.goto(settings.template_url)
-            blank_template = page.content()
-
+            # Create a Jinja environment with UTF-8 encoding
+            env = Environment(loader=FileSystemLoader(template_url))
+            # Load the template
+            template = env.get_template('index.html')
             for _idx, comment in enumerate(
                 accepted_comments if settings.screenshot_debug else track(accepted_comments, "Downloading screenshots...")
             ):
@@ -175,42 +177,36 @@ def download_screenshots_of_reddit_posts(
                     comment_excerpt = get_comment_excerpt(comment)
                     print(f"[{_idx + 1}/{len(accepted_comments)} {comment.id}] {comment.author}: {comment_excerpt}")
 
-                    # breakpoint()
-
-                    # Reset template
-                    page.set_content(blank_template)
-
                     # Fill template fields and update page
                     values = {
-                        '{{author}}': comment.author.name if comment.author else '[unknown]',
-                        '{{id}}': comment.id,
-                        '{{score}}': number_to_abbreviated_string(comment.score),
-                        '{{avatar}}': comment.author.icon_img if comment.author else '[unknown]',
-                        '{{date}}': datetime_to_human_timedelta(dt.datetime.fromtimestamp(comment.created)),
-                        '{{body_text}}': comment.body,
-                        '{{body_html}}': comment.body_html,
+                        'author': comment.author.name if comment.author else '[unknown]',
+                        'id': comment.id,
+                        'score': number_to_abbreviated_string(comment.score),
+                        'avatar': comment.author.icon_img if comment.author else '[unknown]',
+                        'date': datetime_to_human_timedelta(dt.datetime.fromtimestamp(comment.created)),
+                        'body_text': comment.body,
+                        'body_html': comment.body_html,
                     }
-                    # print(dt.date.fromtimestamp(comment.created).strftime("%A, %d. %B %Y %I:%M%p"))
-                    # print(f"Comment Permalink: {comment.permalink}")
-                    filled_template = fill_template(blank_template, values)
-                    page.set_content(filled_template)
+                    # Render the template with variables
+                    output = template.render(values)
 
-                    entry_element = page.locator('#comment-container').first
+                    # # Save the rendered output to a file
+                    # print("Jinja Comment Output :")
+                    # print(output)
+                    # with open(f"{video_directory}/comment_{comment.id}.html", "w", encoding="utf-8") as output_file:
+                    #     output_file.write(output)
 
-                    # Check if the element exists before taking a screenshot
-                    print(f"Downloading screenshot '{comment_path}'...")
-                    if entry_element.is_visible():
-                        entry_element.scroll_into_view_if_needed()
-                        entry_element.screenshot(path=comment_path)
-                    else:
-                        print("Mmmmhhh... could not create screenshot!")
-                        if settings.screenshot_debug:
-                            print("[screenshot_debug]")
-                            breakpoint()
+                    # Option 1: Pass HTML content
+                    page.set_content(output)
 
-            print("Screenshots downloaded Successfully.")
+                    page.locator('#comment-container').screenshot(path=str(comment_path.resolve()))
+                    #browser.close()
 
-        else:  # Login and take screenshots by scraping Reddit posts
+
+        else:
+
+
+            reddit_login_url = "https://old.reddit.com/login" if settings.use_old_reddit_login else "https://www.reddit.com/login"
 
             print(f"Trying to login ({reddit_login_url})...")
             page.goto(reddit_login_url)
