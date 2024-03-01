@@ -156,8 +156,6 @@ def download_screenshots_of_reddit_posts(
         page = context.new_page()
 
         if settings.use_template:
-            template_url = settings.template_url
-            print(f"Using template '{template_url}'...")
             template_url = str(Path("comment_templates", settings.template_url))
             # Read the Jinja template from a file
             print(f"Using Comment Template : {template_url}")
