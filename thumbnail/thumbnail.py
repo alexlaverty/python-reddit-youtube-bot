@@ -235,7 +235,7 @@ def create_thumbnail(
     # img_width = width / 2
 
     img_clip = (
-        ImageClip(image)
+        ImageClip(str(image))
         .resize(height=height)
         .set_position(("right", "center"))
         .set_opacity(1)
