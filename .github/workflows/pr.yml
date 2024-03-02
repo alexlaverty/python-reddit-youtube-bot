@@ -34,10 +34,9 @@ jobs:
           cp config/auth-env.py config/auth.py
           playwright install
           python3 app.py --total-posts 1 \
+                         --video-length 60 \
                          --enable-background \
-                         --background-directory /app/assets/backgrounds \
-                         --enable-mentions
-          python3 refresh_token.py
+                         --background-directory /app/assets/backgrounds
           rm -f client_secret.json
           rm -f credentials.storage
 
