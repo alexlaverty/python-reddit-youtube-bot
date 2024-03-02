@@ -64,8 +64,12 @@ def fill_template(template, values):
     return filled_template
 
 # Formats `datetime` to something like '1 year ago', '25 minutes ago', etc.
+# `style` can be one of ["none", "old_reddit", "new_reddit"]
 # TODO: check if it works properly (for now it only tries to handle past dates)
-def datetime_to_human_timedelta(datetime):
+def datetime_to_human_timedelta(datetime, style):
+    if style == "none":
+        return datetime
+
     now = dt.datetime.now()
     delta = now - datetime
     total_seconds = delta.total_seconds()
@@ -77,13 +81,18 @@ def datetime_to_human_timedelta(datetime):
     seconds = total_seconds
 
     human_timedelta = "just now"
-    suffixes = ["year", "month", "day", "hour", "minute", "second"]
+    if style == "old_reddit":
+        suffixes = ["year", "month", "day", "hour", "minute", "second"]
+        separator = " "
+    elif style == "new_reddit":
+        suffixes = ["y", "mo", "d", "h", "m", "s"]
+        separator = ""
     elapsed = [years, months, days, hours, minutes, seconds]
     # print(list(zip(suffixes, elapsed)))
     for idx, t in enumerate(elapsed):
         if t > 0:
-            human_timedelta = f"{t:.0f} {suffixes[idx]}"
-            if t > 1:
+            human_timedelta = f"{t:.0f}{separator}{suffixes[idx]}"
+            if t > 1 and style != "new_reddit":
                 human_timedelta += "s"
             human_timedelta += " ago"
             break
@@ -91,20 +100,33 @@ def datetime_to_human_timedelta(datetime):
     return human_timedelta
 
 # Formats `number` to something like '12.2k', '1.1M', etc.
-# (note that the threshold for using 'k' is 10000, i.e. 9500 will still be converted to '9500' and NOT to '9.5k')
-def number_to_abbreviated_string(number):
+# `style` can be one of ["none", "old_reddit", "new_reddit"]
+def number_to_abbreviated_string(number, style):
+    if style == "none":
+        return number
+
     abbreviated_str = f"{number:.0f}"
     millions = number / 1000000
     thousands = number / 1000
-    suffixes = ["M", "k"]
+    if style == "old_reddit":
+        suffixes = ["M", "k"]
+        thresholds = [1, 10]
+    elif style == "new_reddit":
+        suffixes = ["M", "K"]
+        thresholds = [1, 1]
     counts = [millions, thousands]
-    thresholds = [1, 10]
     # print(list(zip(suffixes, counts)))
     for idx, n in enumerate(counts):
-        if n >= thresholds[idx]:
+        frac_part = n - int(n)
+        no_decimals = (n < thresholds[idx] and n > 0.9 * thresholds[idx]) or (n >= thresholds[idx] and (frac_part > 0.9 or frac_part < 0.1))
+        if style == "new_reddit" and no_decimals:
+            abbreviated_str = f"{n:.0f}{suffixes[idx]}"
+            break
+        elif n >= thresholds[idx]:
             abbreviated_str = f"{n:.1f}{suffixes[idx]}"
             break
 
+    return abbreviated_str
     return abbreviated_str
 
 def get_comment_excerpt(comment):
@@ -159,6 +181,10 @@ def download_screenshots_of_reddit_posts(
             template_url = str(Path("comment_templates", settings.template_url))
             # Read the Jinja template from a file
             print(f"Using Comment Template : {template_url}")
+            template_abbreviated_style = settings.template_abbreviated_style
+            if not (template_abbreviated_style in ["none", "old_reddit", "new_reddit"]):
+                template_abbreviated_style = "none"
+            print(f"Template Abbr. Style   : {template_abbreviated_style}")
 
             # Create a Jinja environment with UTF-8 encoding
             env = Environment(loader=FileSystemLoader(template_url))
@@ -179,9 +205,9 @@ def download_screenshots_of_reddit_posts(
                     values = {
                         'author': comment.author.name if comment.author else '[unknown]',
                         'id': comment.id,
-                        'score': number_to_abbreviated_string(comment.score),
+                        'score': number_to_abbreviated_string(comment.score, style=template_abbreviated_style),
                         'avatar': comment.author.icon_img if comment.author else '[unknown]',
-                        'date': datetime_to_human_timedelta(dt.datetime.fromtimestamp(comment.created)),
+                        'date': datetime_to_human_timedelta(dt.datetime.fromtimestamp(comment.created), style=template_abbreviated_style),
                         'body_text': comment.body,
                         'body_html': comment.body_html,
                     }
