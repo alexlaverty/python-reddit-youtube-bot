@@ -521,10 +521,16 @@ def download_screenshots_of_reddit_posts(
                                     if settings.use_old_reddit: # inject css
                                         # Set max-width (as it would be too big normally, with lots of empty space)
                                         # Change background-color (as it would be ~yellow for single-thread posts (permalinks))
+                                        # Insert arrowContainer into entry (so that the screenshot contains upvote/downvote arrows)
+                                        # Add marginLeft to flat-list buttons (to compensate for arrowContainer insertion)
                                         entry_element.evaluate("""el => {
                                             el.style.maxWidth = '750px';
                                             let commentBody = el.querySelector('.usertext-body');
                                             if (commentBody) commentBody.style.backgroundColor = 'inherit';
+                                            let arrowsContainer = el.parentElement.querySelector('.midcol');
+                                            if (arrowsContainer) el.insertBefore(arrowsContainer, el.firstChild);
+                                            let buttons = el.querySelector('.flat-list.buttons');
+                                            if (buttons) buttons.style.marginLeft = '32px';
                                         }""")
 
                                     if settings.screenshot_debug: entry_element.scroll_into_view_if_needed()
