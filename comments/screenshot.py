@@ -214,11 +214,13 @@ def download_screenshots_of_reddit_posts(
                     # Render the template with variables
                     output = template.render(values)
 
-                    # # Save the rendered output to a file
-                    # print("Jinja Comment Output :")
-                    # print(output)
-                    # with open(f"{video_directory}/comment_{comment.id}.html", "w", encoding="utf-8") as output_file:
-                    #     output_file.write(output)
+                    # Save the rendered output to a file
+                    if settings.template_debug:
+                        template_output_file = f"{video_directory}/comment_{comment.id}.html"
+                        print(f"Jinja Comment Output : '{template_output_file}'")
+                        # print(output)
+                        with open(template_output_file, "w", encoding="utf-8") as output_file:
+                            output_file.write(output)
 
                     # Option 1: Pass HTML content
                     page.set_content(output)

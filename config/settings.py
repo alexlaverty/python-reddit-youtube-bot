@@ -68,6 +68,7 @@ use_comments_permalinks = False  # if True don't try to scrape subreddit page, u
 template_url = "dark_reddit_mockup"
 template_abbreviated_style = "new_reddit"  # can be one of ["none", "old_reddit", "new_reddit"]
 use_template = True  # if True loads template_url as a comment template, and fills it with data using the Reddit API (using PRAW)
+template_debug = True  # if True writes template output html files beside screenshots
 
 # Video settings
 background_colour = [26, 26, 27]
