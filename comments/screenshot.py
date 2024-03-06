@@ -129,6 +129,39 @@ def number_to_abbreviated_string(number, style):
     return abbreviated_str
     return abbreviated_str
 
+def set_preferred_theme(theme, page):
+    # Alternate method to try to set preferred theme
+    preferred_theme = 'dark' if theme == 'dark' else 'light'
+    dark_mode_switcher_loc = page.locator('faceplate-switch-input[value="darkmode-switch-value"]').first
+    if dark_mode_switcher_loc.count() == 1:
+        is_dark_mode_enabled = page.locator('html.theme-dark').first.count() > 0
+        if (preferred_theme == "dark" and not is_dark_mode_enabled) or (preferred_theme == "light" and is_dark_mode_enabled):
+            print("Try to set theme to " + (preferred_theme) + "...")
+            dark_mode_switcher_loc.dispatch_event('click')
+            # Ensure to set preferred theme
+            page.wait_for_function("""
+                preferred_theme => {
+                    if (!document.querySelector('html').classList.contains('theme-' + preferred_theme)) {
+                        document.querySelector('faceplate-switch-input[value="darkmode-switch-value"]').click();
+                    }
+                    return true;
+                }
+            """, arg=preferred_theme)
+            # breakpoint()
+
+def bypass_see_this_post_in(page):
+    # Bypass "See this post in..."
+    see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
+    if see_this_post_in_button.is_visible():
+        print("See this post in... [CONTINUE]")
+        see_this_post_in_button.dispatch_event('click')
+        see_this_post_in_button.wait_for(state='hidden')
+    else:
+        # Ensure to hide backdrop
+        backdrop_loc = page.locator('#bottom-sheet #backdrop').first
+        if backdrop_loc.count() > 0:
+            backdrop_loc.evaluate('node => node.style.display="none"')
+
 def get_comment_excerpt(comment):
     comment_excerpt = (comment.body.split("\n")[0])
     if len(comment_excerpt) > 80: comment_excerpt = comment_excerpt[:80] + "…"
@@ -351,13 +384,7 @@ def download_screenshots_of_reddit_posts(
             #print(page.evaluate('() => document.querySelector("html").classList.toString()'))
 
             # Alternate method to try to set preferred theme
-            dark_mode_setter_loc = page.locator('shreddit-darkmode-setter').first
-            dark_mode_tracker_loc = page.locator('faceplate-tracker[noun="dark_mode"]').first
-            if dark_mode_tracker_loc.count() == 1 and dark_mode_setter_loc.count() == 1:
-                print("Try to set theme to " + ('dark' if settings.theme == 'dark' else 'light') + "...")
-                is_dark_mode_enabled = dark_mode_setter_loc.get_attribute('enabled') is not None
-                if (settings.theme == "dark" and not is_dark_mode_enabled) or (settings.theme != "dark" and is_dark_mode_enabled):
-                    dark_mode_tracker_loc.dispatch_event('click')
+            set_preferred_theme(settings.theme, page)
 
             print("Downloading screenshots of reddit posts...")
 
@@ -457,18 +484,7 @@ def download_screenshots_of_reddit_posts(
                                     page.goto(f"{reddit_base_url}{comment.permalink}", timeout=0)
 
                                 # Bypass "See this post in..."
-                                see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
-                                if see_this_post_in_button.is_visible():
-                                    print("See this post in... [CONTINUE]")
-                                    see_this_post_in_button.dispatch_event('click')
-                                    see_this_post_in_button.wait_for(state='hidden')
-                                else:
-                                    # Ensure to hide backdrop
-                                    backdrop_loc = page.locator('#bottom-sheet #backdrop').first
-                                    if backdrop_loc.count() > 0:
-                                        if settings.screenshot_debug:
-                                            print("Hiding backdrop...")
-                                        backdrop_loc.evaluate('node => node.style.display="none"')
+                                bypass_see_this_post_in(page)
 
                                 # Click on "View more comments", if present
                                 view_more_comments_button = page.locator('.overflow-actions-dialog ~ button').first
@@ -521,15 +537,12 @@ def download_screenshots_of_reddit_posts(
                                     time.sleep(3)
                                     if is_new_layout(page):
                                         # Bypass "See this post in..."
-                                        see_this_post_in_button = page.locator('#bottom-sheet button.continue').first
-                                        if see_this_post_in_button.is_visible():
-                                            print("See this post in... [CONTINUE]")
-                                            see_this_post_in_button.dispatch_event('click')
+                                        bypass_see_this_post_in(page)
 
                                         comment_loc = page.locator(selector).first
                                         if comment_loc:
                                             # If replies are expanded toggle them
-                                            expanded_loc = comment_loc.locator('#comment-fold-button[aria-expanded="true"]').first
+                                            expanded_loc = comment_loc.locator('#utton[aria-expanded="true"]').first
                                             if expanded_loc.is_visible():
                                                 #print("Collapse the comment replies")
                                                 expanded_loc.dispatch_event("click")
