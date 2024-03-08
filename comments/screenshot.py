@@ -548,7 +548,7 @@ def download_screenshots_of_reddit_posts(
                                         comment_loc = page.locator(selector).first
                                         if comment_loc:
                                             # If replies are expanded toggle them
-                                            expanded_loc = comment_loc.locator('#utton[aria-expanded="true"]').first
+                                            expanded_loc = comment_loc.locator('button[aria-expanded="true"]').first
                                             if expanded_loc.is_visible():
                                                 #print("Collapse the comment replies")
                                                 expanded_loc.dispatch_event("click")
