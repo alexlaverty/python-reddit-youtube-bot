@@ -303,7 +303,7 @@ def create(video_directory: Path, post: Submission, thumbnails: List[Path]) -> N
         #     title_clip = title_clip.resize(height=settings.video_height * 0.95)
     else:
         title_clip = (
-            (ImageClip(str(v.thumbnail)) if v.thumbnail is not None else ColorClip((settings.video_width, settings.video_height)))
+            (ImageClip(str(v.thumbnail)) if v.thumbnail is not None else ColorClip(size=(settings.video_width, settings.video_height), color=[0,0,0]))
             .set_position(("center", title_clip_position_vertical))
             .set_duration(title_clip_duration)
             .set_audio(audioclip_title)
