@@ -17,6 +17,7 @@ subreddits = [
     "unpopularopinion",
     "confessions",
     "confession",
+    "singularity",
 ]
 
 subreddits_excluded = [
